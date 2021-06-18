@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-furryoctochainsaw-dev-154356-authRole",
+      "UnauthRoleArn": "arn:aws:iam::867278282974:role/amplify-furryoctochainsaw-dev-154356-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::867278282974:role/amplify-furryoctochainsaw-dev-154356-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-furryoctochainsaw-dev-154356-deployment",
+      "UnauthRoleName": "amplify-furryoctochainsaw-dev-154356-unauthRole",
+      "StackName": "amplify-furryoctochainsaw-dev-154356",
+      "StackId": "arn:aws:cloudformation:us-east-2:867278282974:stack/amplify-furryoctochainsaw-dev-154356/322cab40-cedb-11eb-8035-0ac0d8175ef2",
+      "AmplifyAppId": "d1vid43jdy8ksv"
+    },
+    "categories": {
+      "auth": {
+        "furryoctochainsawf8118bd3": {}
+      }
+    }
+  }
+}

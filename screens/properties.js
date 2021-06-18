@@ -15,29 +15,78 @@ import {
 import Task from "../components/Task";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
-
+import {API, Auth, graphqlOperation} from 'aws-amplify';
+import { getLandlord, getProperty, listPropertys } from "../src/graphql/queries";
+import { createProperty, createLandlord, updateLandlord } from "../src/graphql/mutations";
 export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
-  const [rentals, setRental] = useState([
-    { address: "220 Yonge Street", city: "Toronto", issues: 0, key: "1" },
-    { address: "1442 Lawrence Ave W", city: "Toronto", issues: 3, key: "2" },
-    { address: "2925 Dufferin St", city: "Toronto", issues: 2, key: "3" },
-    { address: "2350 Bridletowne Cir", city: "Toronto", issues: 1, key: "4" },
-  ]);
+  const [rentals, setRental] = useState([]);
+  const [user, setUser] = useState("");
 
+
+  const checkUser = async () => {
+    try {
+      const curUser = await Auth.currentAuthenticatedUser();
+      const landlord = await API.graphql({query:getLandlord,variables:{id:curUser.username}});
+      console.log("landlord",landlord);
+      if (landlord.data.getLandlord == null) {
+        console.log("adding...");
+        const tmp = {};
+        tmp.id = curUser.username;
+        tmp.properties = [];
+        const userData = await API.graphql(graphqlOperation(createLandlord,{input:tmp}));
+      }
+      setUser(curUser.username);
+    } catch (error) {
+      console.log("not found",error,"a",user);
+    }
+  }
+  const getRentals = async () => {
+    try {
+      const x = await checkUser(); 
+      const landlord = await API.graphql({query:getLandlord,variables:{id:user}});
+      if (landlord.data.getLandlord != null) {
+        const properties = landlord.data.getLandlord.properties;
+        if (rentals.length==0) {
+          for (const property of properties) {
+            const rental = await API.graphql({query:getProperty,variables:{id:property}});
+            console.log(rental.data.getProperty);
+            rentals.push(rental.data.getProperty);
+          }
+        }
+      }
+    } catch (error) {
+      console.log("error getting", error);
+    }
+  }
+  getRentals();
+
+  
+  const addProperty = async (rental) => {
+    try {
+      const rentalData = await API.graphql(graphqlOperation(createProperty,{input:rental}));
+      const tmp = await API.graphql({query:getLandlord,variables:{id:user}});
+      const landlord = tmp.data.getLandlord;
+      delete landlord.createdAt;
+      delete landlord.updatedAt;
+      landlord.properties.push(rental.id);
+      const landlordData = await API.graphql(graphqlOperation(updateLandlord,{input:landlord}));
+      rentals.push(rental);
+    } catch (error) {
+      console.log("error adding", error);
+    }
+  }
   const addRental = (rental) => {
     //change this to not random
-    rental.key = Math.random().toString();
+    rental.id = Math.random().toString();
     rental.issues = 0;
-    setRental((currentRentals) => {
-      return [rental, ...currentRentals];
-    });
+    addProperty(rental);
     setModalOpen(false);
   };
   /*Functions */
   const pressRental = (item) => {
-    console.log(item.key);
+    console.log(item.id);
     //let item = rentals[key];
     navigation.navigate("RentalDetails", item);
   };

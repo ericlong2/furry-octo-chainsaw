@@ -10,7 +10,18 @@ import {
 } from "react-native";
 import Properties from "./screens/properties";
 import Navigator from "./routes/homeStack";
-
-export default function App() {
+import Amplify from 'aws-amplify';
+import { withAuthenticator } from 'aws-amplify-react-native'
+import {Auth} from 'aws-amplify';
+import config from './src/aws-exports';
+Amplify.configure({
+  ...config,
+  Analytics: {
+    disabled: true,
+  },
+});
+function App() {
   return <Navigator />;
 }
+export default withAuthenticator(App)
+

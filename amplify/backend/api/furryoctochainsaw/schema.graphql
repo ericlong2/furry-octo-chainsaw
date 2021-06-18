@@ -1,0 +1,12 @@
+type Landlord @model {
+  id: ID!
+  properties: [ID]!
+}
+
+type Property @model {
+  id: ID!
+  number: Int!
+  address: String!
+  city: String!
+  issues: Int!
+}
