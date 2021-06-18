@@ -29,7 +29,7 @@ export default function properties({ navigation }) {
     try {
       const curUser = await Auth.currentAuthenticatedUser();
       const landlord = await API.graphql({query:getLandlord,variables:{id:curUser.username}});
-      console.log("landlord",landlord);
+      //console.log("landlord",landlord);
       if (landlord.data.getLandlord == null) {
         console.log("adding...");
         const tmp = {};
@@ -44,7 +44,8 @@ export default function properties({ navigation }) {
   }
   const getRentals = async () => {
     try {
-      const x = await checkUser(); 
+      const x = await checkUser();
+      console.log("user",user);
       const landlord = await API.graphql({query:getLandlord,variables:{id:user}});
       if (landlord.data.getLandlord != null) {
         const properties = landlord.data.getLandlord.properties;
@@ -52,15 +53,19 @@ export default function properties({ navigation }) {
           for (const property of properties) {
             const rental = await API.graphql({query:getProperty,variables:{id:property}});
             console.log(rental.data.getProperty);
-            rentals.push(rental.data.getProperty);
+            setRental((currentRentals) => {
+              return [rental.data.getProperty, ...currentRentals];
+            });
           }
+          console.log("retrieved");
         }
+
       }
     } catch (error) {
       console.log("error getting", error);
     }
   }
-  getRentals();
+  
 
   
   const addProperty = async (rental) => {
@@ -72,7 +77,9 @@ export default function properties({ navigation }) {
       delete landlord.updatedAt;
       landlord.properties.push(rental.id);
       const landlordData = await API.graphql(graphqlOperation(updateLandlord,{input:landlord}));
-      rentals.push(rental);
+      setRental((currentRentals) => {
+        return [rental, ...currentRentals];
+      });
     } catch (error) {
       console.log("error adding", error);
     }
@@ -105,6 +112,7 @@ export default function properties({ navigation }) {
     ]);
   };
 
+  getRentals();
   return (
     <View style={StyleSheet.container}>
       <Modal visible={modalOpen} animationType="slide">
@@ -136,7 +144,7 @@ export default function properties({ navigation }) {
             data={rentals}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => pressRental(item)}>
-                <Task text={item.address} />
+                <Task text={item.number + " " + item.address} />
               </TouchableOpacity>
             )}
           />
