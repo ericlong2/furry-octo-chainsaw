@@ -144,7 +144,7 @@ export default function properties({ navigation }) {
             data={rentals}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => pressRental(item)}>
-                <Task text={item.number + " " + item.address} />
+                <Task text={item.number==0?item.address:item.number+' '+item.address} />
               </TouchableOpacity>
             )}
           />

@@ -7,7 +7,7 @@ export default function AddForm({ addRental }) {
     <View style={StyleSheet.container}>
       <Formik
         initialValues={{
-          number: "",
+          number: 0,
           address: "",
           city: "",
         }}
