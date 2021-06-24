@@ -13,45 +13,65 @@ import {
   FlatList,
 } from "react-native";
 import Task from "../components/Task";
+import GooglePlacesInput from "./GooglePlacesInput";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
-import {API, Auth, graphqlOperation} from 'aws-amplify';
-import { getLandlord, getProperty, listPropertys } from "../src/graphql/queries";
-import { createProperty, createLandlord, updateLandlord } from "../src/graphql/mutations";
+import { API, Auth, graphqlOperation } from "aws-amplify";
+import {
+  getLandlord,
+  getProperty,
+  listPropertys,
+} from "../src/graphql/queries";
+import {
+  createProperty,
+  createLandlord,
+  updateLandlord,
+} from "../src/graphql/mutations";
 export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
   const [rentals, setRental] = useState([]);
   const [user, setUser] = useState("");
-
+  const [number, setNumber] = useState(0);
 
   const checkUser = async () => {
     try {
       const curUser = await Auth.currentAuthenticatedUser();
-      const landlord = await API.graphql({query:getLandlord,variables:{id:curUser.username}});
+      const landlord = await API.graphql({
+        query: getLandlord,
+        variables: { id: curUser.username },
+      });
       //console.log("landlord",landlord);
       if (landlord.data.getLandlord == null) {
         console.log("adding...");
         const tmp = {};
         tmp.id = curUser.username;
         tmp.properties = [];
-        const userData = await API.graphql(graphqlOperation(createLandlord,{input:tmp}));
+        const userData = await API.graphql(
+          graphqlOperation(createLandlord, { input: tmp })
+        );
       }
       setUser(curUser.username);
     } catch (error) {
-      console.log("not found",error,"a",user);
+      console.log("not found", error, "a", user);
     }
-  }
+  };
   const getRentals = async () => {
     try {
       const x = await checkUser();
-      console.log("user",user);
-      const landlord = await API.graphql({query:getLandlord,variables:{id:user}});
+      console.log("user", user);
+      const landlord = await API.graphql({
+        query: getLandlord,
+        variables: { id: user },
+      });
       if (landlord.data.getLandlord != null) {
         const properties = landlord.data.getLandlord.properties;
-        if (rentals.length==0) {
+        if (rentals.length == 0) {
           for (const property of properties) {
-            const rental = await API.graphql({query:getProperty,variables:{id:property}});
+            const rental = await API.graphql({
+              query: getProperty,
+              variables: { id: property },
+            });
             console.log(rental.data.getProperty);
             setRental((currentRentals) => {
               return [rental.data.getProperty, ...currentRentals];
@@ -59,35 +79,40 @@ export default function properties({ navigation }) {
           }
           console.log("retrieved");
         }
-
       }
     } catch (error) {
       console.log("error getting", error);
     }
-  }
-  
+  };
 
-  
   const addProperty = async (rental) => {
     try {
-      const rentalData = await API.graphql(graphqlOperation(createProperty,{input:rental}));
-      const tmp = await API.graphql({query:getLandlord,variables:{id:user}});
+      const rentalData = await API.graphql(
+        graphqlOperation(createProperty, { input: rental })
+      );
+      const tmp = await API.graphql({
+        query: getLandlord,
+        variables: { id: user },
+      });
       const landlord = tmp.data.getLandlord;
       delete landlord.createdAt;
       delete landlord.updatedAt;
       landlord.properties.push(rental.id);
-      const landlordData = await API.graphql(graphqlOperation(updateLandlord,{input:landlord}));
+      const landlordData = await API.graphql(
+        graphqlOperation(updateLandlord, { input: landlord })
+      );
       setRental((currentRentals) => {
         return [rental, ...currentRentals];
       });
     } catch (error) {
       console.log("error adding", error);
     }
-  }
+  };
   const addRental = (rental) => {
     //change this to not random
     rental.id = Math.random().toString();
     rental.issues = 0;
+    rental.number = number;
     addProperty(rental);
     setModalOpen(false);
   };
@@ -124,7 +149,17 @@ export default function properties({ navigation }) {
               style={{ ...styles.modalToggle, ...styles.modalClose }}
               onPress={() => setModalOpen(false)}
             />
-            <AddForm addRental={addRental} />
+            <View style={styles.googleInput}>
+              <TextInput
+                style={styles.TextInput}
+                placeholder="Apt number(optional)"
+                onChangeText={(number) => setNumber(number)}
+                //defaultValue={number}
+                keyboardType="numeric"
+              />
+              <GooglePlacesInput addRental={addRental} />
+            </View>
+            {/*<AddForm addRental={addRental} />*/}
           </View>
         </TouchableWithoutFeedback>
       </Modal>
@@ -144,7 +179,13 @@ export default function properties({ navigation }) {
             data={rentals}
             renderItem={({ item }) => (
               <TouchableOpacity onPress={() => pressRental(item)}>
-                <Task text={item.number==0?item.address:item.number+' '+item.address} />
+                <Task
+                  text={
+                    item.number == 0
+                      ? item.address
+                      : item.number + " " + item.address
+                  }
+                />
               </TouchableOpacity>
             )}
           />
@@ -155,6 +196,16 @@ export default function properties({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  TextInput: {
+    paddingBottom: 10,
+    backgroundColor: "grey",
+    color: "white",
+  },
+  googleInput: {
+    flex: 1,
+    marginTop: 20,
+    paddingBottom: 30,
+  },
   container: {
     flex: 1,
     backgroundColor: "#E8EAED",
