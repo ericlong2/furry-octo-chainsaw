@@ -47,9 +47,13 @@ export const createProperty = /* GraphQL */ `
   ) {
     createProperty(input: $input, condition: $condition) {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
@@ -63,9 +67,13 @@ export const updateProperty = /* GraphQL */ `
   ) {
     updateProperty(input: $input, condition: $condition) {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
@@ -79,9 +87,13 @@ export const deleteProperty = /* GraphQL */ `
   ) {
     deleteProperty(input: $input, condition: $condition) {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt

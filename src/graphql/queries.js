@@ -32,9 +32,13 @@ export const getProperty = /* GraphQL */ `
   query GetProperty($id: ID!) {
     getProperty(id: $id) {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
@@ -50,9 +54,13 @@ export const listPropertys = /* GraphQL */ `
     listPropertys(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        number
         address
+        number
+        houseNumber
+        streetName
         city
+        province
+        country
         issues
         createdAt
         updatedAt

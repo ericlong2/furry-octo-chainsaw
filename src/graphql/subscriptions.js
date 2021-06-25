@@ -35,9 +35,13 @@ export const onCreateProperty = /* GraphQL */ `
   subscription OnCreateProperty {
     onCreateProperty {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
@@ -48,9 +52,13 @@ export const onUpdateProperty = /* GraphQL */ `
   subscription OnUpdateProperty {
     onUpdateProperty {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
@@ -61,9 +69,13 @@ export const onDeleteProperty = /* GraphQL */ `
   subscription OnDeleteProperty {
     onDeleteProperty {
       id
-      number
       address
+      number
+      houseNumber
+      streetName
       city
+      province
+      country
       issues
       createdAt
       updatedAt
