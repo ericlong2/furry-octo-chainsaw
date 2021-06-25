@@ -113,6 +113,7 @@ export default function properties({ navigation }) {
     rental.id = Math.random().toString();
     rental.issues = 0;
     rental.number = number;
+    setNumber(0);
     addProperty(rental);
     setModalOpen(false);
   };
