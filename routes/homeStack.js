@@ -11,12 +11,12 @@ const screens = {
       title: "Home",
     },
   },
-  RentalDetails: {
-    screen: RentalDetails,
-    navigationOptions: {
-      title: "Rental Page",
-    },
-  },
+  // RentalDetails: {
+  //   screen: RentalDetails,
+  //   navigationOptions: {
+  //     title: "Rental Page",
+  //   },
+  // },
 };
 
 const HomeStack = createStackNavigator(screens, {

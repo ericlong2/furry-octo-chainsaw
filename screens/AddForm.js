@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, StyleSheet, Button, TextInput } from "react-native";
 import { Formik } from "formik";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 export default function AddForm({ addRental }) {
   return (
@@ -30,6 +31,7 @@ export default function AddForm({ addRental }) {
             <TextInput
               style={styles.input}
               placeholder="Address"
+              autoCompleteType="street-address"
               onChangeText={props.handleChange("address")}
               value={props.values.address}
             />

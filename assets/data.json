@@ -1,0 +1,55 @@
+{
+    "description": "31 Castlegrove Road Northeast, Calgary, AB, Canada",
+    "matched_substrings": Array [
+      Object {
+        "length": 2,
+        "offset": 0,
+      },
+      Object {
+        "length": 11,
+        "offset": 3,
+      },
+    ],
+    "place_id": "ChIJXSCce35jcVMRli9ClsRGsNc",
+    "reference": "ChIJXSCce35jcVMRli9ClsRGsNc",
+    "structured_formatting": Object {
+      "main_text": "31 Castlegrove Road Northeast",
+      "main_text_matched_substrings": Array [
+        Object {
+          "length": 2,
+          "offset": 0,
+        },
+        Object {
+          "length": 11,
+          "offset": 3,
+        },
+      ],
+      "secondary_text": "Calgary, AB, Canada",
+    },
+    "terms": Array [
+      Object {
+        "offset": 0,
+        "value": "31",
+      },
+      Object {
+        "offset": 3,
+        "value": "Castlegrove Road Northeast",
+      },
+      Object {
+        "offset": 31,
+        "value": "Calgary",
+      },
+      Object {
+        "offset": 40,
+        "value": "AB",
+      },
+      Object {
+        "offset": 44,
+        "value": "Canada",
+      },
+    ],
+    "types": Array [
+      "premise",
+      "geocode",
+    ],
+  }
