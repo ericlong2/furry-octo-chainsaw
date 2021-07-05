@@ -17,7 +17,7 @@ import Task from "../components/Task";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
 import GooglePlacesInput from "./GooglePlacesInput";
-import RentalPage from "./rentalPage";
+
 import Options from "./options";
 
 export default function properties({ navigation }) {
@@ -55,9 +55,8 @@ export default function properties({ navigation }) {
   const pressRental = (item) => {
     console.log(item.key);
     //let item = rentals[key];
-    //navigation.navigate("RentalDetails", item);
-    return <RentalPage address={item.address} />;
-    console.log("h");
+    navigation.navigate("RentalDetails", item);
+    //return <RentalPage address={item.address} />;
   };
 
   const handleAddTask = () => {

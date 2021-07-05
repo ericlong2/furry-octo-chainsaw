@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,51 +21,53 @@ import AddTicketModal from "./AddTicketModal";
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
 }
 
-export default class rentalPage extends React.Component {
-  state = {
+export default function rentalPage({ navigation }) {
+  const [state, setState] = useState({
     addTicketVisible: false,
     lists: tempData,
     people: tempPeople,
-  };
-  address = "house";
+  });
+  const address = navigation.getParam("address");
+  console.log(navigation.address);
   //address = props.get("address");
 
-  toggleAddTicketModal() {
-    this.setState({ addTicketVisible: !this.state.addTicketVisible });
-  }
+  const toggleAddTicketModal = () => {
+    setState({
+      addTicketVisible: !state.addTicketVisible,
+      // lists: state.tempData,
+      // people: state.tempPeople,
+    });
+    console.log(state.addTicketVisible);
+  };
 
-  renderList = (list) => {
+  const renderList = (list) => {
     return (
-      <TicketList
-        list={list}
-        updateList={this.updateList}
-        deleteList={this.deleteList}
-      />
+      <TicketList list={list} updateList={updateList} deleteList={deleteList} />
     );
   };
 
-  addList = (list) => {
-    this.setState({
+  const addList = (list) => {
+    setState({
       lists: [
-        ...this.state.lists,
-        { ...list, id: this.state.lists.length + 1, todos: [] },
+        ...state.lists,
+        { ...list, id: state.lists.length + 1, todos: [] },
       ],
     });
   };
 
-  updateList = (list) => {
-    this.setState({
-      lists: this.state.lists.map((item) => {
+  const updateList = (list) => {
+    setState({
+      lists: state.lists.map((item) => {
         return item.id === list.id ? list : item;
       }),
     });
   };
 
-  deleteList = (list) => {
+  const deleteList = (list) => {
     {
       /*add this method to Fire.js
 deleteList(list){
-        let ref = this.ref;
+        let ref =  ref;
         ref.doc(list.id).delete()
     }
 this method in App.js
@@ -76,101 +78,99 @@ deleteList = list => {
     }
   };
 
-  renderPeople = (person) => {
+  const renderPeople = (person) => {
     return <PeopleList person={person} />;
   };
 
-  render() {
-    return (
-      <SafeAreaView style={styles.container}>
-        <Modal
-          animationType="slide"
-          visible={this.state.addTicketVisible}
-          onRequestClose={() => this.toggleAddTicketModal()}
-        >
-          <AddTicketModal
-            closeModel={() => this.toggleAddTicketModal()}
-            addList={this.addList}
-          />
-        </Modal>
+  return (
+    <SafeAreaView style={styles.container}>
+      <Modal
+        animationType="slide"
+        visible={state.addTicketVisible}
+        onRequestClose={() => toggleAddTicketModal()}
+      >
+        <AddTicketModal
+          closeModel={() => toggleAddTicketModal()}
+          addList={addList}
+        />
+      </Modal>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            marginTop: 64,
-          }}
-        >
-          <View style={styles.divider} />
-          <Text style={styles.title}>
-            {this.address}{" "}
-            <Text style={{ fontWeight: "300", color: colors.blue }}>
-              {" "}
-              Repairs
-            </Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-around",
+          marginTop: 64,
+        }}
+      >
+        <View style={styles.divider} />
+        <Text style={styles.title}>
+          {address}{" "}
+          <Text style={{ fontWeight: "300", color: colors.blue }}>
+            {" "}
+            Repairs
           </Text>
-          <View style={styles.divider} />
-        </View>
+        </Text>
+        <View style={styles.divider} />
+      </View>
 
-        <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
-          <Text style={styles.sectionTitle}>Tenents</Text>
-          <FlatList
-            data={this.state.people}
-            keyExtractor={(item) => item.name}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => this.renderPeople(item)}
-            keyboardShouldPersistTaps="always"
-          />
-        </View>
+      <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
+        <Text style={styles.sectionTitle}>Tenents</Text>
+        <FlatList
+          data={state.people}
+          keyExtractor={(item) => item.name}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => renderPeople(item)}
+          keyboardShouldPersistTaps="always"
+        />
+      </View>
 
-        <View style={{ height: 275, paddingLeft: 32 }}>
-          <Text style={styles.sectionTitle}> Tickets</Text>
-          <FlatList
-            data={this.state.lists}
-            keyExtractor={(item) => item.name}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => this.renderList(item)}
-            keyboardShouldPersistTaps="always"
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            marginLeft: 10,
-          }}
-        >
-          <View style={{ marginVertical: 48, alignItems: "center" }}>
-            <TouchableOpacity
-              style={styles.Plus}
-              onPress={() => this.toggleAddTicketModal()}
-            >
-              <Text style={styles.add}>Add Ticket</Text>
-              <AntDesign name="plus" size={16} color={colors.blue} />
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity>
-            {/* add onPress navigation back to properties page */}
-            <MaterialIcons name="home" size={128} color={colors.blue} />
+      <View style={{ height: 275, paddingLeft: 32 }}>
+        <Text style={styles.sectionTitle}> Tickets</Text>
+        <FlatList
+          data={state.lists}
+          keyExtractor={(item) => item.name}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => renderList(item)}
+          keyboardShouldPersistTaps="always"
+        />
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
+          marginLeft: 10,
+        }}
+      >
+        <View style={{ marginVertical: 48, alignItems: "center" }}>
+          <TouchableOpacity
+            style={styles.Plus}
+            onPress={() => toggleAddTicketModal()}
+          >
+            <Text style={styles.add}>Add Ticket</Text>
+            <AntDesign name="plus" size={16} color={colors.blue} />
           </TouchableOpacity>
-
-          <View style={{ marginVertical: 48, alignItems: "center" }}>
-            <TouchableOpacity
-              style={styles.Plus}
-              onPress={() => this.toggleAddTicketModal()}
-            >
-              <Text style={styles.add}>Add Tenent</Text>
-              <AntDesign name="plus" size={16} color={colors.blue} />
-            </TouchableOpacity>
-          </View>
         </View>
-      </SafeAreaView>
-    );
-  }
+
+        <TouchableOpacity>
+          {/* add onPress navigation back to properties page */}
+          <MaterialIcons name="home" size={128} color={colors.blue} />
+        </TouchableOpacity>
+
+        <View style={{ marginVertical: 48, alignItems: "center" }}>
+          <TouchableOpacity
+            style={styles.Plus}
+            onPress={() => toggleAddTicketModal()}
+          >
+            <Text style={styles.add}>Add Tenent</Text>
+            <AntDesign name="plus" size={16} color={colors.blue} />
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
