@@ -1,17 +1,4 @@
 import React, { useState } from "react";
-<<<<<<< Updated upstream
-import { View, Text, StyleSheet } from "react-native";
-
-export default function rentalPage({ navigation }) {
-  return (
-    <View style={StyleSheet.container}>
-      <Text>Rental page, needs to be dynamic</Text>
-      <Text>{navigation.getParam("address")}</Text>
-      <Text>{navigation.getParam("city")}</Text>
-      <Text>{navigation.getParam("issues")}</Text>
-      <Text>{navigation.getParam("key")}</Text>
-    </View>
-=======
 import {
   StyleSheet,
   Text,
@@ -393,16 +380,12 @@ deleteList = list => {
         </View>
       </ScrollView>
     </SafeAreaView>
->>>>>>> Stashed changes
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-<<<<<<< Updated upstream
-    backgroundColor: "#E8EAED",
-=======
     backgroundColor: "#fff",
     justifyContent: "flex-start",
   },
@@ -443,7 +426,6 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     marginLeft: 5,
     color: colors.black,
->>>>>>> Stashed changes
   },
 });
 

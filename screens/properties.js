@@ -16,19 +16,6 @@ import Task from "../components/Task";
 import GooglePlacesInput from "./GooglePlacesInput";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
-<<<<<<< Updated upstream
-import { API, Auth, graphqlOperation } from "aws-amplify";
-import {
-  getLandlord,
-  getProperty,
-  listPropertys,
-} from "../src/graphql/queries";
-import {
-  createProperty,
-  createLandlord,
-  updateLandlord,
-} from "../src/graphql/mutations";
-=======
 import GooglePlacesInput from "./GooglePlacesInput";
 
 import Options from "./options";
@@ -38,19 +25,15 @@ import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import {getLandlord, getProperty} from "../src/graphql/queries";
 import {createProperty, updateLandlord} from "../src/graphql/mutations";
 
->>>>>>> Stashed changes
 export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
   const [rentals, setRental] = useState([]);
   const [user, setUser] = useState("");
   const [number, setNumber] = useState(0);
-<<<<<<< Updated upstream
-=======
   const [rentals, setRental] = useState([]);
   const [user, setUser] = useState("");
   const [loaded, setLoaded] = useState(false);
->>>>>>> Stashed changes
 
   const checkUser = async () => {
     try {
@@ -218,17 +201,11 @@ export default function properties({ navigation }) {
   };
   const addRental = (rental) => {
     //change this to not random
-<<<<<<< Updated upstream
-    rental.id = Math.random().toString();
-    rental.issues = 0;
-    rental.number = number;
-=======
     rental.id = generateID();
     rental.issues = 0;
     rental.number = number;
     rental.tasks = [];
     rental.tenants = [];
->>>>>>> Stashed changes
     setNumber(0);
     addProperty(rental);
     setModalOpen(false);
@@ -278,8 +255,6 @@ export default function properties({ navigation }) {
         </TouchableWithoutFeedback>
       </Modal>
 
-<<<<<<< Updated upstream
-=======
       {/*menu options*/}
       <Modal visible={modal2Open} animationType="slide">
         <View>
@@ -319,7 +294,6 @@ export default function properties({ navigation }) {
         </View>
       </Modal>
 
->>>>>>> Stashed changes
       <MaterialIcons
         name="add"
         size={24}
