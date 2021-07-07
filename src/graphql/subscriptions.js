@@ -5,6 +5,10 @@ export const onCreateLandlord = /* GraphQL */ `
   subscription OnCreateLandlord {
     onCreateLandlord {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
@@ -15,6 +19,10 @@ export const onUpdateLandlord = /* GraphQL */ `
   subscription OnUpdateLandlord {
     onUpdateLandlord {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
@@ -25,12 +33,118 @@ export const onDeleteLandlord = /* GraphQL */ `
   subscription OnDeleteLandlord {
     onDeleteLandlord {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
     }
   }
 `;
+<<<<<<< Updated upstream
+=======
+export const onCreateSubtask = /* GraphQL */ `
+  subscription OnCreateSubtask {
+    onCreateSubtask {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateSubtask = /* GraphQL */ `
+  subscription OnUpdateSubtask {
+    onUpdateSubtask {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteSubtask = /* GraphQL */ `
+  subscription OnDeleteSubtask {
+    onDeleteSubtask {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreateTask = /* GraphQL */ `
+  subscription OnCreateTask {
+    onCreateTask {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateTask = /* GraphQL */ `
+  subscription OnUpdateTask {
+    onUpdateTask {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteTask = /* GraphQL */ `
+  subscription OnDeleteTask {
+    onDeleteTask {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onCreateTenant = /* GraphQL */ `
+  subscription OnCreateTenant {
+    onCreateTenant {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateTenant = /* GraphQL */ `
+  subscription OnUpdateTenant {
+    onUpdateTenant {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteTenant = /* GraphQL */ `
+  subscription OnDeleteTenant {
+    onDeleteTenant {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+>>>>>>> Stashed changes
 export const onCreateProperty = /* GraphQL */ `
   subscription OnCreateProperty {
     onCreateProperty {
@@ -43,6 +157,11 @@ export const onCreateProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }
@@ -60,6 +179,11 @@ export const onUpdateProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }
@@ -77,6 +201,11 @@ export const onDeleteProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }

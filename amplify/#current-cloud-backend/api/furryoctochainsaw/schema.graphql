@@ -1,0 +1,37 @@
+type Landlord @model {
+  id: ID!
+  name: String!
+  properties: [ID]!
+}
+
+type Subtask @model {
+  id: ID!
+  title: String!
+  inprogress: Boolean!
+}
+
+type Task @model {
+  id: ID!
+  name: String!
+  color: String!
+  subtasks: [ID]!
+}
+
+type Tenant @model {
+  id: ID!
+  name: String!
+}
+
+type Property @model {
+  id: ID!
+  address: String!
+  number: Int!
+  houseNumber: Int!
+  streetName: String! 
+  city: String!
+  province: String!
+  country: String!
+  issues: Int!
+  tasks: [ID]!
+  tenants: [ID]!
+}

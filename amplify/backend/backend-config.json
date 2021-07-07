@@ -1,6 +1,10 @@
 {
   "auth": {
+<<<<<<< Updated upstream
     "furryoctochainsawf8118bd3": {
+=======
+    "furryoctochainsaw0d025109": {
+>>>>>>> Stashed changes
       "service": "Cognito",
       "providerPlugin": "awscloudformation",
       "dependsOn": [],
@@ -16,7 +20,11 @@
           "defaultAuthentication": {
             "authenticationType": "AMAZON_COGNITO_USER_POOLS",
             "userPoolConfig": {
+<<<<<<< Updated upstream
               "userPoolId": "authfurryoctochainsawf8118bd3"
+=======
+              "userPoolId": "authfurryoctochainsaw0d025109"
+>>>>>>> Stashed changes
             }
           },
           "additionalAuthenticationProviders": []

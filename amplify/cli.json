@@ -2,6 +2,10 @@
   "features": {
     "graphqltransformer": {
       "addmissingownerfields": true,
+<<<<<<< Updated upstream
+=======
+      "improvepluralization": true,
+>>>>>>> Stashed changes
       "validatetypenamereservedwords": true,
       "useexperimentalpipelinedtransformer": false,
       "enableiterativegsiupdates": true,
@@ -23,7 +27,14 @@
       "cleangeneratedmodelsdirectory": true,
       "retaincasestyle": true,
       "addtimestampfields": true,
+<<<<<<< Updated upstream
       "handlelistnullabilitytransparently": true
+=======
+      "handlelistnullabilitytransparently": true,
+      "emitauthprovider": true,
+      "generateindexrules": true,
+      "enabledartnullsafety": true
+>>>>>>> Stashed changes
     },
     "appsync": {
       "generategraphqlpermissions": true

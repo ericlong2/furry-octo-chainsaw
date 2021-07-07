@@ -1,8 +1,33 @@
 type Landlord @model {
   id: ID!
+<<<<<<< Updated upstream
   properties: [ID]!
 }
 
+=======
+  name: String!
+  properties: [ID]!
+}
+
+type Subtask @model {
+  id: ID!
+  title: String!
+  inprogress: Boolean!
+}
+
+type Task @model {
+  id: ID!
+  name: String!
+  color: String!
+  subtasks: [ID]!
+}
+
+type Tenant @model {
+  id: ID!
+  name: String!
+}
+
+>>>>>>> Stashed changes
 type Property @model {
   id: ID!
   address: String!
@@ -13,4 +38,10 @@ type Property @model {
   province: String!
   country: String!
   issues: Int!
+<<<<<<< Updated upstream
 }
+=======
+  tasks: [ID]!
+  tenants: [ID]!
+}
+>>>>>>> Stashed changes

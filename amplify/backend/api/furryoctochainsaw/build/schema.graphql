@@ -1,0 +1,409 @@
+type Landlord {
+  id: ID!
+  name: String!
+  properties: [ID]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Subtask {
+  id: ID!
+  title: String!
+  inprogress: Boolean!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Task {
+  id: ID!
+  name: String!
+  color: String!
+  subtasks: [ID]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Tenant {
+  id: ID!
+  name: String!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+type Property {
+  id: ID!
+  address: String!
+  number: Int!
+  houseNumber: Int!
+  streetName: String!
+  city: String!
+  province: String!
+  country: String!
+  issues: Int!
+  tasks: [ID]!
+  tenants: [ID]!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
+enum ModelSortDirection {
+  ASC
+  DESC
+}
+
+type ModelLandlordConnection {
+  items: [Landlord]
+  nextToken: String
+}
+
+input ModelStringInput {
+  ne: String
+  eq: String
+  le: String
+  lt: String
+  ge: String
+  gt: String
+  contains: String
+  notContains: String
+  between: [String]
+  beginsWith: String
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIDInput {
+  ne: ID
+  eq: ID
+  le: ID
+  lt: ID
+  ge: ID
+  gt: ID
+  contains: ID
+  notContains: ID
+  between: [ID]
+  beginsWith: ID
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+  size: ModelSizeInput
+}
+
+input ModelIntInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelFloatInput {
+  ne: Float
+  eq: Float
+  le: Float
+  lt: Float
+  ge: Float
+  gt: Float
+  between: [Float]
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelBooleanInput {
+  ne: Boolean
+  eq: Boolean
+  attributeExists: Boolean
+  attributeType: ModelAttributeTypes
+}
+
+input ModelSizeInput {
+  ne: Int
+  eq: Int
+  le: Int
+  lt: Int
+  ge: Int
+  gt: Int
+  between: [Int]
+}
+
+input ModelLandlordFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  properties: ModelIDInput
+  and: [ModelLandlordFilterInput]
+  or: [ModelLandlordFilterInput]
+  not: ModelLandlordFilterInput
+}
+
+enum ModelAttributeTypes {
+  binary
+  binarySet
+  bool
+  list
+  map
+  number
+  numberSet
+  string
+  stringSet
+  _null
+}
+
+type Query {
+  getLandlord(id: ID!): Landlord
+  listLandlords(filter: ModelLandlordFilterInput, limit: Int, nextToken: String): ModelLandlordConnection
+  getSubtask(id: ID!): Subtask
+  listSubtasks(filter: ModelSubtaskFilterInput, limit: Int, nextToken: String): ModelSubtaskConnection
+  getTask(id: ID!): Task
+  listTasks(filter: ModelTaskFilterInput, limit: Int, nextToken: String): ModelTaskConnection
+  getTenant(id: ID!): Tenant
+  listTenants(filter: ModelTenantFilterInput, limit: Int, nextToken: String): ModelTenantConnection
+  getProperty(id: ID!): Property
+  listProperties(filter: ModelPropertyFilterInput, limit: Int, nextToken: String): ModelPropertyConnection
+}
+
+input CreateLandlordInput {
+  id: ID
+  name: String!
+  properties: [ID]!
+}
+
+input UpdateLandlordInput {
+  id: ID!
+  name: String
+  properties: [ID]
+}
+
+input DeleteLandlordInput {
+  id: ID!
+}
+
+type Mutation {
+  createLandlord(input: CreateLandlordInput!, condition: ModelLandlordConditionInput): Landlord
+  updateLandlord(input: UpdateLandlordInput!, condition: ModelLandlordConditionInput): Landlord
+  deleteLandlord(input: DeleteLandlordInput!, condition: ModelLandlordConditionInput): Landlord
+  createSubtask(input: CreateSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask
+  updateSubtask(input: UpdateSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask
+  deleteSubtask(input: DeleteSubtaskInput!, condition: ModelSubtaskConditionInput): Subtask
+  createTask(input: CreateTaskInput!, condition: ModelTaskConditionInput): Task
+  updateTask(input: UpdateTaskInput!, condition: ModelTaskConditionInput): Task
+  deleteTask(input: DeleteTaskInput!, condition: ModelTaskConditionInput): Task
+  createTenant(input: CreateTenantInput!, condition: ModelTenantConditionInput): Tenant
+  updateTenant(input: UpdateTenantInput!, condition: ModelTenantConditionInput): Tenant
+  deleteTenant(input: DeleteTenantInput!, condition: ModelTenantConditionInput): Tenant
+  createProperty(input: CreatePropertyInput!, condition: ModelPropertyConditionInput): Property
+  updateProperty(input: UpdatePropertyInput!, condition: ModelPropertyConditionInput): Property
+  deleteProperty(input: DeletePropertyInput!, condition: ModelPropertyConditionInput): Property
+}
+
+input ModelLandlordConditionInput {
+  name: ModelStringInput
+  properties: ModelIDInput
+  and: [ModelLandlordConditionInput]
+  or: [ModelLandlordConditionInput]
+  not: ModelLandlordConditionInput
+}
+
+type Subscription {
+  onCreateLandlord: Landlord @aws_subscribe(mutations: ["createLandlord"])
+  onUpdateLandlord: Landlord @aws_subscribe(mutations: ["updateLandlord"])
+  onDeleteLandlord: Landlord @aws_subscribe(mutations: ["deleteLandlord"])
+  onCreateSubtask: Subtask @aws_subscribe(mutations: ["createSubtask"])
+  onUpdateSubtask: Subtask @aws_subscribe(mutations: ["updateSubtask"])
+  onDeleteSubtask: Subtask @aws_subscribe(mutations: ["deleteSubtask"])
+  onCreateTask: Task @aws_subscribe(mutations: ["createTask"])
+  onUpdateTask: Task @aws_subscribe(mutations: ["updateTask"])
+  onDeleteTask: Task @aws_subscribe(mutations: ["deleteTask"])
+  onCreateTenant: Tenant @aws_subscribe(mutations: ["createTenant"])
+  onUpdateTenant: Tenant @aws_subscribe(mutations: ["updateTenant"])
+  onDeleteTenant: Tenant @aws_subscribe(mutations: ["deleteTenant"])
+  onCreateProperty: Property @aws_subscribe(mutations: ["createProperty"])
+  onUpdateProperty: Property @aws_subscribe(mutations: ["updateProperty"])
+  onDeleteProperty: Property @aws_subscribe(mutations: ["deleteProperty"])
+}
+
+type ModelSubtaskConnection {
+  items: [Subtask]
+  nextToken: String
+}
+
+input ModelSubtaskFilterInput {
+  id: ModelIDInput
+  title: ModelStringInput
+  inprogress: ModelBooleanInput
+  and: [ModelSubtaskFilterInput]
+  or: [ModelSubtaskFilterInput]
+  not: ModelSubtaskFilterInput
+}
+
+input CreateSubtaskInput {
+  id: ID
+  title: String!
+  inprogress: Boolean!
+}
+
+input UpdateSubtaskInput {
+  id: ID!
+  title: String
+  inprogress: Boolean
+}
+
+input DeleteSubtaskInput {
+  id: ID!
+}
+
+input ModelSubtaskConditionInput {
+  title: ModelStringInput
+  inprogress: ModelBooleanInput
+  and: [ModelSubtaskConditionInput]
+  or: [ModelSubtaskConditionInput]
+  not: ModelSubtaskConditionInput
+}
+
+type ModelTaskConnection {
+  items: [Task]
+  nextToken: String
+}
+
+input ModelTaskFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  color: ModelStringInput
+  subtasks: ModelIDInput
+  and: [ModelTaskFilterInput]
+  or: [ModelTaskFilterInput]
+  not: ModelTaskFilterInput
+}
+
+input CreateTaskInput {
+  id: ID
+  name: String!
+  color: String!
+  subtasks: [ID]!
+}
+
+input UpdateTaskInput {
+  id: ID!
+  name: String
+  color: String
+  subtasks: [ID]
+}
+
+input DeleteTaskInput {
+  id: ID!
+}
+
+input ModelTaskConditionInput {
+  name: ModelStringInput
+  color: ModelStringInput
+  subtasks: ModelIDInput
+  and: [ModelTaskConditionInput]
+  or: [ModelTaskConditionInput]
+  not: ModelTaskConditionInput
+}
+
+type ModelTenantConnection {
+  items: [Tenant]
+  nextToken: String
+}
+
+input ModelTenantFilterInput {
+  id: ModelIDInput
+  name: ModelStringInput
+  and: [ModelTenantFilterInput]
+  or: [ModelTenantFilterInput]
+  not: ModelTenantFilterInput
+}
+
+input CreateTenantInput {
+  id: ID
+  name: String!
+}
+
+input UpdateTenantInput {
+  id: ID!
+  name: String
+}
+
+input DeleteTenantInput {
+  id: ID!
+}
+
+input ModelTenantConditionInput {
+  name: ModelStringInput
+  and: [ModelTenantConditionInput]
+  or: [ModelTenantConditionInput]
+  not: ModelTenantConditionInput
+}
+
+type ModelPropertyConnection {
+  items: [Property]
+  nextToken: String
+}
+
+input ModelPropertyFilterInput {
+  id: ModelIDInput
+  address: ModelStringInput
+  number: ModelIntInput
+  houseNumber: ModelIntInput
+  streetName: ModelStringInput
+  city: ModelStringInput
+  province: ModelStringInput
+  country: ModelStringInput
+  issues: ModelIntInput
+  tasks: ModelIDInput
+  tenants: ModelIDInput
+  and: [ModelPropertyFilterInput]
+  or: [ModelPropertyFilterInput]
+  not: ModelPropertyFilterInput
+}
+
+input CreatePropertyInput {
+  id: ID
+  address: String!
+  number: Int!
+  houseNumber: Int!
+  streetName: String!
+  city: String!
+  province: String!
+  country: String!
+  issues: Int!
+  tasks: [ID]!
+  tenants: [ID]!
+}
+
+input UpdatePropertyInput {
+  id: ID!
+  address: String
+  number: Int
+  houseNumber: Int
+  streetName: String
+  city: String
+  province: String
+  country: String
+  issues: Int
+  tasks: [ID]
+  tenants: [ID]
+}
+
+input DeletePropertyInput {
+  id: ID!
+}
+
+input ModelPropertyConditionInput {
+  address: ModelStringInput
+  number: ModelIntInput
+  houseNumber: ModelIntInput
+  streetName: ModelStringInput
+  city: ModelStringInput
+  province: ModelStringInput
+  country: ModelStringInput
+  issues: ModelIntInput
+  tasks: ModelIDInput
+  tenants: ModelIDInput
+  and: [ModelPropertyConditionInput]
+  or: [ModelPropertyConditionInput]
+  not: ModelPropertyConditionInput
+}

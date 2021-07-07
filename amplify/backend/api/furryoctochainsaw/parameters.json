@@ -4,7 +4,11 @@
   "DynamoDBEnableServerSideEncryption": false,
   "AuthCognitoUserPoolId": {
     "Fn::GetAtt": [
+<<<<<<< Updated upstream
       "authfurryoctochainsawf8118bd3",
+=======
+      "authfurryoctochainsaw0d025109",
+>>>>>>> Stashed changes
       "Outputs.UserPoolId"
     ]
   }

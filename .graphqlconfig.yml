@@ -10,6 +10,9 @@ projects:
         codeGenTarget: javascript
         generatedFileName: ''
         docsFilePath: src/graphql
+<<<<<<< Updated upstream
 extensions:
   amplify:
     version: 3
+=======
+>>>>>>> Stashed changes

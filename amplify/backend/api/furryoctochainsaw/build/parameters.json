@@ -1,0 +1,14 @@
+{
+    "CreateAPIKey": 0,
+    "AppSyncApiName": "furryoctochainsaw",
+    "DynamoDBBillingMode": "PAY_PER_REQUEST",
+    "DynamoDBEnableServerSideEncryption": false,
+    "AuthCognitoUserPoolId": {
+        "Fn::GetAtt": [
+            "authfurryoctochainsaw0d025109",
+            "Outputs.UserPoolId"
+        ]
+    },
+    "S3DeploymentBucket": "amplify-furryoctochainsaw-dev-152427-deployment",
+    "S3DeploymentRootKey": "amplify-appsync-files/7cc14be1cd91abb8e5f48bc2eb12521ee7896887"
+}

@@ -16,6 +16,7 @@ import Task from "../components/Task";
 import GooglePlacesInput from "./GooglePlacesInput";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
+<<<<<<< Updated upstream
 import { API, Auth, graphqlOperation } from "aws-amplify";
 import {
   getLandlord,
@@ -27,12 +28,29 @@ import {
   createLandlord,
   updateLandlord,
 } from "../src/graphql/mutations";
+=======
+import GooglePlacesInput from "./GooglePlacesInput";
+
+import Options from "./options";
+
+import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
+
+import {getLandlord, getProperty} from "../src/graphql/queries";
+import {createProperty, updateLandlord} from "../src/graphql/mutations";
+
+>>>>>>> Stashed changes
 export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
   const [rentals, setRental] = useState([]);
   const [user, setUser] = useState("");
   const [number, setNumber] = useState(0);
+<<<<<<< Updated upstream
+=======
+  const [rentals, setRental] = useState([]);
+  const [user, setUser] = useState("");
+  const [loaded, setLoaded] = useState(false);
+>>>>>>> Stashed changes
 
   const checkUser = async () => {
     try {
@@ -84,6 +102,96 @@ export default function properties({ navigation }) {
       console.log("error getting", error);
     }
   };
+  
+  const loadProperties = async() => {
+
+    if (!loaded) {
+      setLoaded(true);
+      // load properties that have already been added previously
+      try {
+
+        // get the current user
+        const curUser = await Auth.currentAuthenticatedUser();
+        //console.log("user",curUser.attributes);
+        setUser(curUser.attributes.email);
+
+
+        // get the landlord object corresponding to current user
+        const landlord = await API.graphql({
+          query: getLandlord,
+          variables: {id:curUser.attributes.email}
+        });
+
+        //console.log("loading properties for",landlord.data.getLandlord);
+        // load properties into rental list
+        const properties = landlord.data.getLandlord.properties;
+
+        
+
+        for (const property of properties) {
+
+          // Load property details
+          const rental = await API.graphql({
+            query:getProperty,
+            variables: {id: property},
+          });
+
+          // output property details
+          console.log(rental.data.getProperty);
+
+          // add to rentals
+          setRental((currentRentals)=>{
+            return [rental.data.getProperty, ...currentRentals];
+          });
+        }
+        
+          //console.log("finished retrieving properties");
+      
+      } catch (error) {
+        console.log("error loading properties:",error);
+      }
+    }
+  }
+  loadProperties();
+
+  const generateID = () => {
+    return Math.random().toString();
+  }
+  const addProperty = async (rental) => {
+    try {
+
+      console.log(rental);
+      // create a new property object for rental
+      const rentalData = await API.graphql(
+        graphqlOperation(createProperty, { input: rental })
+      );
+
+      // get current landlord
+      const tmp = await API.graphql({
+        query: getLandlord,
+        variables: { id: user },
+      });
+
+      const landlord = tmp.data.getLandlord;
+      delete landlord.createdAt;
+      delete landlord.updatedAt;
+
+      // add property to landlord's property list
+      landlord.properties.push(rental.id);
+
+      console.log(landlord);
+      const landlordData = await API.graphql(
+        graphqlOperation(updateLandlord, { input: landlord })
+      );
+
+      // update the rental list
+      setRental((currentRentals) => {
+        return [rental, ...currentRentals];
+      });
+    } catch (error) {
+      console.log("error adding", error);
+    }
+  };
 
   const addProperty = async (rental) => {
     try {
@@ -110,33 +218,38 @@ export default function properties({ navigation }) {
   };
   const addRental = (rental) => {
     //change this to not random
+<<<<<<< Updated upstream
     rental.id = Math.random().toString();
     rental.issues = 0;
     rental.number = number;
+=======
+    rental.id = generateID();
+    rental.issues = 0;
+    rental.number = number;
+    rental.tasks = [];
+    rental.tenants = [];
+>>>>>>> Stashed changes
     setNumber(0);
     addProperty(rental);
     setModalOpen(false);
   };
+
+
   /*Functions */
   const pressRental = (item) => {
     console.log(item.id);
     //let item = rentals[key];
     navigation.navigate("RentalDetails", item);
   };
-
-  const handleAddTask = () => {
-    Alert.alert("Add Property", "Do you wish to add a new rental property", [
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Presssed"),
-        style: "cancel",
-      },
-      {
-        text: "Yes",
-        onPress: () => navigation.navigate("AddRental"),
-      },
-    ]);
-  };
+ 
+  async function signOut() {
+    try {
+        await Auth.signOut();
+        navigation.navigate("Start");
+    } catch (error) {
+        console.log('error signing out: ', error);
+    }
+  }
 
   getRentals();
   return (
@@ -165,6 +278,48 @@ export default function properties({ navigation }) {
         </TouchableWithoutFeedback>
       </Modal>
 
+<<<<<<< Updated upstream
+=======
+      {/*menu options*/}
+      <Modal visible={modal2Open} animationType="slide">
+        <View>
+          <MaterialIcons
+            name="close"
+            size={24}
+            style={{ ...styles.modalToggle, ...styles.modalClose }}
+            onPress={() => setModal2Open(false)}
+          />
+          <Button
+            //style={styles.button}
+            title="Logout"
+            color="maroon"
+            onPress={signOut}
+          />
+          {/*<Options />*/}
+        </View>
+      </Modal>
+
+      {/* email verification*/}
+      <Modal visible={modal3Open} animationType="slide">
+        <View>
+          <TextInput
+            style={styles.TextInput}
+            placeholder="Apt number(optional)"
+            onChangeText={(number) => setVerification(number)}
+            //defaultValue={number}
+            keyboardType="numeric"
+          />
+          <Button
+            //style={styles.button}
+            title="Submit"
+            color="maroon"
+            onPress={() => submitVerif(verification)}
+          />
+          {/*<Options />*/}
+        </View>
+      </Modal>
+
+>>>>>>> Stashed changes
       <MaterialIcons
         name="add"
         size={24}

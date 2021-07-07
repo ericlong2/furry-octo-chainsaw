@@ -8,6 +8,10 @@ export const createLandlord = /* GraphQL */ `
   ) {
     createLandlord(input: $input, condition: $condition) {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
@@ -21,6 +25,10 @@ export const updateLandlord = /* GraphQL */ `
   ) {
     updateLandlord(input: $input, condition: $condition) {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
@@ -34,12 +42,145 @@ export const deleteLandlord = /* GraphQL */ `
   ) {
     deleteLandlord(input: $input, condition: $condition) {
       id
+<<<<<<< Updated upstream
+=======
+      name
+>>>>>>> Stashed changes
       properties
       createdAt
       updatedAt
     }
   }
 `;
+<<<<<<< Updated upstream
+=======
+export const createSubtask = /* GraphQL */ `
+  mutation CreateSubtask(
+    $input: CreateSubtaskInput!
+    $condition: ModelSubtaskConditionInput
+  ) {
+    createSubtask(input: $input, condition: $condition) {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateSubtask = /* GraphQL */ `
+  mutation UpdateSubtask(
+    $input: UpdateSubtaskInput!
+    $condition: ModelSubtaskConditionInput
+  ) {
+    updateSubtask(input: $input, condition: $condition) {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteSubtask = /* GraphQL */ `
+  mutation DeleteSubtask(
+    $input: DeleteSubtaskInput!
+    $condition: ModelSubtaskConditionInput
+  ) {
+    deleteSubtask(input: $input, condition: $condition) {
+      id
+      title
+      inprogress
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const createTask = /* GraphQL */ `
+  mutation CreateTask(
+    $input: CreateTaskInput!
+    $condition: ModelTaskConditionInput
+  ) {
+    createTask(input: $input, condition: $condition) {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateTask = /* GraphQL */ `
+  mutation UpdateTask(
+    $input: UpdateTaskInput!
+    $condition: ModelTaskConditionInput
+  ) {
+    updateTask(input: $input, condition: $condition) {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteTask = /* GraphQL */ `
+  mutation DeleteTask(
+    $input: DeleteTaskInput!
+    $condition: ModelTaskConditionInput
+  ) {
+    deleteTask(input: $input, condition: $condition) {
+      id
+      name
+      color
+      subtasks
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const createTenant = /* GraphQL */ `
+  mutation CreateTenant(
+    $input: CreateTenantInput!
+    $condition: ModelTenantConditionInput
+  ) {
+    createTenant(input: $input, condition: $condition) {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateTenant = /* GraphQL */ `
+  mutation UpdateTenant(
+    $input: UpdateTenantInput!
+    $condition: ModelTenantConditionInput
+  ) {
+    updateTenant(input: $input, condition: $condition) {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteTenant = /* GraphQL */ `
+  mutation DeleteTenant(
+    $input: DeleteTenantInput!
+    $condition: ModelTenantConditionInput
+  ) {
+    deleteTenant(input: $input, condition: $condition) {
+      id
+      name
+      createdAt
+      updatedAt
+    }
+  }
+`;
+>>>>>>> Stashed changes
 export const createProperty = /* GraphQL */ `
   mutation CreateProperty(
     $input: CreatePropertyInput!
@@ -55,6 +196,11 @@ export const createProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }
@@ -75,6 +221,11 @@ export const updateProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }
@@ -95,6 +246,11 @@ export const deleteProperty = /* GraphQL */ `
       province
       country
       issues
+<<<<<<< Updated upstream
+=======
+      tasks
+      tenants
+>>>>>>> Stashed changes
       createdAt
       updatedAt
     }

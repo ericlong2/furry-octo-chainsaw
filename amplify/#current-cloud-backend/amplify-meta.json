@@ -1,0 +1,63 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-furryoctochainsaw-dev-152427-authRole",
+      "UnauthRoleArn": "arn:aws:iam::867278282974:role/amplify-furryoctochainsaw-dev-152427-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::867278282974:role/amplify-furryoctochainsaw-dev-152427-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-furryoctochainsaw-dev-152427-deployment",
+      "UnauthRoleName": "amplify-furryoctochainsaw-dev-152427-unauthRole",
+      "StackName": "amplify-furryoctochainsaw-dev-152427",
+      "StackId": "arn:aws:cloudformation:us-east-2:867278282974:stack/amplify-furryoctochainsaw-dev-152427/c98bbd00-de8f-11eb-bbcf-06bb4e67c3e0",
+      "AmplifyAppId": "d37re3vrjin4rr"
+    }
+  },
+  "auth": {
+    "furryoctochainsaw0d025109": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-152427-deployment/amplify-cfn-templates/auth/furryoctochainsaw0d025109-cloudformation-template.yml",
+        "logicalId": "authfurryoctochainsaw0d025109"
+      },
+      "lastPushTimeStamp": "2021-07-07T01:07:36.974Z",
+      "output": {
+        "UserPoolId": "us-east-2_SikCm2Aeh",
+        "AppClientIDWeb": "33f9vk2j8f3td1pcqki4otuu4s",
+        "AppClientID": "1alrhbqcrpfsts8pad8521o8k",
+        "IdentityPoolId": "us-east-2:f8ce3c04-a700-408c-b712-0be1fd1a90f4",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-2:867278282974:userpool/us-east-2_SikCm2Aeh",
+        "IdentityPoolName": "furryoctochainsaw0d025109_identitypool_0d025109__dev",
+        "UserPoolName": "furryoctochainsaw0d025109_userpool_0d025109"
+      },
+      "lastPushDirHash": "Phgt7ysTRUtgCfZ7kq+gWANhccw="
+    }
+  },
+  "api": {
+    "furryoctochainsaw": {
+      "service": "AppSync",
+      "providerPlugin": "awscloudformation",
+      "output": {
+        "authConfig": {
+          "defaultAuthentication": {
+            "authenticationType": "AMAZON_COGNITO_USER_POOLS",
+            "userPoolConfig": {
+              "userPoolId": "authfurryoctochainsaw0d025109"
+            }
+          },
+          "additionalAuthenticationProviders": []
+        },
+        "GraphQLAPIIdOutput": "mwg7naqkdzft5dsxh3pw6yrjki",
+        "GraphQLAPIEndpointOutput": "https://raw52mmhcvaf3frmbmfq4mnvly.appsync-api.us-east-2.amazonaws.com/graphql"
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-152427-deployment/amplify-cfn-templates/api/cloudformation-template.json",
+        "logicalId": "apifurryoctochainsaw"
+      },
+      "lastPushTimeStamp": "2021-07-07T01:07:39.178Z",
+      "lastPushDirHash": "nNrQZ84ioubgU7D6ueOGvi523f4="
+    }
+  }
+}
