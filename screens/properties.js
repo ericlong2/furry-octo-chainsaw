@@ -148,7 +148,6 @@ export default function properties({ navigation }) {
 
   /*Functions */
   const pressRental = (item) => {
-    console.log(item.key);
     //let item = rentals[key];
     navigation.navigate("RentalDetails", item);
     //return <RentalPage address={item.address} />;

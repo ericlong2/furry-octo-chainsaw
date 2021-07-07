@@ -57,23 +57,29 @@ export default function rentalPage({ navigation }) {
         console.log(propertyData);
         setTaskList([]);
         for (const id of propertyData.data.getProperty.tasks) {
+          //console.log(id);
           const taskData = await API.graphql({
             query: getTask,
             variables: { id : id},
           });
-          console.log(taskData);
+          //console.log(taskData);
           const curTask = taskData.data.getTask;
-          curTask.subtasks = [];
-
-          for (const subtask of taskData.data.getTask.subtasks) {
-            const subtaskData = await API.graphql({
-              query: getSubtask,
-              variables: {id:subtask},
-            });
-            curTask.subtasks.push(subtaskData.data.getSubtask);
+          curTask.subtaskList = [];
+          console.log(curTask.subtasks);
+          for (const subtask of curTask.subtasks) {
+              console.log(subtask);
+              const subtaskData = await API.graphql({
+                query: getSubtask,
+                variables: {id:subtask},
+              });
+              //console.log(subtaskData);
+              curTask.subtaskList.push(subtaskData.data.getSubtask);
           }
+          console.log("before",curTask);
+          curTask.subtasks = curTask.subtaskList;
+          delete curTask.subtaskList;
 
-
+          console.log("loading task", curTask);
           taskList.push(curTask);
           // setTaskList((currentTasks)=>{
           //   return [taskData.data.getTask, ...currentTasks];
@@ -89,11 +95,12 @@ export default function rentalPage({ navigation }) {
           });
           
           //remove later
-          tenantData.data.getTenant.subtasks = [];
+          //tenantData.data.getTenant.subtasks = [];
 
-          setTenantList((currentTenants)=>{
-            return [tenantData.data.getTenant, ...currentTenants];
-          });
+          tenantList.push(tenantData.data.getTenant);
+          // setTenantList((currentTenants)=>{
+          //   return [tenantData.data.getTenant, ...currentTenants];
+          // });
         }
 
         setState({
@@ -150,11 +157,14 @@ export default function rentalPage({ navigation }) {
           graphqlOperation(updateProperty, {input:propertyData.data.getProperty})
         );
 
+        //state.lists.push(list);
         setState({
           lists: [
             ...state.lists,
             list
           ],
+          addTicketVisible: false,
+          people: state.people,
         });
       } catch (error) {
         console.log("error adding list",error);
@@ -171,19 +181,29 @@ export default function rentalPage({ navigation }) {
         });
         propertyData.data.getProperty.tenants.push(list.id);
 
+        delete propertyData.data.getProperty.createdAt;
+        delete propertyData.data.getProperty.updatedAt;
+
+        await API.graphql(
+          graphqlOperation(updateProperty, {input:propertyData.data.getProperty})
+        );
+
+        console.log("adding tenant",list);
+        //state.people.push(list);
         setState({
           people: [
             ...state.people,
             list
           ],
+          addTicketVisible: false,
+          lists: state.lists,
         });
       } catch (error) {
         console.log("error adding list",error);
       }
     }
-    console.log(list);
     
-    console.log(state.lists);
+    console.log(state);
   };
 
   const updateList = async (list) => {
@@ -192,21 +212,27 @@ export default function rentalPage({ navigation }) {
     //     return item.id === list.id ? list : item;
     //   }),
     // });
-    
+    setTaskList([]);
+    console.log("list",list);
+    for (let i = 0; i < list.subtasks.length; i++) {
+      taskList.push(list.subtasks[i].id);
+    }
     try {
       const taskData = await API.graphql({
         query: getTask,
         variables: { id: list.id},
       });
 
-      taskData.data.getTask.subtasks.push(list.subtasks[list.subtasks.length-1].id);
-
+      taskData.data.getTask.subtasks = taskList;
+      
       delete taskData.data.getTask.createdAt;
       delete taskData.data.getTask.updatedAt;
 
       const tmp = await API.graphql(
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
+
+      console.log("added subtask",taskData);
     } catch (error) {
       console.log("error updating",error);
     }

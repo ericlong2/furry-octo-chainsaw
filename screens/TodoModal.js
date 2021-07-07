@@ -20,8 +20,8 @@ export default class TodoModal extends Component {
     
     toggleTodoCompleted = async(index) =>{
         console.log("toggling",index);
-        let list = this.props.list
-        list.subtasks[index].inprogress = !list.subtasks[index].inprogress
+        let list = this.props.list;
+        list.subtasks[index].inprogress = !list.subtasks[index].inprogress;
 
         this.props.updateList(list);
         try {
