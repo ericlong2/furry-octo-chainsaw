@@ -29,7 +29,7 @@ export default function LoginScreen({ navigation }) {
     console.log("password", password.value);
     try {
       const user = await Auth.signIn(email.value, password.value);
-      navigation.navigate("properties");
+      navigation.navigate("Home");
       //   navigation.reset({
       //     index: 0,
       //     routes: [{ name: "Login" }],

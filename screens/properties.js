@@ -20,6 +20,11 @@ import GooglePlacesInput from "./GooglePlacesInput";
 
 import Options from "./options";
 
+import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
+
+import {getLandlord, getProperty} from "../src/graphql/queries";
+import {createProperty, updateLandlord} from "../src/graphql/mutations";
+
 export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
@@ -27,12 +32,9 @@ export default function properties({ navigation }) {
   const [modal3Open, setModal3Open] = useState(false);
   const [verification, setVerification] = useState(false); //this might need to be changed
   const [number, setNumber] = useState(0);
-  const [rentals, setRental] = useState([
-    { address: "220 Yonge Street", city: "Toronto", issues: 0, key: "1" },
-    { address: "1442 Lawrence Ave W", city: "Toronto", issues: 3, key: "2" },
-    { address: "2925 Dufferin St", city: "Toronto", issues: 2, key: "3" },
-    { address: "2350 Bridletowne Cir", city: "Toronto", issues: 1, key: "4" },
-  ]);
+  const [rentals, setRental] = useState([]);
+  const [user, setUser] = useState("");
+  const [loaded, setLoaded] = useState(false);
 
   const submitVerif = (code) => {
     console.log(code);
@@ -40,17 +42,110 @@ export default function properties({ navigation }) {
     //setModal3Open(false)
     //also your gonna need to scan if the acc has been verified or not or smt
   };
+  
+  const loadProperties = async() => {
+
+    if (!loaded) {
+      setLoaded(true);
+      // load properties that have already been added previously
+      try {
+
+        // get the current user
+        const curUser = await Auth.currentAuthenticatedUser();
+        //console.log("user",curUser.attributes);
+        setUser(curUser.attributes.email);
+
+
+        // get the landlord object corresponding to current user
+        const landlord = await API.graphql({
+          query: getLandlord,
+          variables: {id:curUser.attributes.email}
+        });
+
+        //console.log("loading properties for",landlord.data.getLandlord);
+        // load properties into rental list
+        const properties = landlord.data.getLandlord.properties;
+
+        
+
+        for (const property of properties) {
+
+          // Load property details
+          const rental = await API.graphql({
+            query:getProperty,
+            variables: {id: property},
+          });
+
+          // output property details
+          console.log(rental.data.getProperty);
+
+          // add to rentals
+          setRental((currentRentals)=>{
+            return [rental.data.getProperty, ...currentRentals];
+          });
+        }
+        
+          //console.log("finished retrieving properties");
+      
+      } catch (error) {
+        console.log("error loading properties:",error);
+      }
+    }
+  }
+  loadProperties();
+
+  const generateID = () => {
+    return Math.random().toString();
+  }
+  const addProperty = async (rental) => {
+    try {
+
+      console.log(rental);
+      // create a new property object for rental
+      const rentalData = await API.graphql(
+        graphqlOperation(createProperty, { input: rental })
+      );
+
+      // get current landlord
+      const tmp = await API.graphql({
+        query: getLandlord,
+        variables: { id: user },
+      });
+
+      const landlord = tmp.data.getLandlord;
+      delete landlord.createdAt;
+      delete landlord.updatedAt;
+
+      // add property to landlord's property list
+      landlord.properties.push(rental.id);
+
+      console.log(landlord);
+      const landlordData = await API.graphql(
+        graphqlOperation(updateLandlord, { input: landlord })
+      );
+
+      // update the rental list
+      setRental((currentRentals) => {
+        return [rental, ...currentRentals];
+      });
+    } catch (error) {
+      console.log("error adding", error);
+    }
+  };
 
   const addRental = (rental) => {
     //change this to not random
-    rental.key = Math.random().toString();
+    rental.id = generateID();
     rental.issues = 0;
     rental.number = number;
-    setRental((currentRentals) => {
-      return [rental, ...currentRentals];
-    });
+    rental.tasks = [];
+    rental.tenants = [];
+    setNumber(0);
+    addProperty(rental);
     setModalOpen(false);
   };
+
+
   /*Functions */
   const pressRental = (item) => {
     console.log(item.key);
@@ -58,20 +153,15 @@ export default function properties({ navigation }) {
     navigation.navigate("RentalDetails", item);
     //return <RentalPage address={item.address} />;
   };
-
-  const handleAddTask = () => {
-    Alert.alert("Add Property", "Do you wish to add a new rental property", [
-      {
-        text: "Cancel",
-        onPress: () => console.log("Cancel Presssed"),
-        style: "cancel",
-      },
-      {
-        text: "Yes",
-        onPress: () => navigation.navigate("AddRental"),
-      },
-    ]);
-  };
+ 
+  async function signOut() {
+    try {
+        await Auth.signOut();
+        navigation.navigate("Start");
+    } catch (error) {
+        console.log('error signing out: ', error);
+    }
+  }
 
   return (
     <View style={styles.container}>
@@ -114,7 +204,7 @@ export default function properties({ navigation }) {
             //style={styles.button}
             title="Logout"
             color="maroon"
-            onPress={() => console.log("logout")}
+            onPress={signOut}
           />
           {/*<Options />*/}
         </View>

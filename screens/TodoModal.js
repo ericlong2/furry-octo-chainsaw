@@ -4,27 +4,67 @@ import { Text, View, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, Keybo
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import colors from './Colors'
 import { Swipeable } from 'react-native-gesture-handler'
+import { createSubtask } from '../src/graphql/mutations'
+import { API, graphqlOperation } from 'aws-amplify'
 {/*https://www.npmjs.com/package/react-native-swipe-list-view*/}
+
+
+
+import {getSubtask} from "../src/graphql/queries";
+import {deleteSubtask,updateSubtask} from "../src/graphql/mutations";
 
 export default class TodoModal extends Component {
     state = {
         newTodo: ""
     };
-
-    toggleTodoCompleted = index =>{
+    
+    toggleTodoCompleted = async(index) =>{
+        console.log("toggling",index);
         let list = this.props.list
-        list.todos[index].inprogress = !list.todos[index].inprogress
+        list.subtasks[index].inprogress = !list.subtasks[index].inprogress
 
         this.props.updateList(list);
+        try {
+            const subtaskData = await API.graphql({
+                query: getSubtask,
+                variables: { id: list.subtasks[index].id},
+            });
+
+            console.log(subtaskData);
+            subtaskData.data.getSubtask.inprogress = !subtaskData.data.getSubtask.inprogress;
+
+            delete subtaskData.data.getSubtask.createdAt;
+            delete subtaskData.data.getSubtask.updatedAt;
+
+            const tmp = await API.graphql(
+                graphqlOperation(updateSubtask, { input: subtaskData.data.getSubtask })
+            );
+
+        } catch (error) {
+            console.log("error toggling todo",error);
+        }
     };
 
-    addTodo = () => {
-        let list = this.props.list
+    generateID = () => {
+        return Math.random().toString();
+    }
 
-        if(!list.todos.some(todo => todo.title === this.state.newTodo)){
-            list.todos.push({ title: this.state.newTodo, inprogress: false })
+    addTodo = async() => {
+        let list = this.props.list;
+
+        if(!list.subtasks.some(todo => todo.title === this.state.newTodo)){
+            const subtask = { title: this.state.newTodo, inprogress: false, id: this.generateID() };
+            try {
+                const subtaskData = await API.graphql(
+                    graphqlOperation(createSubtask, { input: subtask })
+                  );
+            } catch (error) {
+                console.log("error adding subtask", error);
+            }
+
+            list.subtasks.push(subtask);
             
-            this.props.updateList(list)
+            this.props.updateList(list);
         }
 
 
@@ -33,10 +73,18 @@ export default class TodoModal extends Component {
         Keyboard.dismiss();
     };
 
-    deleteTodo = index => {
+    deleteTodo = async(index) => {
         let list = this.props.list;
-        list.todos.splice(index,1);
+        try {
+            const subtaskData = await API.graphql(
+                graphqlOperation(deleteSubtask, { input: list.subtasks[index]})
+            );
+        } catch (error) {
+            console.log("error deleting subtask", error);
+        }
 
+        list.subtasks.splice(index,1);
+        
         this.props.updateList(list);
     }
     
@@ -95,8 +143,8 @@ export default class TodoModal extends Component {
     render() {
         const list = this.props.list
 
-        const taskCount = list.todos.length
-        const completedCount = list.todos.filter(todo => todo.inprogress).length
+        const taskCount = list.subtasks.length
+        const completedCount = list.subtasks.filter(todo => todo.inprogress).length
 
         return (
             <KeyboardAvoidingView style={{flex: 1}} behavior = "height">
@@ -119,7 +167,7 @@ export default class TodoModal extends Component {
 
                     <View style={[styles.section, {flex: 3, marginVertical: 16}]}>
                         <FlatList 
-                        data ={list.todos} 
+                        data ={list.subtasks} 
                         renderItem={({item, index}) => this.renderTodo(item, index)} 
                         keyExtractor={item=>item.title}
                         showsVerticalScrollIndicator = {false}

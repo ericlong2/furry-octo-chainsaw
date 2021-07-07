@@ -15,10 +15,10 @@ export default class TicketList extends React.Component{
     }
 
     render()  {
-        const list = this.props.list
+        const list = this.props.list;
 
-        const inprogressCount = list.todos.filter(todo => todo.inprogress).length;
-        const remainingCount = list.todos.length - inprogressCount;
+        const inprogressCount = list.subtasks.filter(todo => todo.inprogress).length;
+        const remainingCount = list.subtasks.length - inprogressCount;
 
         return (
             <View>

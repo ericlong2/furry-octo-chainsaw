@@ -21,6 +21,8 @@ import { nameValidator } from "../helpers/nameValidator";
 import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
+import { createLandlord } from "../src/graphql/mutations";
+
 export default function RegisterScreen({ navigation }) {
   const [verification, setVerification] = useState(false); //this might need to be changed
   const [modal3Open, setModal3Open] = useState(false);
@@ -37,6 +39,25 @@ export default function RegisterScreen({ navigation }) {
     try {
       await Auth.confirmSignUp(email.value, code);
       setModal3Open(false);
+      if (isEnabled) {
+        
+        const tmp = {};
+        console.log("adding new landlord:",email.value);
+        tmp.id = email.value;
+        tmp.properties = [];
+        tmp.name = name.value;
+        const userData = await API.graphql(
+          graphqlOperation(createLandlord, { input: tmp })
+        );
+      } else {
+        const tmp = {};
+        console.log("adding new tenant:",email.value);
+        tmp.id = email.value;
+        tmp.name = name.value;
+        const userData = await API.graphql(
+          graphqlOperation(createTenant, { input: tmp })
+        );
+      }
       navigation.navigate("Login");
     } catch (error) {
       console.log("error confirming sign up", error);
