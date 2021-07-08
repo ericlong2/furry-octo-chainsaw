@@ -29,11 +29,10 @@ export default function LoginScreen({ navigation }) {
     console.log("password", password.value);
     try {
       const user = await Auth.signIn(email.value, password.value);
-      navigation.navigate("Home");
-      //   navigation.reset({
-      //     index: 0,
-      //     routes: [{ name: "Login" }],
-      //   });
+      //////////////////////////////////WHER YOU NEED TO CHNAGE REDIRECt
+
+      //navigation.navigate("Home"); this is for landlord
+      //navigation.navigate("Tenant"); This is for tenant
     } catch (error) {
       console.log("error signing in", error);
     }

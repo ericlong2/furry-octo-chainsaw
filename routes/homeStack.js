@@ -6,8 +6,15 @@ import Login from "../screens/LoginScreen";
 import Register from "../screens/RegisterScreen";
 import Start from "../screens/StartScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
+import Tenant from "../screens/Tenant";
 
 const screens = {
+  Tenant: {
+    screen: Tenant,
+    navigationOptions: {
+      title: "Tenant",
+    },
+  },
   ResetPasswordScreen: {
     screen: ResetPasswordScreen,
     navigationOptions: {

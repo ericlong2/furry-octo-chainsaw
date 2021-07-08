@@ -40,9 +40,8 @@ export default function RegisterScreen({ navigation }) {
       await Auth.confirmSignUp(email.value, code);
       setModal3Open(false);
       if (isEnabled) {
-        
         const tmp = {};
-        console.log("adding new landlord:",email.value);
+        console.log("adding new landlord:", email.value);
         tmp.id = email.value;
         tmp.properties = [];
         tmp.name = name.value;
@@ -51,7 +50,7 @@ export default function RegisterScreen({ navigation }) {
         );
       } else {
         const tmp = {};
-        console.log("adding new tenant:",email.value);
+        console.log("adding new tenant:", email.value);
         tmp.id = email.value;
         tmp.name = name.value;
         const userData = await API.graphql(
@@ -114,7 +113,10 @@ export default function RegisterScreen({ navigation }) {
           <TextInput
             style={styles.TextInput}
             placeholder="Enter the verification code sent to your email"
-            onChangeText={(number) => setVerification(number)}
+            onChangeText={(number) => {
+              setVerification(number);
+              navigation.navigate("Login");
+            }}
             //defaultValue={number}
             keyboardType="numeric"
           />
