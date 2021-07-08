@@ -34,6 +34,9 @@ export default function RegisterScreen({ navigation }) {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   // eslint-disable-next-line prettier/prettier
 
+  const resendVerif = () => {
+    console.log("resend verification");
+  };
   const submitVerif = async (code) => {
     console.log(code);
     try {
@@ -119,6 +122,12 @@ export default function RegisterScreen({ navigation }) {
             }}
             //defaultValue={number}
             keyboardType="numeric"
+          />
+          <Button
+            //style={styles.button}
+            title="Resend Verification Code"
+            color="blue"
+            onPress={() => resendVerif()}
           />
           <Button
             //style={styles.button}
