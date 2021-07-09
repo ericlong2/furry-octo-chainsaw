@@ -1,6 +1,6 @@
 //Temporary data until we connect to backend
 
-export default tempData = [
+const tempData = [
     {
         id: 1,
         name: "Plan a trip",
@@ -71,3 +71,5 @@ export default tempData = [
         ]
     }
 ]
+
+export default tempData;

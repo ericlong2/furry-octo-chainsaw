@@ -1,4 +1,4 @@
-export default tempPeople = [
+const tempPeople = [
     {
         id: 1,
         name: "James Doe",
@@ -16,3 +16,5 @@ export default tempPeople = [
     }
         
 ]
+
+export default tempPeople;

@@ -2,6 +2,7 @@ import { nextTick } from 'async';
 import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, Modal} from 'react-native';
 import TodoModal from './TodoModal';
+import colors from './Colors';
 {/* component */ }
 
 export default class TicketList extends React.Component{

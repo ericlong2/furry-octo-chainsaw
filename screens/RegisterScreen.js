@@ -21,7 +21,7 @@ import { nameValidator } from "../helpers/nameValidator";
 import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import { createLandlord } from "../src/graphql/mutations";
+import { createLandlord,createTenant } from "../src/graphql/mutations";
 
 export default function RegisterScreen({ navigation }) {
   const [verification, setVerification] = useState(false); //this might need to be changed
@@ -34,8 +34,14 @@ export default function RegisterScreen({ navigation }) {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   // eslint-disable-next-line prettier/prettier
 
-  const resendVerif = () => {
+  const resendVerif = async() => {
     console.log("resend verification");
+    try {
+      await Auth.resendSignUp(email.value);
+      console.log('code resent successfully');
+  } catch (err) {
+      console.log('error resending code: ', err);
+  }
   };
   const submitVerif = async (code) => {
     console.log(code);
@@ -118,7 +124,6 @@ export default function RegisterScreen({ navigation }) {
             placeholder="Enter the verification code sent to your email"
             onChangeText={(number) => {
               setVerification(number);
-              navigation.navigate("Login");
             }}
             //defaultValue={number}
             keyboardType="numeric"
