@@ -17,11 +17,25 @@ import tempPeople from "./tempPeople";
 import TicketList from "./TicketList";
 import PeopleList from "./PeopleList";
 import AddTicketModal from "./AddTicketModal";
+import Task from "../components/Task";
 
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import {getProperty,getTenant,getTask, getSubtask} from "../src/graphql/queries";
-import {createTask,createTenant, deleteSubtask, updateProperty, updateTask} from "../src/graphql/mutations";
+import {
+  getProperty,
+  getTenant,
+  getTask,
+  getSubtask,
+} from "../src/graphql/queries";
+import {
+  createTask,
+  createTenant,
+  deleteSubtask,
+  updateProperty,
+  updateTask,
+} from "../src/graphql/mutations";
+import Task from "../components/Task";
+import TenantForm from "./TenantForm";
 {
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
 }
@@ -37,10 +51,36 @@ export default function rentalPage({ navigation }) {
   const [taskList, setTaskList] = useState([]);
   const [tenantList, setTenantList] = useState([]);
   const [addType, setAddType] = useState(false);
+  const [tenantModal, setTenantModal] = useState(false);
+  const [currentTenant, setCurrentTenant] = useState();
+  const [editTenantModal, setEditTenantModal] = useState(false);
+  const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
+  //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
+  const [tenants, setTenants] = useState([
+    {
+      name: "Bob",
+    },
+    {
+      name: "Create new tenant",
+    },
+  ]);
+
+  //open modal with the tenant details
+  const pressTenant = (item) => {
+    //navigation.navigate("TenantForm", item);
+    setCurrentTenant(item);
+    setEditTenantModal(true);
+  };
+
+  const editTenant = () => {
+    console.log("edit tenant");
+    setEditTenantModal(false);
+    //need to place a :new tenant at end if that was what was edited
+  };
   const generateID = () => {
     return Math.random().toString();
-  }
+  };
 
   const address = navigation.getParam("address");
   //const address = "";
@@ -60,22 +100,22 @@ export default function rentalPage({ navigation }) {
           //console.log(id);
           const taskData = await API.graphql({
             query: getTask,
-            variables: { id : id},
+            variables: { id: id },
           });
           //console.log(taskData);
           const curTask = taskData.data.getTask;
           curTask.subtaskList = [];
           console.log(curTask.subtasks);
           for (const subtask of curTask.subtasks) {
-              console.log(subtask);
-              const subtaskData = await API.graphql({
-                query: getSubtask,
-                variables: {id:subtask},
-              });
-              //console.log(subtaskData);
-              curTask.subtaskList.push(subtaskData.data.getSubtask);
+            console.log(subtask);
+            const subtaskData = await API.graphql({
+              query: getSubtask,
+              variables: { id: subtask },
+            });
+            //console.log(subtaskData);
+            curTask.subtaskList.push(subtaskData.data.getSubtask);
           }
-          console.log("before",curTask);
+          console.log("before", curTask);
           curTask.subtasks = curTask.subtaskList;
           delete curTask.subtaskList;
 
@@ -86,14 +126,13 @@ export default function rentalPage({ navigation }) {
           // });
         }
 
-
         setTenantList([]);
         for (const id of propertyData.data.getProperty.tenants) {
           const tenantData = await API.graphql({
             query: getTenant,
-            variables: { id : id},
+            variables: { id: id },
           });
-          
+
           //remove later
           //tenantData.data.getTenant.subtasks = [];
 
@@ -105,18 +144,18 @@ export default function rentalPage({ navigation }) {
 
         setState({
           addTicketVisible: state.addTicketVisible,
-          lists:taskList,
-          people:tenantList,
+          lists: taskList,
+          people: tenantList,
         });
 
         console.log(state);
         console.log(taskList);
         console.log(tenantList);
       } catch (error) {
-        console.log("error retrieving property data",error);
+        console.log("error retrieving property data", error);
       }
     }
-  }
+  };
   loadData();
   //console.log(navigation.address);
   //address = props.get("address");
@@ -137,7 +176,6 @@ export default function rentalPage({ navigation }) {
   };
 
   const addList = async (list) => {
-
     list.id = generateID();
     if (!addType) {
       list.subtasks = [];
@@ -154,27 +192,24 @@ export default function rentalPage({ navigation }) {
         delete propertyData.data.getProperty.updatedAt;
 
         await API.graphql(
-          graphqlOperation(updateProperty, {input:propertyData.data.getProperty})
+          graphqlOperation(updateProperty, {
+            input: propertyData.data.getProperty,
+          })
         );
 
         //state.lists.push(list);
         setState({
-          lists: [
-            ...state.lists,
-            list
-          ],
+          lists: [...state.lists, list],
           addTicketVisible: false,
           people: state.people,
         });
       } catch (error) {
-        console.log("error adding list",error);
+        console.log("error adding list", error);
       }
     } else {
       delete list.color;
       try {
-        await API.graphql(
-          graphqlOperation(createTenant, { input: list })
-        );
+        await API.graphql(graphqlOperation(createTenant, { input: list }));
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: navigation.getParam("id") },
@@ -185,24 +220,23 @@ export default function rentalPage({ navigation }) {
         delete propertyData.data.getProperty.updatedAt;
 
         await API.graphql(
-          graphqlOperation(updateProperty, {input:propertyData.data.getProperty})
+          graphqlOperation(updateProperty, {
+            input: propertyData.data.getProperty,
+          })
         );
 
-        console.log("adding tenant",list);
+        console.log("adding tenant", list);
         //state.people.push(list);
         setState({
-          people: [
-            ...state.people,
-            list
-          ],
+          people: [...state.people, list],
           addTicketVisible: false,
           lists: state.lists,
         });
       } catch (error) {
-        console.log("error adding list",error);
+        console.log("error adding list", error);
       }
     }
-    
+
     console.log(state);
   };
 
@@ -213,18 +247,18 @@ export default function rentalPage({ navigation }) {
     //   }),
     // });
     setTaskList([]);
-    console.log("list",list);
+    console.log("list", list);
     for (let i = 0; i < list.subtasks.length; i++) {
       taskList.push(list.subtasks[i].id);
     }
     try {
       const taskData = await API.graphql({
         query: getTask,
-        variables: { id: list.id},
+        variables: { id: list.id },
       });
 
       taskData.data.getTask.subtasks = taskList;
-      
+
       delete taskData.data.getTask.createdAt;
       delete taskData.data.getTask.updatedAt;
 
@@ -232,9 +266,9 @@ export default function rentalPage({ navigation }) {
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
 
-      console.log("added subtask",taskData);
+      console.log("added subtask", taskData);
     } catch (error) {
-      console.log("error updating",error);
+      console.log("error updating", error);
     }
   };
 
@@ -251,9 +285,9 @@ deleteList = list => {
   };
     */
       setTaskList([]);
-      state.lists.forEach((x,i)=>{
-        if (x.id!=list.id) {
-          setTaskList((currentTasks)=>{
+      state.lists.forEach((x, i) => {
+        if (x.id != list.id) {
+          setTaskList((currentTasks) => {
             return [x.id, ...currentTasks];
           });
         }
@@ -261,44 +295,46 @@ deleteList = list => {
       try {
         const taskData = await API.graphql({
           query: getTask,
-          veriables: {id: list.id},
+          veriables: { id: list.id },
         });
 
         for (const id of taskData.data.getTask.subtasks) {
-            const subtaskData = await API.graphql({
-              query: getSubtask,
-              variables: {id: id},
-            })
+          const subtaskData = await API.graphql({
+            query: getSubtask,
+            variables: { id: id },
+          });
 
-            const tmp = await API.graphql(
-              graphqlOperation(deleteSubtask, {input: subtaskData.data.getSubtask})
-            );
+          const tmp = await API.graphql(
+            graphqlOperation(deleteSubtask, {
+              input: subtaskData.data.getSubtask,
+            })
+          );
         }
 
         const tmp = await API.graphql(
-          graphqlOperation(deleteTask, { input: taskData.data.getTask})
+          graphqlOperation(deleteTask, { input: taskData.data.getTask })
         );
-
       } catch (error) {
-        console.log("error deleting task",error);
+        console.log("error deleting task", error);
       }
 
       try {
-        
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: navigation.getParam("id") },
         });
         propertyData.data.getProperty.tasks = taskList;
-  
+
         delete propertyData.data.getProperty.createdAt;
         delete propertyData.data.getProperty.updatedAt;
-  
+
         const tmp = await API.graphql(
-          graphqlOperation(updateProperty, { id: propertyData.data.getProperty })
+          graphqlOperation(updateProperty, {
+            id: propertyData.data.getProperty,
+          })
         );
       } catch (error) {
-        console.log("error updating",error);
+        console.log("error updating", error);
       }
       setLoaded(false);
       loadData();
@@ -309,6 +345,23 @@ deleteList = list => {
     return <PeopleList person={person} />;
   };
 
+  async function signOut() {
+    try {
+      await Auth.signOut();
+      navigation.navigate("Start");
+    } catch (error) {
+      console.log("error signing out: ", error);
+    }
+  }
+
+  async function refresh() {
+    // try {
+    //     await Auth.signOut();
+    //     navigation.navigate("Start");
+    // } catch (error) {
+    //     console.log('error signing out: ', error);
+    // }
+  }
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -321,6 +374,62 @@ deleteList = list => {
             closeModel={() => toggleAddTicketModal()}
             addList={addList}
           />
+        </Modal>
+
+        <Modal animationType="slide" visible={tenantModal}>
+          <View style={styles.Modal}>
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => setTenantModal(false)}
+            />
+            <FlatList
+              data={tenants}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => pressTenant(item)}>
+                  <Task text={item.name} />
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </Modal>
+
+        <Modal animationType="slide" visible={editTenantModal}>
+          <View style={styles.Modal}>
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => setEditTenantModal(false)}
+            />
+            <TenantForm editTenant={editTenant} tenant={currentTenant} />
+          </View>
+        </Modal>
+
+        {/*menu options*/}
+        <Modal visible={modalMenuOpen} animationType="slide">
+          <View>
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => setModalMenuOpen(false)}
+            />
+            <Button
+              //style={styles.button}
+              title="Logout"
+              color="maroon"
+              onPress={signOut}
+            />
+            <Button
+              //style={styles.button}
+              title="Refresh"
+              color="blue"
+              onPress={refresh}
+            />
+            {/*<Options />*/}
+          </View>
         </Modal>
 
         <View
@@ -385,10 +494,7 @@ deleteList = list => {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity
-            onPress={()=>navigation.navigate("Home")}
-            >
-            
+          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
             <MaterialIcons name="home" size={128} color={colors.blue} />
           </TouchableOpacity>
 
@@ -397,13 +503,21 @@ deleteList = list => {
               style={styles.Plus}
               onPress={() => {
                 setAddType(true);
-                toggleAddTicketModal();
+                //toggleAddTicketModal();
+                setTenantModal(true);
               }}
             >
-              <Text style={styles.add}>Add Tenant</Text>
+              <Text style={styles.add}>Add/Edit Tenants</Text>
               <AntDesign name="plus" size={16} color={colors.blue} />
             </TouchableOpacity>
           </View>
+
+          <MaterialIcons
+            name="menu-open"
+            size={24}
+            style={styles.modalMenuToggle}
+            onPress={() => setModalMenuOpen(true)}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -433,6 +547,16 @@ const styles = StyleSheet.create({
     color: colors.black,
     paddingHorizontal: 64,
   },
+  modalMenuToggle: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: "baseline",
+  },
   Plus: {
     borderWidth: 2,
     borderColor: colors.blue,
@@ -455,4 +579,3 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
 });
-
