@@ -78,6 +78,7 @@ export default function rentalPage({ navigation }) {
     setEditTenantModal(false);
     //need to place a :new tenant at end if that was what was edited
   };
+  
   const generateID = () => {
     return Math.random().toString();
   };
@@ -86,39 +87,61 @@ export default function rentalPage({ navigation }) {
   //const address = "";
   const loadData = async () => {
     if (!loaded) {
+
+      // empty lists
       state.lists = [];
       state.people = [];
       setLoaded(true);
+
+
       try {
+
+        // get property data
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: navigation.getParam("id") },
         });
         console.log(propertyData);
+
+        // empty task list
         setTaskList([]);
+
+        // loop through all tasks belonging to current property
         for (const id of propertyData.data.getProperty.tasks) {
-          //console.log(id);
+
+          // get task data
           const taskData = await API.graphql({
             query: getTask,
             variables: { id: id },
           });
-          //console.log(taskData);
+
+          // initialize new list to store subtasks
           const curTask = taskData.data.getTask;
           curTask.subtaskList = [];
           console.log(curTask.subtasks);
+
+          // loop through the ids of the subtasks
           for (const subtask of curTask.subtasks) {
+
+            // retrieve subtask data from the id
             console.log(subtask);
             const subtaskData = await API.graphql({
               query: getSubtask,
               variables: { id: subtask },
             });
+
+            // add the data to the subtask array
             //console.log(subtaskData);
             curTask.subtaskList.push(subtaskData.data.getSubtask);
           }
-          console.log("before", curTask);
+
+          // update subtasks
+          // console.log("before", curTask);
           curTask.subtasks = curTask.subtaskList;
           delete curTask.subtaskList;
 
+
+          // push task into array
           console.log("loading task", curTask);
           taskList.push(curTask);
           // setTaskList((currentTasks)=>{
@@ -126,8 +149,13 @@ export default function rentalPage({ navigation }) {
           // });
         }
 
+        // empty tenant list
         setTenantList([]);
+
+        // loop through ids of the tenants
         for (const id of propertyData.data.getProperty.tenants) {
+
+          // get tenant data from tenant id
           const tenantData = await API.graphql({
             query: getTenant,
             variables: { id: id },
@@ -136,12 +164,14 @@ export default function rentalPage({ navigation }) {
           //remove later
           //tenantData.data.getTenant.subtasks = [];
 
+          // add tenant data to tenant list
           tenantList.push(tenantData.data.getTenant);
           // setTenantList((currentTenants)=>{
           //   return [tenantData.data.getTenant, ...currentTenants];
           // });
         }
 
+        // update state
         setState({
           addTicketVisible: state.addTicketVisible,
           lists: taskList,
@@ -156,9 +186,11 @@ export default function rentalPage({ navigation }) {
       }
     }
   };
+  // load data once when the page starts
   loadData();
   //console.log(navigation.address);
   //address = props.get("address");
+
 
   const toggleAddTicketModal = () => {
     setState({
@@ -175,28 +207,41 @@ export default function rentalPage({ navigation }) {
     );
   };
 
+
   const addList = async (list) => {
+    // generate id for new list
     list.id = generateID();
-    if (!addType) {
+
+    // if (!addType) {
+      // initialize list of subtasks
       list.subtasks = [];
+
+
       try {
-        const tmp = await API.graphql(
+        // create the new task in the database
+        await API.graphql(
           graphqlOperation(createTask, { input: list })
         );
+
+        // get the current propertys data
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: navigation.getParam("id") },
         });
+
+        // add this task to the propertys list of tasks
         propertyData.data.getProperty.tasks.push(list.id);
         delete propertyData.data.getProperty.createdAt;
         delete propertyData.data.getProperty.updatedAt;
 
+        // update this property in the database
         await API.graphql(
           graphqlOperation(updateProperty, {
             input: propertyData.data.getProperty,
           })
         );
 
+        // push the new task into the states task list too
         //state.lists.push(list);
         setState({
           lists: [...state.lists, list],
@@ -206,36 +251,36 @@ export default function rentalPage({ navigation }) {
       } catch (error) {
         console.log("error adding list", error);
       }
-    } else {
-      delete list.color;
-      try {
-        await API.graphql(graphqlOperation(createTenant, { input: list }));
-        const propertyData = await API.graphql({
-          query: getProperty,
-          variables: { id: navigation.getParam("id") },
-        });
-        propertyData.data.getProperty.tenants.push(list.id);
+    // } else {
+    //   delete list.color;
+    //   try {
+    //     await API.graphql(graphqlOperation(createTenant, { input: list }));
+    //     const propertyData = await API.graphql({
+    //       query: getProperty,
+    //       variables: { id: navigation.getParam("id") },
+    //     });
+    //     propertyData.data.getProperty.tenants.push(list.id);
 
-        delete propertyData.data.getProperty.createdAt;
-        delete propertyData.data.getProperty.updatedAt;
+    //     delete propertyData.data.getProperty.createdAt;
+    //     delete propertyData.data.getProperty.updatedAt;
 
-        await API.graphql(
-          graphqlOperation(updateProperty, {
-            input: propertyData.data.getProperty,
-          })
-        );
+    //     await API.graphql(
+    //       graphqlOperation(updateProperty, {
+    //         input: propertyData.data.getProperty,
+    //       })
+    //     );
 
-        console.log("adding tenant", list);
-        //state.people.push(list);
-        setState({
-          people: [...state.people, list],
-          addTicketVisible: false,
-          lists: state.lists,
-        });
-      } catch (error) {
-        console.log("error adding list", error);
-      }
-    }
+    //     console.log("adding tenant", list);
+    //     //state.people.push(list);
+    //     setState({
+    //       people: [...state.people, list],
+    //       addTicketVisible: false,
+    //       lists: state.lists,
+    //     });
+    //   } catch (error) {
+    //     console.log("error adding list", error);
+    //   }
+    // }
 
     console.log(state);
   };
@@ -246,23 +291,32 @@ export default function rentalPage({ navigation }) {
     //     return item.id === list.id ? list : item;
     //   }),
     // });
+
+    // empty the list
     setTaskList([]);
     console.log("list", list);
+
+    // get a list of the ids of the subtasks
     for (let i = 0; i < list.subtasks.length; i++) {
       taskList.push(list.subtasks[i].id);
     }
     try {
+
+      // get the previous task data of current task
       const taskData = await API.graphql({
         query: getTask,
         variables: { id: list.id },
       });
 
+      // update subtasks
       taskData.data.getTask.subtasks = taskList;
 
       delete taskData.data.getTask.createdAt;
       delete taskData.data.getTask.updatedAt;
 
-      const tmp = await API.graphql(
+
+      // put updated task into database
+      await API.graphql(
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
 
@@ -273,7 +327,7 @@ export default function rentalPage({ navigation }) {
   };
 
   const deleteList = async (list) => {
-    {
+    
       /*add this method to Fire.js
 deleteList(list){
         let ref =  ref;
@@ -284,7 +338,11 @@ deleteList = list => {
     firebase.deleteList(list);
   };
     */
+
+      // empty task list
       setTaskList([]);
+
+      // add all task ids for the property except the one that is being removed
       state.lists.forEach((x, i) => {
         if (x.id != list.id) {
           setTaskList((currentTasks) => {
@@ -292,26 +350,35 @@ deleteList = list => {
           });
         }
       });
+
+
       try {
+        // get task data for the task that is being removed
         const taskData = await API.graphql({
           query: getTask,
           veriables: { id: list.id },
         });
 
+
+        // loop through the ids of the subtasks
         for (const id of taskData.data.getTask.subtasks) {
+
+          // get subtask data
           const subtaskData = await API.graphql({
             query: getSubtask,
             variables: { id: id },
           });
 
-          const tmp = await API.graphql(
+          // remove subtask from database
+          await API.graphql(
             graphqlOperation(deleteSubtask, {
               input: subtaskData.data.getSubtask,
             })
           );
         }
 
-        const tmp = await API.graphql(
+        // remove task from database
+        await API.graphql(
           graphqlOperation(deleteTask, { input: taskData.data.getTask })
         );
       } catch (error) {
@@ -319,26 +386,31 @@ deleteList = list => {
       }
 
       try {
+
+        // get property data
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: navigation.getParam("id") },
         });
+
+        // update task list for current property
         propertyData.data.getProperty.tasks = taskList;
 
         delete propertyData.data.getProperty.createdAt;
         delete propertyData.data.getProperty.updatedAt;
 
-        const tmp = await API.graphql(
+        // update property object in database
+        await API.graphql(
           graphqlOperation(updateProperty, {
             id: propertyData.data.getProperty,
           })
         );
       } catch (error) {
-        console.log("error updating", error);
+        console.log("error updating property", error);
       }
       setLoaded(false);
       loadData();
-    }
+    
   };
 
   const renderPeople = (person) => {
@@ -355,12 +427,8 @@ deleteList = list => {
   }
 
   async function refresh() {
-    // try {
-    //     await Auth.signOut();
-    //     navigation.navigate("Start");
-    // } catch (error) {
-    //     console.log('error signing out: ', error);
-    // }
+    setLoaded(false);
+    loadData();
   }
   return (
     <SafeAreaView style={styles.container}>
@@ -451,7 +519,7 @@ deleteList = list => {
         </View>
 
         <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
-          <Text style={styles.sectionTitle}>Tenents</Text>
+          <Text style={styles.sectionTitle}>Tenants</Text>
           <FlatList
             data={state.people}
             keyExtractor={(item) => item.name}

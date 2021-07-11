@@ -17,9 +17,19 @@ type Task @model {
   subtasks: [ID]!
 }
 
+type Invitation @model {
+  id: ID!
+  propertyID: ID!
+  leaseTerm: Int!
+  leaseStart: String!
+  rentAmount: Int!
+  
+}
 type Tenant @model {
   id: ID!
   name: String!
+  invitations: [ID]!
+  accepted: ID
 }
 
 type Property @model {
@@ -34,4 +44,5 @@ type Property @model {
   issues: Int!
   tasks: [ID]!
   tenants: [ID]!
+  landlord: ID!
 }

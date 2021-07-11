@@ -90,11 +90,46 @@ export const listTasks = /* GraphQL */ `
     }
   }
 `;
+export const getInvitation = /* GraphQL */ `
+  query GetInvitation($id: ID!) {
+    getInvitation(id: $id) {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const listInvitations = /* GraphQL */ `
+  query ListInvitations(
+    $filter: ModelInvitationFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listInvitations(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        propertyID
+        leaseTerm
+        leaseStart
+        rentAmount
+        createdAt
+        updatedAt
+      }
+      nextToken
+    }
+  }
+`;
 export const getTenant = /* GraphQL */ `
   query GetTenant($id: ID!) {
     getTenant(id: $id) {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -110,6 +145,8 @@ export const listTenants = /* GraphQL */ `
       items {
         id
         name
+        invitations
+        accepted
         createdAt
         updatedAt
       }
@@ -131,6 +168,7 @@ export const getProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }
@@ -155,6 +193,7 @@ export const listProperties = /* GraphQL */ `
         issues
         tasks
         tenants
+        landlord
         createdAt
         updatedAt
       }

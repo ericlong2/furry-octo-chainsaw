@@ -47,25 +47,49 @@ export default function RegisterScreen({ navigation }) {
     console.log(code);
     try {
       await Auth.confirmSignUp(email.value, code);
+
+      // if sign up has been confirmed, close submit verification window
       setModal3Open(false);
+
+      // if signing up as landlord
       if (isEnabled) {
-        const tmp = {};
+        // create new landlord object
+        const tmp = {id:email.value,properties:[],name:name.value};
         console.log("adding new landlord:", email.value);
-        tmp.id = email.value;
-        tmp.properties = [];
-        tmp.name = name.value;
-        const userData = await API.graphql(
+
+        // add the landlord object to the database
+        await API.graphql(
           graphqlOperation(createLandlord, { input: tmp })
         );
+
       } else {
-        const tmp = {};
-        console.log("adding new tenant:", email.value);
-        tmp.id = email.value;
-        tmp.name = name.value;
-        const userData = await API.graphql(
-          graphqlOperation(createTenant, { input: tmp })
+
+        // If signing up as a tenant, check if email has received invitations
+        const tenantData = await API.graphql(
+          graphqlOperation(getTenant, {id:email.value})
         );
+
+        // If no one sends invitation
+        if (tenantData.data.getTenant==null) {
+
+            // create tenant object
+            const tmp = {id:email.value,name:name.value,invitations:[]};
+            
+            // add tenant object to database
+            await API.graphql(
+              graphqlOperation(createTenant, { input: tmp })
+            );
+
+        } else {
+          // otherwise update object
+            tenantData.data.getTenant.name = name.value;
+            await API.graphql(
+              graphqlOperation(updateTenant, {input: tenantData.data.getTenant})
+            );
+        }
       }
+
+      // goto login
       navigation.navigate("Login");
     } catch (error) {
       console.log("error confirming sign up", error);

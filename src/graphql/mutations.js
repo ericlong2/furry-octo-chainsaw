@@ -130,6 +130,54 @@ export const deleteTask = /* GraphQL */ `
     }
   }
 `;
+export const createInvitation = /* GraphQL */ `
+  mutation CreateInvitation(
+    $input: CreateInvitationInput!
+    $condition: ModelInvitationConditionInput
+  ) {
+    createInvitation(input: $input, condition: $condition) {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const updateInvitation = /* GraphQL */ `
+  mutation UpdateInvitation(
+    $input: UpdateInvitationInput!
+    $condition: ModelInvitationConditionInput
+  ) {
+    updateInvitation(input: $input, condition: $condition) {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const deleteInvitation = /* GraphQL */ `
+  mutation DeleteInvitation(
+    $input: DeleteInvitationInput!
+    $condition: ModelInvitationConditionInput
+  ) {
+    deleteInvitation(input: $input, condition: $condition) {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
 export const createTenant = /* GraphQL */ `
   mutation CreateTenant(
     $input: CreateTenantInput!
@@ -138,6 +186,8 @@ export const createTenant = /* GraphQL */ `
     createTenant(input: $input, condition: $condition) {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -151,6 +201,8 @@ export const updateTenant = /* GraphQL */ `
     updateTenant(input: $input, condition: $condition) {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -164,6 +216,8 @@ export const deleteTenant = /* GraphQL */ `
     deleteTenant(input: $input, condition: $condition) {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -186,6 +240,7 @@ export const createProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }
@@ -208,6 +263,7 @@ export const updateProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }
@@ -230,6 +286,7 @@ export const deleteProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }

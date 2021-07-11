@@ -103,11 +103,52 @@ export const onDeleteTask = /* GraphQL */ `
     }
   }
 `;
+export const onCreateInvitation = /* GraphQL */ `
+  subscription OnCreateInvitation {
+    onCreateInvitation {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onUpdateInvitation = /* GraphQL */ `
+  subscription OnUpdateInvitation {
+    onUpdateInvitation {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
+export const onDeleteInvitation = /* GraphQL */ `
+  subscription OnDeleteInvitation {
+    onDeleteInvitation {
+      id
+      propertyID
+      leaseTerm
+      leaseStart
+      rentAmount
+      createdAt
+      updatedAt
+    }
+  }
+`;
 export const onCreateTenant = /* GraphQL */ `
   subscription OnCreateTenant {
     onCreateTenant {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -118,6 +159,8 @@ export const onUpdateTenant = /* GraphQL */ `
     onUpdateTenant {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -128,6 +171,8 @@ export const onDeleteTenant = /* GraphQL */ `
     onDeleteTenant {
       id
       name
+      invitations
+      accepted
       createdAt
       updatedAt
     }
@@ -147,6 +192,7 @@ export const onCreateProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }
@@ -166,6 +212,7 @@ export const onUpdateProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }
@@ -185,6 +232,7 @@ export const onDeleteProperty = /* GraphQL */ `
       issues
       tasks
       tenants
+      landlord
       createdAt
       updatedAt
     }

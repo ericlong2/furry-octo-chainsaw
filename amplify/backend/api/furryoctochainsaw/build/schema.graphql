@@ -23,9 +23,21 @@ type Task {
   updatedAt: AWSDateTime!
 }
 
+type Invitation {
+  id: ID!
+  propertyID: ID!
+  leaseTerm: Int!
+  leaseStart: String!
+  rentAmount: Int!
+  createdAt: AWSDateTime!
+  updatedAt: AWSDateTime!
+}
+
 type Tenant {
   id: ID!
   name: String!
+  invitations: [ID]!
+  accepted: ID
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -42,6 +54,7 @@ type Property {
   issues: Int!
   tasks: [ID]!
   tenants: [ID]!
+  landlord: ID!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -158,6 +171,8 @@ type Query {
   listSubtasks(filter: ModelSubtaskFilterInput, limit: Int, nextToken: String): ModelSubtaskConnection
   getTask(id: ID!): Task
   listTasks(filter: ModelTaskFilterInput, limit: Int, nextToken: String): ModelTaskConnection
+  getInvitation(id: ID!): Invitation
+  listInvitations(filter: ModelInvitationFilterInput, limit: Int, nextToken: String): ModelInvitationConnection
   getTenant(id: ID!): Tenant
   listTenants(filter: ModelTenantFilterInput, limit: Int, nextToken: String): ModelTenantConnection
   getProperty(id: ID!): Property
@@ -190,6 +205,9 @@ type Mutation {
   createTask(input: CreateTaskInput!, condition: ModelTaskConditionInput): Task
   updateTask(input: UpdateTaskInput!, condition: ModelTaskConditionInput): Task
   deleteTask(input: DeleteTaskInput!, condition: ModelTaskConditionInput): Task
+  createInvitation(input: CreateInvitationInput!, condition: ModelInvitationConditionInput): Invitation
+  updateInvitation(input: UpdateInvitationInput!, condition: ModelInvitationConditionInput): Invitation
+  deleteInvitation(input: DeleteInvitationInput!, condition: ModelInvitationConditionInput): Invitation
   createTenant(input: CreateTenantInput!, condition: ModelTenantConditionInput): Tenant
   updateTenant(input: UpdateTenantInput!, condition: ModelTenantConditionInput): Tenant
   deleteTenant(input: DeleteTenantInput!, condition: ModelTenantConditionInput): Tenant
@@ -216,6 +234,9 @@ type Subscription {
   onCreateTask: Task @aws_subscribe(mutations: ["createTask"])
   onUpdateTask: Task @aws_subscribe(mutations: ["updateTask"])
   onDeleteTask: Task @aws_subscribe(mutations: ["deleteTask"])
+  onCreateInvitation: Invitation @aws_subscribe(mutations: ["createInvitation"])
+  onUpdateInvitation: Invitation @aws_subscribe(mutations: ["updateInvitation"])
+  onDeleteInvitation: Invitation @aws_subscribe(mutations: ["deleteInvitation"])
   onCreateTenant: Tenant @aws_subscribe(mutations: ["createTenant"])
   onUpdateTenant: Tenant @aws_subscribe(mutations: ["updateTenant"])
   onDeleteTenant: Tenant @aws_subscribe(mutations: ["deleteTenant"])
@@ -304,6 +325,52 @@ input ModelTaskConditionInput {
   not: ModelTaskConditionInput
 }
 
+type ModelInvitationConnection {
+  items: [Invitation]
+  nextToken: String
+}
+
+input ModelInvitationFilterInput {
+  id: ModelIDInput
+  propertyID: ModelIDInput
+  leaseTerm: ModelIntInput
+  leaseStart: ModelStringInput
+  rentAmount: ModelIntInput
+  and: [ModelInvitationFilterInput]
+  or: [ModelInvitationFilterInput]
+  not: ModelInvitationFilterInput
+}
+
+input CreateInvitationInput {
+  id: ID
+  propertyID: ID!
+  leaseTerm: Int!
+  leaseStart: String!
+  rentAmount: Int!
+}
+
+input UpdateInvitationInput {
+  id: ID!
+  propertyID: ID
+  leaseTerm: Int
+  leaseStart: String
+  rentAmount: Int
+}
+
+input DeleteInvitationInput {
+  id: ID!
+}
+
+input ModelInvitationConditionInput {
+  propertyID: ModelIDInput
+  leaseTerm: ModelIntInput
+  leaseStart: ModelStringInput
+  rentAmount: ModelIntInput
+  and: [ModelInvitationConditionInput]
+  or: [ModelInvitationConditionInput]
+  not: ModelInvitationConditionInput
+}
+
 type ModelTenantConnection {
   items: [Tenant]
   nextToken: String
@@ -312,6 +379,8 @@ type ModelTenantConnection {
 input ModelTenantFilterInput {
   id: ModelIDInput
   name: ModelStringInput
+  invitations: ModelIDInput
+  accepted: ModelIDInput
   and: [ModelTenantFilterInput]
   or: [ModelTenantFilterInput]
   not: ModelTenantFilterInput
@@ -320,11 +389,15 @@ input ModelTenantFilterInput {
 input CreateTenantInput {
   id: ID
   name: String!
+  invitations: [ID]!
+  accepted: ID
 }
 
 input UpdateTenantInput {
   id: ID!
   name: String
+  invitations: [ID]
+  accepted: ID
 }
 
 input DeleteTenantInput {
@@ -333,6 +406,8 @@ input DeleteTenantInput {
 
 input ModelTenantConditionInput {
   name: ModelStringInput
+  invitations: ModelIDInput
+  accepted: ModelIDInput
   and: [ModelTenantConditionInput]
   or: [ModelTenantConditionInput]
   not: ModelTenantConditionInput
@@ -355,6 +430,7 @@ input ModelPropertyFilterInput {
   issues: ModelIntInput
   tasks: ModelIDInput
   tenants: ModelIDInput
+  landlord: ModelIDInput
   and: [ModelPropertyFilterInput]
   or: [ModelPropertyFilterInput]
   not: ModelPropertyFilterInput
@@ -372,6 +448,7 @@ input CreatePropertyInput {
   issues: Int!
   tasks: [ID]!
   tenants: [ID]!
+  landlord: ID!
 }
 
 input UpdatePropertyInput {
@@ -386,6 +463,7 @@ input UpdatePropertyInput {
   issues: Int
   tasks: [ID]
   tenants: [ID]
+  landlord: ID
 }
 
 input DeletePropertyInput {
@@ -403,6 +481,7 @@ input ModelPropertyConditionInput {
   issues: ModelIntInput
   tasks: ModelIDInput
   tenants: ModelIDInput
+  landlord: ModelIDInput
   and: [ModelPropertyConditionInput]
   or: [ModelPropertyConditionInput]
   not: ModelPropertyConditionInput

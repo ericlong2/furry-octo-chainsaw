@@ -140,6 +140,7 @@ export default function properties({ navigation }) {
     rental.number = number;
     rental.tasks = [];
     rental.tenants = [];
+    rental.landlord = user;
     setNumber(0);
     addProperty(rental);
     setModalOpen(false);

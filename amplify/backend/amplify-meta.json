@@ -22,7 +22,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-161414-deployment/amplify-cfn-templates/auth/furryoctochainsaw80998717-cloudformation-template.yml",
         "logicalId": "authfurryoctochainsaw80998717"
       },
-      "lastPushTimeStamp": "2021-07-07T20:24:35.747Z",
+      "lastPushTimeStamp": "2021-07-10T22:38:11.839Z",
       "output": {
         "UserPoolId": "us-east-2_dmvtrqoEu",
         "AppClientIDWeb": "3hn280k89bj0scplk506k2e0c8",
@@ -32,7 +32,7 @@
         "IdentityPoolName": "furryoctochainsaw80998717_identitypool_80998717__dev",
         "UserPoolName": "furryoctochainsaw80998717_userpool_80998717"
       },
-      "lastPushDirHash": "Q/hwT6CDYC+3S8rSWicnnkjM/NQ="
+      "lastPushDirHash": "uvlNBIZWWKFEfUsM4qrEHkWuFIE="
     }
   },
   "api": {
@@ -56,8 +56,8 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-161414-deployment/amplify-cfn-templates/api/cloudformation-template.json",
         "logicalId": "apifurryoctochainsaw"
       },
-      "lastPushTimeStamp": "2021-07-07T20:24:35.747Z",
-      "lastPushDirHash": "pbKBq5ZJVcQ9ZTde28B/j/gQTHc="
+      "lastPushTimeStamp": "2021-07-10T22:38:14.044Z",
+      "lastPushDirHash": "7MVptjdeBDi75HrutqUV0zwY9IM="
     }
   }
 }
