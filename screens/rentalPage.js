@@ -73,12 +73,16 @@ export default function rentalPage({ navigation }) {
     setEditTenantModal(true);
   };
 
+  const createTenant = () => {
+    console.log("create tenant");
+    setEditTenantModal(true);
+  };
   const editTenant = () => {
     console.log("edit tenant");
     setEditTenantModal(false);
     //need to place a :new tenant at end if that was what was edited
   };
-  
+
   const generateID = () => {
     return Math.random().toString();
   };
@@ -87,15 +91,12 @@ export default function rentalPage({ navigation }) {
   //const address = "";
   const loadData = async () => {
     if (!loaded) {
-
       // empty lists
       state.lists = [];
       state.people = [];
       setLoaded(true);
 
-
       try {
-
         // get property data
         const propertyData = await API.graphql({
           query: getProperty,
@@ -108,7 +109,6 @@ export default function rentalPage({ navigation }) {
 
         // loop through all tasks belonging to current property
         for (const id of propertyData.data.getProperty.tasks) {
-
           // get task data
           const taskData = await API.graphql({
             query: getTask,
@@ -122,7 +122,6 @@ export default function rentalPage({ navigation }) {
 
           // loop through the ids of the subtasks
           for (const subtask of curTask.subtasks) {
-
             // retrieve subtask data from the id
             console.log(subtask);
             const subtaskData = await API.graphql({
@@ -140,7 +139,6 @@ export default function rentalPage({ navigation }) {
           curTask.subtasks = curTask.subtaskList;
           delete curTask.subtaskList;
 
-
           // push task into array
           console.log("loading task", curTask);
           taskList.push(curTask);
@@ -154,7 +152,6 @@ export default function rentalPage({ navigation }) {
 
         // loop through ids of the tenants
         for (const id of propertyData.data.getProperty.tenants) {
-
           // get tenant data from tenant id
           const tenantData = await API.graphql({
             query: getTenant,
@@ -191,7 +188,6 @@ export default function rentalPage({ navigation }) {
   //console.log(navigation.address);
   //address = props.get("address");
 
-
   const toggleAddTicketModal = () => {
     setState({
       addTicketVisible: !state.addTicketVisible,
@@ -207,50 +203,46 @@ export default function rentalPage({ navigation }) {
     );
   };
 
-
   const addList = async (list) => {
     // generate id for new list
     list.id = generateID();
 
     // if (!addType) {
-      // initialize list of subtasks
-      list.subtasks = [];
+    // initialize list of subtasks
+    list.subtasks = [];
 
+    try {
+      // create the new task in the database
+      await API.graphql(graphqlOperation(createTask, { input: list }));
 
-      try {
-        // create the new task in the database
-        await API.graphql(
-          graphqlOperation(createTask, { input: list })
-        );
+      // get the current propertys data
+      const propertyData = await API.graphql({
+        query: getProperty,
+        variables: { id: navigation.getParam("id") },
+      });
 
-        // get the current propertys data
-        const propertyData = await API.graphql({
-          query: getProperty,
-          variables: { id: navigation.getParam("id") },
-        });
+      // add this task to the propertys list of tasks
+      propertyData.data.getProperty.tasks.push(list.id);
+      delete propertyData.data.getProperty.createdAt;
+      delete propertyData.data.getProperty.updatedAt;
 
-        // add this task to the propertys list of tasks
-        propertyData.data.getProperty.tasks.push(list.id);
-        delete propertyData.data.getProperty.createdAt;
-        delete propertyData.data.getProperty.updatedAt;
+      // update this property in the database
+      await API.graphql(
+        graphqlOperation(updateProperty, {
+          input: propertyData.data.getProperty,
+        })
+      );
 
-        // update this property in the database
-        await API.graphql(
-          graphqlOperation(updateProperty, {
-            input: propertyData.data.getProperty,
-          })
-        );
-
-        // push the new task into the states task list too
-        //state.lists.push(list);
-        setState({
-          lists: [...state.lists, list],
-          addTicketVisible: false,
-          people: state.people,
-        });
-      } catch (error) {
-        console.log("error adding list", error);
-      }
+      // push the new task into the states task list too
+      //state.lists.push(list);
+      setState({
+        lists: [...state.lists, list],
+        addTicketVisible: false,
+        people: state.people,
+      });
+    } catch (error) {
+      console.log("error adding list", error);
+    }
     // } else {
     //   delete list.color;
     //   try {
@@ -301,7 +293,6 @@ export default function rentalPage({ navigation }) {
       taskList.push(list.subtasks[i].id);
     }
     try {
-
       // get the previous task data of current task
       const taskData = await API.graphql({
         query: getTask,
@@ -313,7 +304,6 @@ export default function rentalPage({ navigation }) {
 
       delete taskData.data.getTask.createdAt;
       delete taskData.data.getTask.updatedAt;
-
 
       // put updated task into database
       await API.graphql(
@@ -327,8 +317,7 @@ export default function rentalPage({ navigation }) {
   };
 
   const deleteList = async (list) => {
-    
-      /*add this method to Fire.js
+    /*add this method to Fire.js
 deleteList(list){
         let ref =  ref;
         ref.doc(list.id).delete()
@@ -339,78 +328,73 @@ deleteList = list => {
   };
     */
 
-      // empty task list
-      setTaskList([]);
+    // empty task list
+    setTaskList([]);
 
-      // add all task ids for the property except the one that is being removed
-      state.lists.forEach((x, i) => {
-        if (x.id != list.id) {
-          setTaskList((currentTasks) => {
-            return [x.id, ...currentTasks];
-          });
-        }
+    // add all task ids for the property except the one that is being removed
+    state.lists.forEach((x, i) => {
+      if (x.id != list.id) {
+        setTaskList((currentTasks) => {
+          return [x.id, ...currentTasks];
+        });
+      }
+    });
+
+    try {
+      // get task data for the task that is being removed
+      const taskData = await API.graphql({
+        query: getTask,
+        veriables: { id: list.id },
       });
 
-
-      try {
-        // get task data for the task that is being removed
-        const taskData = await API.graphql({
-          query: getTask,
-          veriables: { id: list.id },
+      // loop through the ids of the subtasks
+      for (const id of taskData.data.getTask.subtasks) {
+        // get subtask data
+        const subtaskData = await API.graphql({
+          query: getSubtask,
+          variables: { id: id },
         });
 
-
-        // loop through the ids of the subtasks
-        for (const id of taskData.data.getTask.subtasks) {
-
-          // get subtask data
-          const subtaskData = await API.graphql({
-            query: getSubtask,
-            variables: { id: id },
-          });
-
-          // remove subtask from database
-          await API.graphql(
-            graphqlOperation(deleteSubtask, {
-              input: subtaskData.data.getSubtask,
-            })
-          );
-        }
-
-        // remove task from database
+        // remove subtask from database
         await API.graphql(
-          graphqlOperation(deleteTask, { input: taskData.data.getTask })
-        );
-      } catch (error) {
-        console.log("error deleting task", error);
-      }
-
-      try {
-
-        // get property data
-        const propertyData = await API.graphql({
-          query: getProperty,
-          variables: { id: navigation.getParam("id") },
-        });
-
-        // update task list for current property
-        propertyData.data.getProperty.tasks = taskList;
-
-        delete propertyData.data.getProperty.createdAt;
-        delete propertyData.data.getProperty.updatedAt;
-
-        // update property object in database
-        await API.graphql(
-          graphqlOperation(updateProperty, {
-            id: propertyData.data.getProperty,
+          graphqlOperation(deleteSubtask, {
+            input: subtaskData.data.getSubtask,
           })
         );
-      } catch (error) {
-        console.log("error updating property", error);
       }
-      setLoaded(false);
-      loadData();
-    
+
+      // remove task from database
+      await API.graphql(
+        graphqlOperation(deleteTask, { input: taskData.data.getTask })
+      );
+    } catch (error) {
+      console.log("error deleting task", error);
+    }
+
+    try {
+      // get property data
+      const propertyData = await API.graphql({
+        query: getProperty,
+        variables: { id: navigation.getParam("id") },
+      });
+
+      // update task list for current property
+      propertyData.data.getProperty.tasks = taskList;
+
+      delete propertyData.data.getProperty.createdAt;
+      delete propertyData.data.getProperty.updatedAt;
+
+      // update property object in database
+      await API.graphql(
+        graphqlOperation(updateProperty, {
+          id: propertyData.data.getProperty,
+        })
+      );
+    } catch (error) {
+      console.log("error updating property", error);
+    }
+    setLoaded(false);
+    loadData();
   };
 
   const renderPeople = (person) => {
@@ -463,6 +447,7 @@ deleteList = list => {
           </View>
         </Modal>
 
+        {/* May not be nessesarry */}
         <Modal animationType="slide" visible={editTenantModal}>
           <View style={styles.Modal}>
             <MaterialIcons
@@ -471,7 +456,7 @@ deleteList = list => {
               style={{ ...styles.modalToggle, ...styles.modalClose }}
               onPress={() => setEditTenantModal(false)}
             />
-            <TenantForm editTenant={editTenant} tenant={currentTenant} />
+            <TenantForm editTenant={editTenant} />
           </View>
         </Modal>
 
@@ -570,12 +555,13 @@ deleteList = list => {
             <TouchableOpacity
               style={styles.Plus}
               onPress={() => {
-                setAddType(true);
+                //setAddType(true);
                 //toggleAddTicketModal();
-                setTenantModal(true);
+                //setTenantModal(true);
+                createTenant();
               }}
             >
-              <Text style={styles.add}>Add/Edit Tenants</Text>
+              <Text style={styles.add}>Add Tenant</Text>
               <AntDesign name="plus" size={16} color={colors.blue} />
             </TouchableOpacity>
           </View>

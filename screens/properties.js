@@ -22,8 +22,8 @@ import Options from "./options";
 
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import {getLandlord, getProperty} from "../src/graphql/queries";
-import {createProperty, updateLandlord} from "../src/graphql/mutations";
+import { getLandlord, getProperty } from "../src/graphql/queries";
+import { createProperty, updateLandlord } from "../src/graphql/mutations";
 
 export default function properties({ navigation }) {
   /*Constants*/
@@ -42,64 +42,56 @@ export default function properties({ navigation }) {
     //setModal3Open(false)
     //also your gonna need to scan if the acc has been verified or not or smt
   };
-  
-  const loadProperties = async() => {
 
+  const loadProperties = async () => {
     if (!loaded) {
       setLoaded(true);
       // load properties that have already been added previously
       try {
-
         // get the current user
         const curUser = await Auth.currentAuthenticatedUser();
         //console.log("user",curUser.attributes);
         setUser(curUser.attributes.email);
 
-
         // get the landlord object corresponding to current user
         const landlord = await API.graphql({
           query: getLandlord,
-          variables: {id:curUser.attributes.email}
+          variables: { id: curUser.attributes.email },
         });
 
         //console.log("loading properties for",landlord.data.getLandlord);
         // load properties into rental list
         const properties = landlord.data.getLandlord.properties;
 
-        
-
         for (const property of properties) {
-
           // Load property details
           const rental = await API.graphql({
-            query:getProperty,
-            variables: {id: property},
+            query: getProperty,
+            variables: { id: property },
           });
 
           // output property details
           console.log(rental.data.getProperty);
 
           // add to rentals
-          setRental((currentRentals)=>{
+          setRental((currentRentals) => {
             return [rental.data.getProperty, ...currentRentals];
           });
         }
-        
-          //console.log("finished retrieving properties");
-      
+
+        //console.log("finished retrieving properties");
       } catch (error) {
-        console.log("error loading properties:",error);
+        console.log("error loading properties:", error);
       }
     }
-  }
+  };
   loadProperties();
 
   const generateID = () => {
     return Math.random().toString();
-  }
+  };
   const addProperty = async (rental) => {
     try {
-
       console.log(rental);
       // create a new property object for rental
       const rentalData = await API.graphql(
@@ -146,20 +138,19 @@ export default function properties({ navigation }) {
     setModalOpen(false);
   };
 
-
   /*Functions */
   const pressRental = (item) => {
     //let item = rentals[key];
     navigation.navigate("RentalDetails", item);
     //return <RentalPage address={item.address} />;
   };
- 
+
   async function signOut() {
     try {
-        await Auth.signOut();
-        navigation.navigate("Start");
+      await Auth.signOut();
+      navigation.navigate("Start");
     } catch (error) {
-        console.log('error signing out: ', error);
+      console.log("error signing out: ", error);
     }
   }
 

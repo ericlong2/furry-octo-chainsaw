@@ -31,12 +31,12 @@ export default function LoginScreen({ navigation }) {
       const user = await Auth.signIn(email.value, password.value);
       //////////////////////////////////WHER YOU NEED TO CHNAGE REDIRECt
       console.log(user);
-      if (user.attributes['custom:landlord']=="true") {
-          console.log("signing in as landlord");
-          navigation.navigate("Home");
+      if (user.attributes["custom:landlord"] == "true") {
+        console.log("signing in as landlord");
+        navigation.navigate("Home");
       } else {
-          console.log("signing in as tenant");
-          navigation.navigate("Tenant");
+        console.log("signing in as tenant");
+        navigation.navigate("InvitationPage");
       }
       //navigation.navigate("Home"); this is for landlord
       //navigation.navigate("Tenant"); This is for tenant

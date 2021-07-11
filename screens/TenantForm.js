@@ -1,16 +1,16 @@
 import React from "react";
-import { View } from "react-native";
+import { TextInput, View } from "react-native";
 import { Formik } from "formik";
 
-function TenantForm({ editTenant, tenant }) {
+function TenantForm({ editTenant }) {
   return (
     <View style={StyleSheet.container}>
       <Formik
         initialValues={{
-          email: tenant.email,
-          leaseTerm: tenant.leaseTerm,
-          leaseStart: tenant.leaseStart,
-          rentAmount: tenant.rentAmount,
+          email: "",
+          leaseTerm: 0,
+          leaseStart: "",
+          rentAmount: 0,
         }}
         onSubmit={(values, actions) => {
           console.log(values); //this can be taken out later
@@ -23,7 +23,7 @@ function TenantForm({ editTenant, tenant }) {
             <Text>Email</Text>
             <TextInput
               style={styles.input}
-              placeholder={initialValues.email}
+              placeholder="Enter email"
               onChangeText={props.handleChange("email")}
               value={props.values.email}
               //keyboardType="numeric"
@@ -32,16 +32,17 @@ function TenantForm({ editTenant, tenant }) {
             <Text>Lease Term</Text>
             <TextInput
               style={styles.input}
-              placeholder={initialValues.leaseTerm}
+              placeholder="Lease term in months"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("leaseTerm")}
               value={props.values.leaseTerm}
+              keyboardType="numeric"
             />
 
-            <Text>Lease Start</Text>
+            <Text>Lease Start Date</Text>
             <TextInput
               style={styles.input}
-              placeholder={initialValues.leaseStart}
+              placeholder="lease terms start date"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("leaseStart")}
               value={props.values.leaseStart}
@@ -50,10 +51,11 @@ function TenantForm({ editTenant, tenant }) {
             <Text>Monthly Rent</Text>
             <TextInput
               style={styles.input}
-              placeholder={initialValues.rentAmount}
+              placeholder="monthly rent amount"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("rentAmount")}
               value={props.values.rentAmount}
+              keyboardType="numeric"
             />
 
             <Button
