@@ -73,11 +73,11 @@ export default function rentalPage({ navigation }) {
     setEditTenantModal(true);
   };
 
-  const createTenant = () => {
+  const openAddTenant = () => {
     console.log("create tenant");
     setEditTenantModal(true);
   };
-  const editTenant = () => {
+  const editTenant = (tenant) => {
     console.log("edit tenant");
     setEditTenantModal(false);
     //need to place a :new tenant at end if that was what was edited
@@ -246,7 +246,7 @@ export default function rentalPage({ navigation }) {
     // } else {
     //   delete list.color;
     //   try {
-    //     await API.graphql(graphqlOperation(createTenant, { input: list }));
+    //     await API.graphql(graphqlOperation(openAddTenant, { input: list }));
     //     const propertyData = await API.graphql({
     //       query: getProperty,
     //       variables: { id: navigation.getParam("id") },
@@ -398,7 +398,11 @@ deleteList = list => {
   };
 
   const renderPeople = (person) => {
-    return <PeopleList person={person} />;
+    return (
+      <TouchableOpacity onPress={() => navigation.navigate("Tenant", person)}>
+        <PeopleList person={person} />
+      </TouchableOpacity>
+    );
   };
 
   async function signOut() {
@@ -558,7 +562,7 @@ deleteList = list => {
                 //setAddType(true);
                 //toggleAddTicketModal();
                 //setTenantModal(true);
-                createTenant();
+                openAddTenant();
               }}
             >
               <Text style={styles.add}>Add Tenant</Text>

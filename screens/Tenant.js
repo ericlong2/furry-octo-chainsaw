@@ -1,161 +1,52 @@
-import { StatusBar } from "expo-status-bar";
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  FlatList,
-  Modal,
-  SafeAreaView,
-  ScrollView,
-} from "react-native";
-import colors from "./Colors";
-import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import tempData from "./tempData";
-import tempPeople from "./tempPeople";
-import TicketList from "./TicketList";
-import PeopleList from "./PeopleList";
-import AddTicketModal from "./AddTicketModal";
-{
-  /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
-}
+import { View } from "react-native";
 
-export default class Tenant extends React.Component {
-  state = {
-    addTicketVisible: false,
-    lists: tempData,
-    people: tempPeople,
+function Tenant({ navigation }) {
+  const [modalMenuOpen, setModalMenuOpen] = useState(false);
+
+  const editTenant = () => {
+    //open modal to edit the tenant and save the information
   };
-
-  toggleAddTicketModal() {
-    this.setState({ addTicketVisible: !this.state.addTicketVisible });
-  }
-
-  renderList = (list) => {
-    return (
-      <TicketList
-        list={list}
-        updateList={this.updateList}
-        deleteList={this.deleteList}
+  return (
+    <View>
+      {/*menu options*/}
+      <Modal visible={modalMenuOpen} animationType="slide">
+        <View>
+          <MaterialIcons
+            name="close"
+            size={24}
+            style={{ ...styles.modalToggle, ...styles.modalClose }}
+            onPress={() => setModalMenuOpen(false)}
+          />
+          <Button
+            //style={styles.button}
+            title="Edit Tenant Info"
+            color="yellow"
+            onPress={() => editTenant()}
+          />
+          <Button
+            //style={styles.button}
+            title="Logout"
+            color="maroon"
+            onPress={signOut}
+          />
+          <Button
+            //style={styles.button}
+            title="Refresh"
+            color="blue"
+            onPress={refresh}
+          />
+          {/*<Options />*/}
+        </View>
+      </Modal>
+      <MaterialIcons
+        name="menu-open"
+        size={24}
+        style={styles.modalMenuToggle}
+        onPress={() => setModalMenuOpen(true)}
       />
-    );
-  };
-
-  addList = (list) => {
-    this.setState({
-      lists: [
-        ...this.state.lists,
-        { ...list, id: this.state.lists.length + 1, todos: [] },
-      ],
-    });
-  };
-
-  updateList = (list) => {
-    this.setState({
-      lists: this.state.lists.map((item) => {
-        return item.id === list.id ? list : item;
-      }),
-    });
-  };
-
-  deleteList = (list) => {
-    {
-      /*add this method to Fire.js
-deleteList(list){
-        let ref = this.ref;
-        ref.doc(list.id).delete()
-    }
-this method in App.js
-deleteList = list => {
-    firebase.deleteList(list);
-  };
-    */
-    }
-  };
-
-  renderPeople = (person) => {
-    return <PeopleList person={person} />;
-  };
-
-  render() {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView>
-          <Modal
-            animationType="slide"
-            visible={this.state.addTicketVisible}
-            onRequestClose={() => this.toggleAddTicketModal()}
-          >
-            <AddTicketModal
-              closeModel={() => this.toggleAddTicketModal()}
-              addList={this.addList}
-            />
-          </Modal>
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-around",
-              marginTop: 64,
-            }}
-          >
-            <View style={styles.divider} />
-            <Text style={styles.title}>
-              House{" "}
-              <Text style={{ fontWeight: "300", color: colors.blue }}>
-                {" "}
-                Repairs
-              </Text>
-            </Text>
-            <View style={styles.divider} />
-          </View>
-
-          <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
-            <Text style={styles.sectionTitle}>Tenents</Text>
-            <FlatList
-              data={this.state.people}
-              keyExtractor={(item) => item.name}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => this.renderPeople(item)}
-              keyboardShouldPersistTaps="always"
-            />
-          </View>
-
-          <View style={{ height: 275, paddingLeft: 32 }}>
-            <Text style={styles.sectionTitle}> Tickets</Text>
-            <FlatList
-              data={this.state.lists}
-              keyExtractor={(item) => item.name}
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              renderItem={({ item }) => this.renderList(item)}
-              keyboardShouldPersistTaps="always"
-            />
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginLeft: 10,
-            }}
-          >
-            <View style={{ marginVertical: 48, alignItems: "center" }}>
-              <TouchableOpacity
-                style={styles.Plus}
-                onPress={() => this.toggleAddTicketModal()}
-              >
-                <Text style={styles.add}>Add Ticket</Text>
-                <AntDesign name="plus" size={16} color={colors.blue} />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    );
-  }
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -163,6 +54,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     justifyContent: "flex-start",
+  },
+  scrollView: {
+    backgroundColor: "pink",
+    marginHorizontal: 20,
   },
   divider: {
     backgroundColor: colors.lightBlue,
@@ -176,6 +71,16 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.black,
     paddingHorizontal: 64,
+  },
+  modalMenuToggle: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: "baseline",
   },
   Plus: {
     borderWidth: 2,
@@ -199,3 +104,5 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
 });
+
+export default Tenant;
