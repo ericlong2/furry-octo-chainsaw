@@ -1,6 +1,6 @@
 import React from "react";
-import { View } from "react-native";
-
+import { View, StyleSheet } from "react-native";
+import colors from "./Colors";
 function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 

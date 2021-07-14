@@ -22,7 +22,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-161414-deployment/amplify-cfn-templates/auth/furryoctochainsaw80998717-cloudformation-template.yml",
         "logicalId": "authfurryoctochainsaw80998717"
       },
-      "lastPushTimeStamp": "2021-07-10T22:38:11.839Z",
+      "lastPushTimeStamp": "2021-07-12T02:55:09.396Z",
       "output": {
         "UserPoolId": "us-east-2_dmvtrqoEu",
         "AppClientIDWeb": "3hn280k89bj0scplk506k2e0c8",
@@ -56,7 +56,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-furryoctochainsaw-dev-161414-deployment/amplify-cfn-templates/api/cloudformation-template.json",
         "logicalId": "apifurryoctochainsaw"
       },
-      "lastPushTimeStamp": "2021-07-10T22:38:14.044Z",
+      "lastPushTimeStamp": "2021-07-12T02:55:09.399Z",
       "lastPushDirHash": "7MVptjdeBDi75HrutqUV0zwY9IM="
     }
   }
