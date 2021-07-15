@@ -65,6 +65,7 @@ export default function properties({ navigation }) {
 
         for (const property of properties) {
           // Load property details
+          console.log(property);
           const rental = await API.graphql({
             query: getProperty,
             variables: { id: property },

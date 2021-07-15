@@ -1,6 +1,6 @@
 import { styleSheets } from "min-document";
 import React, { useState } from "react";
-import { FlatList, View, TouchableOpacity } from "react-native";
+import { FlatList, View, TouchableOpacity, StyleSheet } from "react-native";
 import Task from "../components/Task";
 
 function invitationPage({ navigation }) {

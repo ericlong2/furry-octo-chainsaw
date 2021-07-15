@@ -13,12 +13,13 @@ import {
 } from "react-native";
 import colors from "./Colors";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
-import tempData from "./tempData";
-import tempPeople from "./tempPeople";
+// import tempData from "./tempData";
+// import tempPeople from "./tempPeople";
 import TicketList from "./TicketList";
 import PeopleList from "./PeopleList";
 import AddTicketModal from "./AddTicketModal";
 import Task from "../components/Task";
+import Button from "../components/Button";
 
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
@@ -27,15 +28,17 @@ import {
   getTenant,
   getTask,
   getSubtask,
+  getInvitation,
 } from "../src/graphql/queries";
 import {
   createTask,
   createTenant,
   deleteSubtask,
+  updateInvitation,
   updateProperty,
   updateTask,
+  updateTenant,
 } from "../src/graphql/mutations";
-import Task from "../components/Task";
 import TenantForm from "./TenantForm";
 {
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
@@ -51,21 +54,24 @@ export default function rentalPage({ navigation }) {
   const [loaded, setLoaded] = useState(false);
   const [taskList, setTaskList] = useState([]);
   const [tenantList, setTenantList] = useState([]);
-  const [addType, setAddType] = useState(false);
   const [tenantModal, setTenantModal] = useState(false);
   const [currentTenant, setCurrentTenant] = useState();
   const [editTenantModal, setEditTenantModal] = useState(false);
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
   //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
-  const [tenants, setTenants] = useState([
-    {
-      name: "Bob",
-    },
-    {
-      name: "Create new tenant",
-    },
-  ]);
+  // const [tenants, setTenants] = useState([
+  //   {
+  //     name: "Bob",
+  //   },
+  //   {
+  //     name: "Create new tenant",
+  //   },
+  // ]);
+
+  const generateID = () => {
+    return Math.random().toString();
+  };
 
   //open modal with the tenant details
   const pressTenant = (item) => {
@@ -78,15 +84,84 @@ export default function rentalPage({ navigation }) {
     console.log("create tenant");
     setEditTenantModal(true);
   };
-  const editTenant = (tenant) => {
+  const editTenant = async (tenant) => {
     console.log("edit tenant");
     setEditTenantModal(false);
+    try {
+      // get property data
+      const propertyData = await API.graphql({
+        query: getProperty,
+        variables: { id: navigation.getParam("id") },
+      });
+      console.log(propertyData);
+
+      // create inviation
+      const invitation = {id: generateID(), propertyID: propertyData.data.getProperty.ID, leaseTerm: tenant.leaseTerm, leaseStart: tenant.leaseStart, rentAmount: tenant.rentAmount}
+
+
+      // check if tenant is already in the property
+      for (const curTenant of propertyData.data.getProperty.tenants) {
+
+        if (curTenant == tenant.email) {
+          
+          // if the tenant exists, get info
+          const tenantData = await API.graphql({
+            query: getTenant,
+            variables: { id: curTenant},
+          });
+
+          // change id to current tenant
+          invitation.id = tenantData.data.getTenant.accepted, 
+
+          // update database
+          await API.graphql(
+            graphqlOperation(updateInvitation, { input: invitation })
+          );
+          return;
+        }
+      }
+
+      // create new invitation
+      await API.graphql(
+        graphqlOperation(createInvitation, {input: invitation})
+      );
+
+      // adding new tenant to property, check if tenant exists
+      const tenantData = await API.graphql({
+        query: getTenant,
+        variables: { id: tenant.email},
+      });
+
+
+      // create new tenant object in database if not,
+      if (tenantData.data.getTenant==null) {
+        const newTenant = {id:tenant.email,name:"",invitations:[]}
+        await API.graphql(
+          graphqlOperation(createTenant, {input: newTenant})
+        );
+      }
+
+      // get tenant object
+      const tenantObject = await API.graphql({
+        query: getTenant,
+        variables: { id: tenant.email},
+      });
+
+      tenantObject.data.getTenant.invitations.push(invitation.id);
+
+      // update tenant
+      await API.graphql(
+        graphqlOperation(updateTenant, { input: tenantObject.data.getTenant })
+      );
+
+
+    } catch (error) {
+      console.log("error editing tenant",error);
+    }
     //need to place a :new tenant at end if that was what was edited
   };
 
-  const generateID = () => {
-    return Math.random().toString();
-  };
+  
 
   const address = navigation.getParam("address");
   //const address = "";
@@ -159,6 +234,15 @@ export default function rentalPage({ navigation }) {
             variables: { id: id },
           });
 
+          const invitation = tenantData.data.getTenant.accepted;
+          if (!invitation) continue;
+
+          const invitationData = await API.graphql({
+            query: getInvitation,
+            variables: {id:invitation},
+          });
+
+          if (invitationData.data.getInvitation.propertyID!=propertyData.data.getProperty.id) continue;
           //remove later
           //tenantData.data.getTenant.subtasks = [];
 
@@ -244,46 +328,11 @@ export default function rentalPage({ navigation }) {
     } catch (error) {
       console.log("error adding list", error);
     }
-    // } else {
-    //   delete list.color;
-    //   try {
-    //     await API.graphql(graphqlOperation(openAddTenant, { input: list }));
-    //     const propertyData = await API.graphql({
-    //       query: getProperty,
-    //       variables: { id: navigation.getParam("id") },
-    //     });
-    //     propertyData.data.getProperty.tenants.push(list.id);
-
-    //     delete propertyData.data.getProperty.createdAt;
-    //     delete propertyData.data.getProperty.updatedAt;
-
-    //     await API.graphql(
-    //       graphqlOperation(updateProperty, {
-    //         input: propertyData.data.getProperty,
-    //       })
-    //     );
-
-    //     console.log("adding tenant", list);
-    //     //state.people.push(list);
-    //     setState({
-    //       people: [...state.people, list],
-    //       addTicketVisible: false,
-    //       lists: state.lists,
-    //     });
-    //   } catch (error) {
-    //     console.log("error adding list", error);
-    //   }
-    // }
-
+    
     console.log(state);
   };
 
   const updateList = async (list) => {
-    // setState({
-    //   lists: state.lists.map((item) => {
-    //     return item.id === list.id ? list : item;
-    //   }),
-    // });
 
     // empty the list
     setTaskList([]);
@@ -318,16 +367,6 @@ export default function rentalPage({ navigation }) {
   };
 
   const deleteList = async (list) => {
-    /*add this method to Fire.js
-deleteList(list){
-        let ref =  ref;
-        ref.doc(list.id).delete()
-    }
-this method in App.js
-deleteList = list => {
-    firebase.deleteList(list);
-  };
-    */
 
     // empty task list
     setTaskList([]);
@@ -444,7 +483,7 @@ deleteList = list => {
               onPress={() => setTenantModal(false)}
             />
             <FlatList
-              data={tenants}
+              data={state.people}
               renderItem={({ item }) => (
                 <TouchableOpacity onPress={() => pressTenant(item)}>
                   <Task text={item.name} />

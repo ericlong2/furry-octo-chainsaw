@@ -12,6 +12,7 @@ import {
   Button,
 } from "react-native";
 
+import colors from "./Colors";
 function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
