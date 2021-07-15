@@ -8,6 +8,7 @@ import Start from "../screens/StartScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import Tenant from "../screens/Tenant";
 import InvitationPage from "../screens/invitationPage";
+import editTenant from "../screens/editTenant";
 import TenantForm from "../screens/TenantForm";
 
 const screens = {
@@ -17,6 +18,12 @@ const screens = {
   //     title: "TenantForm",
   //   },
   // },
+  editTenant: {
+    screen: editTenant,
+    navigationOptions: {
+      title: "editTenant",
+    },
+  },
   InvitationPage: {
     screen: InvitationPage,
     navigationOptions: {

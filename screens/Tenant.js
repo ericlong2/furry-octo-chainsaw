@@ -1,14 +1,28 @@
 import React from "react";
-import { View } from "react-native";
+
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  FlatList,
+  Modal,
+  SafeAreaView,
+  ScrollView,
+  Button,
+} from "react-native";
 
 function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
+  const tenant = navigation.getParam("Tenant");
   const editTenant = () => {
     //open modal to edit the tenant and save the information
+    navigation.navigate("editTenant", { Tenant: tenant });
   };
   return (
     <View>
+      <Text>{tenant.name}</Text>
       {/*menu options*/}
       <Modal visible={modalMenuOpen} animationType="slide">
         <View>

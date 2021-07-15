@@ -9,6 +9,7 @@ import {
   Modal,
   SafeAreaView,
   ScrollView,
+  Button,
 } from "react-native";
 import colors from "./Colors";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
@@ -399,7 +400,9 @@ deleteList = list => {
 
   const renderPeople = (person) => {
     return (
-      <TouchableOpacity onPress={() => navigation.navigate("Tenant", person)}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Tenant", { Tenant: person })}
+      >
         <PeopleList person={person} />
       </TouchableOpacity>
     );
