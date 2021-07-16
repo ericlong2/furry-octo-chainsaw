@@ -1,6 +1,13 @@
 import { styleSheets } from "min-document";
 import React, { useState } from "react";
-import { FlatList, View, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  FlatList,
+  View,
+  TouchableOpacity,
+  StyleSheet,
+  MaterialIcons,
+  Alert,
+} from "react-native";
 import Task from "../components/Task";
 
 function invitationPage({ navigation }) {
@@ -13,6 +20,21 @@ function invitationPage({ navigation }) {
     setCurrentInvitation(item);
   };
 
+  const toRental = () => {
+    if (true) {
+      //is not apart of any house place alert
+      Alert.alert(
+        "No Rental",
+        "A rental invitation has not yet been accepted. To continue accept the appropriate rental invitation or request your landlord to resend the invitation",
+        [
+          {
+            text: "OK",
+            onPress: () => console.log("Ok pressed"),
+          },
+        ]
+      );
+    }
+  };
   const accept = () => {
     console.log("accept");
     console.log(item);
@@ -68,6 +90,9 @@ function invitationPage({ navigation }) {
           </TouchableOpacity>
         )}
       />
+      <TouchableOpacity onPress={() => toRental()}>
+        <MaterialIcons name="home" size={128} color={colors.blue} />
+      </TouchableOpacity>
     </View>
   );
 }
