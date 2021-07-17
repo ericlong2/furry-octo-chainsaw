@@ -7,10 +7,9 @@ import Register from "../screens/RegisterScreen";
 import Start from "../screens/StartScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import Tenant from "../screens/Tenant";
-import invitationPage from "../screens/invitationPage";
+import invitationPage from "../screens/testInvitationPage";
 import editTenant from "../screens/editTenant";
 import tenantHome from "../screens/tenantHome";
-import TenantForm from "../screens/TenantForm";
 
 const screens = {
   // TenantForm: {
