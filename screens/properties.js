@@ -207,7 +207,7 @@ export default function properties({ navigation }) {
         <View>
           <TextInput
             style={styles.TextInput}
-            placeholder="Apt number(optional)"
+            placeholder="email code verification"
             onChangeText={(number) => setVerification(number)}
             //defaultValue={number}
             keyboardType="numeric"

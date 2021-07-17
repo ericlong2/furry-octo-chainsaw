@@ -7,7 +7,7 @@ import Register from "../screens/RegisterScreen";
 import Start from "../screens/StartScreen";
 import ResetPasswordScreen from "../screens/ResetPasswordScreen";
 import Tenant from "../screens/Tenant";
-import InvitationPage from "../screens/invitationPage";
+import invitationPage from "../screens/invitationPage";
 import editTenant from "../screens/editTenant";
 import tenantHome from "../screens/tenantHome";
 import TenantForm from "../screens/TenantForm";
@@ -31,10 +31,10 @@ const screens = {
       title: "editTenant",
     },
   },
-  InvitationPage: {
-    screen: InvitationPage,
+  invitationPage: {
+    screen: invitationPage,
     navigationOptions: {
-      title: "InvitationPage",
+      title: "invitationPage",
     },
   },
   Tenant: {

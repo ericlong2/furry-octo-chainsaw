@@ -36,7 +36,7 @@ export default function LoginScreen({ navigation }) {
         navigation.navigate("Home");
       } else {
         console.log("signing in as tenant");
-        navigation.navigate("InvitationPage");
+        navigation.navigate("invitationPage");
       }
       //navigation.navigate("Home"); this is for landlord
       //navigation.navigate("Tenant"); This is for tenant

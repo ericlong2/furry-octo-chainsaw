@@ -13,7 +13,7 @@ import {
 } from "react-native";
 
 import colors from "./Colors";
-function Tenant({ navigation }) {
+export default function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
   const tenant = navigation.getParam("Tenant");
@@ -119,5 +119,3 @@ const styles = StyleSheet.create({
     color: colors.black,
   },
 });
-
-export default Tenant;
