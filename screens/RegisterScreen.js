@@ -22,6 +22,7 @@ import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
 import { createLandlord,createTenant } from "../src/graphql/mutations";
+import { getTenant } from "../src/graphql/queries";
 
 export default function RegisterScreen({ navigation }) {
   const [verification, setVerification] = useState(false); //this might need to be changed

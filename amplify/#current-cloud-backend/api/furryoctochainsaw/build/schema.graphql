@@ -18,14 +18,14 @@ type Task {
   id: ID!
   name: String!
   color: String!
-  subtasks: [ID]!
+  subtasks: [String]!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
 type Invitation {
   id: ID!
-  propertyID: ID!
+  propertyID: String!
   leaseTerm: Int!
   leaseStart: String!
   rentAmount: Int!
@@ -36,8 +36,8 @@ type Invitation {
 type Tenant {
   id: ID!
   name: String!
-  invitations: [ID]!
-  accepted: ID
+  invitations: [String]!
+  accepted: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -52,9 +52,9 @@ type Property {
   province: String!
   country: String!
   issues: Int!
-  tasks: [ID]!
-  tenants: [ID]!
-  landlord: ID!
+  tasks: [String]!
+  tenants: [String]!
+  landlord: String!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -292,7 +292,7 @@ input ModelTaskFilterInput {
   id: ModelIDInput
   name: ModelStringInput
   color: ModelStringInput
-  subtasks: ModelIDInput
+  subtasks: ModelStringInput
   and: [ModelTaskFilterInput]
   or: [ModelTaskFilterInput]
   not: ModelTaskFilterInput
@@ -302,14 +302,14 @@ input CreateTaskInput {
   id: ID
   name: String!
   color: String!
-  subtasks: [ID]!
+  subtasks: [String]!
 }
 
 input UpdateTaskInput {
   id: ID!
   name: String
   color: String
-  subtasks: [ID]
+  subtasks: [String]
 }
 
 input DeleteTaskInput {
@@ -319,7 +319,7 @@ input DeleteTaskInput {
 input ModelTaskConditionInput {
   name: ModelStringInput
   color: ModelStringInput
-  subtasks: ModelIDInput
+  subtasks: ModelStringInput
   and: [ModelTaskConditionInput]
   or: [ModelTaskConditionInput]
   not: ModelTaskConditionInput
@@ -332,7 +332,7 @@ type ModelInvitationConnection {
 
 input ModelInvitationFilterInput {
   id: ModelIDInput
-  propertyID: ModelIDInput
+  propertyID: ModelStringInput
   leaseTerm: ModelIntInput
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
@@ -343,7 +343,7 @@ input ModelInvitationFilterInput {
 
 input CreateInvitationInput {
   id: ID
-  propertyID: ID!
+  propertyID: String!
   leaseTerm: Int!
   leaseStart: String!
   rentAmount: Int!
@@ -351,7 +351,7 @@ input CreateInvitationInput {
 
 input UpdateInvitationInput {
   id: ID!
-  propertyID: ID
+  propertyID: String
   leaseTerm: Int
   leaseStart: String
   rentAmount: Int
@@ -362,7 +362,7 @@ input DeleteInvitationInput {
 }
 
 input ModelInvitationConditionInput {
-  propertyID: ModelIDInput
+  propertyID: ModelStringInput
   leaseTerm: ModelIntInput
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
@@ -379,8 +379,8 @@ type ModelTenantConnection {
 input ModelTenantFilterInput {
   id: ModelIDInput
   name: ModelStringInput
-  invitations: ModelIDInput
-  accepted: ModelIDInput
+  invitations: ModelStringInput
+  accepted: ModelStringInput
   and: [ModelTenantFilterInput]
   or: [ModelTenantFilterInput]
   not: ModelTenantFilterInput
@@ -389,15 +389,15 @@ input ModelTenantFilterInput {
 input CreateTenantInput {
   id: ID
   name: String!
-  invitations: [ID]!
-  accepted: ID
+  invitations: [String]!
+  accepted: String
 }
 
 input UpdateTenantInput {
   id: ID!
   name: String
-  invitations: [ID]
-  accepted: ID
+  invitations: [String]
+  accepted: String
 }
 
 input DeleteTenantInput {
@@ -406,8 +406,8 @@ input DeleteTenantInput {
 
 input ModelTenantConditionInput {
   name: ModelStringInput
-  invitations: ModelIDInput
-  accepted: ModelIDInput
+  invitations: ModelStringInput
+  accepted: ModelStringInput
   and: [ModelTenantConditionInput]
   or: [ModelTenantConditionInput]
   not: ModelTenantConditionInput
@@ -428,9 +428,9 @@ input ModelPropertyFilterInput {
   province: ModelStringInput
   country: ModelStringInput
   issues: ModelIntInput
-  tasks: ModelIDInput
-  tenants: ModelIDInput
-  landlord: ModelIDInput
+  tasks: ModelStringInput
+  tenants: ModelStringInput
+  landlord: ModelStringInput
   and: [ModelPropertyFilterInput]
   or: [ModelPropertyFilterInput]
   not: ModelPropertyFilterInput
@@ -446,9 +446,9 @@ input CreatePropertyInput {
   province: String!
   country: String!
   issues: Int!
-  tasks: [ID]!
-  tenants: [ID]!
-  landlord: ID!
+  tasks: [String]!
+  tenants: [String]!
+  landlord: String!
 }
 
 input UpdatePropertyInput {
@@ -461,9 +461,9 @@ input UpdatePropertyInput {
   province: String
   country: String
   issues: Int
-  tasks: [ID]
-  tenants: [ID]
-  landlord: ID
+  tasks: [String]
+  tenants: [String]
+  landlord: String
 }
 
 input DeletePropertyInput {
@@ -479,9 +479,9 @@ input ModelPropertyConditionInput {
   province: ModelStringInput
   country: ModelStringInput
   issues: ModelIntInput
-  tasks: ModelIDInput
-  tenants: ModelIDInput
-  landlord: ModelIDInput
+  tasks: ModelStringInput
+  tenants: ModelStringInput
+  landlord: ModelStringInput
   and: [ModelPropertyConditionInput]
   or: [ModelPropertyConditionInput]
   not: ModelPropertyConditionInput

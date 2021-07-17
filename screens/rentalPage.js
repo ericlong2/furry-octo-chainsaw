@@ -19,7 +19,6 @@ import TicketList from "./TicketList";
 import PeopleList from "./PeopleList";
 import AddTicketModal from "./AddTicketModal";
 import Task from "../components/Task";
-import Button from "../components/Button";
 
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
@@ -33,6 +32,7 @@ import {
 import {
   createTask,
   createTenant,
+  createInvitation,
   deleteSubtask,
   updateInvitation,
   updateProperty,
@@ -96,12 +96,12 @@ export default function rentalPage({ navigation }) {
       console.log(propertyData);
 
       // create inviation
-      const invitation = {id: generateID(), propertyID: propertyData.data.getProperty.ID, leaseTerm: tenant.leaseTerm, leaseStart: tenant.leaseStart, rentAmount: tenant.rentAmount}
+      const invitation = {id: generateID(), propertyID: propertyData.data.getProperty.id, leaseTerm: tenant.leaseTerm, leaseStart: tenant.leaseStart, rentAmount: tenant.rentAmount}
 
 
       // check if tenant is already in the property
       for (const curTenant of propertyData.data.getProperty.tenants) {
-
+        if (curTenant == null) break;
         if (curTenant == tenant.email) {
           
           // if the tenant exists, get info
@@ -122,9 +122,12 @@ export default function rentalPage({ navigation }) {
       }
 
       // create new invitation
+      console.log(invitation);
       await API.graphql(
         graphqlOperation(createInvitation, {input: invitation})
       );
+
+      console.log("creating new tenant",tenant);
 
       // adding new tenant to property, check if tenant exists
       const tenantData = await API.graphql({
@@ -148,6 +151,8 @@ export default function rentalPage({ navigation }) {
       });
 
       tenantObject.data.getTenant.invitations.push(invitation.id);
+      delete tenantObject.data.getTenant.updatedAt;
+      delete tenantObject.data.getTenant.createdAt;
 
       // update tenant
       await API.graphql(

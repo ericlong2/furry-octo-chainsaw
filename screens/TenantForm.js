@@ -13,6 +13,7 @@ function TenantForm({ editTenant }) {
           rentAmount: 0,
         }}
         onSubmit={(values, actions) => {
+
           console.log(values); //this can be taken out later
           actions.resetForm();
           editTenant(values);
