@@ -173,9 +173,10 @@ export default function invitationPage({ navigation }) {
           <TouchableOpacity onPress={() => pressInvitation(item)}>
             <Task
               text={
-                item.number == 0
-                  ? item.address
-                  : item.number + " " + item.address
+                item.address
+                // item.number == 0
+                //   ? item.address
+                //   : item.number + " " + item.address
               }
             />
           </TouchableOpacity>
