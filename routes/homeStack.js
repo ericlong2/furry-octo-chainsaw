@@ -10,6 +10,7 @@ import Tenant from "../screens/Tenant";
 import invitationPage from "../screens/invitationPage";
 import editTenant from "../screens/editTenant";
 import tenantHome from "../screens/tenantHome";
+import { StackActions } from "@react-navigation/native";
 
 const screens = {
   // TenantForm: {
@@ -79,6 +80,12 @@ const screens = {
     },
   },
 };
+
+const resetAction = StackActions.reset({
+  index: 0,
+  actions: [NavigationActions.navigate({ routeName: "Start" })],
+});
+this.props.navigation.dispatch(resetAction);
 
 const HomeStack = createStackNavigator(screens, {
   initialRouteName: "Start",

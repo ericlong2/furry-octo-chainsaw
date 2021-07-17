@@ -149,7 +149,7 @@ export default function properties({ navigation }) {
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.reset();
+      navigation.resetAction();
       // navigation.reset({
       //   index: 0,
       //   routes: [{ name: "Start" }],
