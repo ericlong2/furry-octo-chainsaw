@@ -1,4 +1,4 @@
-import { API } from "aws-amplify";
+import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import { styleSheets } from "min-document";
 import React, { useState } from "react";
 import {
@@ -6,15 +6,15 @@ import {
   View,
   TouchableOpacity,
   StyleSheet,
-  MaterialIcons,
   Alert,
   Modal,
   Button,
   Text,
 } from "react-native";
 import Task from "../components/Task";
+import { MaterialIcons } from "@expo/vector-icons";
 import colors from "./Colors";
-import { updateTenant } from "../src/graphql/mutations";
+import { updateProperty, updateTenant } from "../src/graphql/mutations";
 import { getInvitation, getProperty, getTenant } from "../src/graphql/queries";
 
 export default function invitationPage({ navigation }) {
@@ -31,7 +31,7 @@ export default function invitationPage({ navigation }) {
         // get user details
         const curUser = await Auth.currentAuthenticatedUser();
         setUser(curUser.attributes.email);
-
+        console.log(curUser.attributes);
         // get tenant object
         const tenantData = await API.graphql({
           query: getTenant,
@@ -40,6 +40,8 @@ export default function invitationPage({ navigation }) {
 
         // go through list of invitations
         for (const invitation of tenantData.data.getTenant.invitations) {
+          if (tenantData.data.getTenant.accepted != null && invitation == tenantData.data.getTenant.accepted) continue;
+          console.log(invitation);
           // get invitation object
           const invitationData = await API.graphql({
             query: getInvitation,
@@ -49,9 +51,10 @@ export default function invitationPage({ navigation }) {
           // get corresponding property
           const propertyData = await API.graphql({
             query: getProperty,
-            variables: { id: invitationData.propertyID },
+            variables: { id: invitationData.data.getInvitation.propertyID },
           });
 
+          propertyData.data.getProperty.propertyID = propertyData.data.getProperty.id;
           propertyData.data.getProperty.id = invitation;
 
           // add to invitation list
@@ -70,6 +73,7 @@ export default function invitationPage({ navigation }) {
   const pressInvitation = (item) => {
     console.log(item);
     setCurrentInvitation(item);
+    setInvitationModal(true);
   };
 
   const toRental = async () => {
@@ -105,12 +109,12 @@ export default function invitationPage({ navigation }) {
     if (currentInvitation == null) return;
     try {
       console.log("accept");
-      console.log(item);
+      //console.log(item);
 
       // get tenant data
       const tenantData = await API.graphql({
         query: getTenant,
-        variables: { id: curUser.attributes.email },
+        variables: { id: user },
       });
 
       // make sure tenant isn't already in a property
@@ -119,10 +123,30 @@ export default function invitationPage({ navigation }) {
       // update tenants accepted
       tenantData.data.getTenant.accepted = currentInvitation.id;
 
+      delete tenantData.data.getTenant.createdAt;
+      delete tenantData.data.getTenant.updatedAt;
+
       // update in database
       await API.graphql(
         graphqlOperation(updateTenant, {
           input: tenantData.data.getTenant,
+        })
+      );
+
+      // get property data
+      const propertyData = await API.graphql({
+        query: getProperty,
+        variables: { id: currentInvitation.propertyID },
+      });
+
+      delete propertyData.data.getProperty.updatedAt;
+      delete propertyData.data.getProperty.createdAt;
+
+      propertyData.data.getProperty.tenants.push(user);
+      // update in database
+      await API.graphql(
+        graphqlOperation(updateProperty, {
+          input: propertyData.data.getProperty,
         })
       );
 

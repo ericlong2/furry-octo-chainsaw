@@ -1,8 +1,42 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput } from "react-native";
+import { View, StyleSheet, TextInput, Text } from "react-native";
 
 function editTenant({ navigation }) {
-  const tenant = navigation.getParam("Tenant");
+  const [loaded, setLoaded] = useState(false);
+  const [tenant, setTenant] = useState({});
+
+  const loadTenant = async() => {
+    if (!loaded) {
+      setLoaded(true);
+      try {
+        // get user details
+        const curUser = await Auth.currentAuthenticatedUser();
+        //setUser(curUser.attributes.email);
+        console.log(curUser.attributes);
+
+        // get tenant object
+        const tenantData = await API.graphql({
+          query: getTenant,
+          variables: { id: curUser.attributes.email },
+        });
+
+        const invitationData = await API.graphql({
+          query: getInvitation,
+          variables: { id: tenantData.data.getTenant.accepted},
+        });
+
+        tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+        tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
+        tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
+        setTenant(tenantData.data.getTenant);
+      } catch (error) {
+        console.log("error loading tenant",error);
+      }
+    } 
+  }
+  loadTenant();
+
+  
   //onst email =tenant.email;
   const [leaseTerm, setLeaseTerm] = useState(tenant.leaseTerm);
   const [leaseStart, setLeaseStart] = useState(tenant.leaseStart);

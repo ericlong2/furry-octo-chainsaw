@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
   StyleSheet,
@@ -12,11 +12,62 @@ import {
   Button,
 } from "react-native";
 
+import { MaterialIcons } from "@expo/vector-icons";
+
+import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
+
 import colors from "./Colors";
+import { getInvitation } from "../src/graphql/queries";
 export default function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
-  const tenant = navigation.getParam("Tenant");
+  const [tenant, setTenant] = useState({});
+  const [loaded, setLoaded] = useState(false);
+
+  const loadTenant = async() => {
+    if (!loaded) {
+      setLoaded(true);
+      try {
+        // get user details
+        const curUser = await Auth.currentAuthenticatedUser();
+        setUser(curUser.attributes.email);
+        console.log(curUser.attributes);
+
+        // get tenant object
+        const tenantData = await API.graphql({
+          query: getTenant,
+          variables: { id: curUser.attributes.email },
+        });
+
+        const invitationData = await API.graphql({
+          query: getInvitation,
+          variables: { id: tenantData.data.getTenant.accepted},
+        });
+
+        tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+        tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
+        tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
+        setTenant(tenantData.data.getTenant);
+      } catch (error) {
+        console.log("error loading tenant",error);
+      }
+    } 
+  }
+  loadTenant();
+
+  async function signOut() {
+    try {
+      await Auth.signOut();
+      navigation.navigate("Start");
+    } catch (error) {
+      console.log("error signing out: ", error);
+    }
+  }
+  function refresh() {
+    setLoaded(false);
+    loadTenant();
+  }
+
   const editTenant = () => {
     //open modal to edit the tenant and save the information
     navigation.navigate("editTenant", { Tenant: tenant });
