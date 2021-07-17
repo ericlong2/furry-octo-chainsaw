@@ -149,11 +149,11 @@ export default function properties({ navigation }) {
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.resetAction();
-      // navigation.reset({
-      //   index: 0,
-      //   routes: [{ name: "Start" }],
-      // });
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Start" }],
+        key: null,
+      });
       //navigation.navigate("Start");
     } catch (error) {
       console.log("error signing out: ", error);

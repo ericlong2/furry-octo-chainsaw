@@ -81,11 +81,11 @@ const screens = {
   },
 };
 
-const resetAction = StackActions.reset({
-  index: 0,
-  actions: [NavigationActions.navigate({ routeName: "Start" })],
-});
-this.props.navigation.dispatch(resetAction);
+// const resetAction = StackActions.reset({
+//   index: 0,
+//   actions: [NavigationActions.navigate({ routeName: "Start" })],
+// });
+// this.props.navigation.dispatch(resetAction);
 
 const HomeStack = createStackNavigator(screens, {
   initialRouteName: "Start",
