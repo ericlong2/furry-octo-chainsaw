@@ -261,6 +261,13 @@ export default function properties({ navigation }) {
         style={styles.modal2Toggle}
         onPress={() => setModal2Open(true)}
       />
+
+      <Button
+            //style={styles.button}
+            title="Submit"
+            color="maroon"
+            onPress={() => submitVerif(verification)}
+          />
     </View>
   );
 }

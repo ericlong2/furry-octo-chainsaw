@@ -185,7 +185,6 @@ export default function rentalPage({ navigation }) {
         const curUser = await Auth.currentAuthenticatedUser();
         if (curUser.attributes["custom:landlord"] == "true") setLandlordBool(true);
 
-        if (curUse)
         // get property data
         const propertyData = await API.graphql({
           query: getProperty,
