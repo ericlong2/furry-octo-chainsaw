@@ -97,7 +97,16 @@ export default function invitationPage({ navigation }) {
           ]
         );
       } else {
-        navigation.navigate("Tenant");
+        const invitationData = await API.graphql({
+          query: getInvitation,
+          variables: { id: tenantData.data.getTenant.accepted},
+        });
+
+        const propertyData = await API.graphql({
+          query: getProperty,
+          variables: { id: invitationData.data.getInvitation.propertyID},
+        });
+        navigation.navigate("RentalDetails", propertyData.data.getProperty);
       }
     } catch (error) {
       console.log("error checking if tenant accepted an invitation", error);

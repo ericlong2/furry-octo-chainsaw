@@ -55,20 +55,20 @@ function editTenant({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder={leaseStart}
-        onChangeText={(input = setLeaseStart(input))}
+        onChangeText={(input => setLeaseStart(input))}
       />
       <Text>Lease Term in Months</Text>
       <TextInput
         style={styles.input}
         placeholder={leaseTerm}
-        onChangeText={(input = setLeaseTerm(input))}
+        onChangeText={(input => setLeaseTerm(input))}
         keyboardType="numeric"
       />
       <Text>Monthly Rent amount</Text>
       <TextInput
         style={styles.input}
         placeholder={rentAmount}
-        onChangeText={(input = setRentAmount(input))}
+        onChangeText={(input => setRentAmount(input))}
         keyboardType="numeric"
       />
 

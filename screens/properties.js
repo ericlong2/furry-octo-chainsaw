@@ -17,6 +17,7 @@ import Task from "../components/Task";
 import AddForm from "./AddForm";
 import { MaterialIcons } from "@expo/vector-icons";
 import GooglePlacesInput from "./GooglePlacesInput";
+import { CommonActions } from '@react-navigation/native';
 
 import Options from "./options";
 
@@ -36,6 +37,7 @@ export default function properties({ navigation }) {
   const [user, setUser] = useState("");
   const [loaded, setLoaded] = useState(false);
 
+  
   const submitVerif = (code) => {
     console.log(code);
     //here you can verify and close window by using
@@ -52,6 +54,8 @@ export default function properties({ navigation }) {
         const curUser = await Auth.currentAuthenticatedUser();
         //console.log("user",curUser.attributes);
         setUser(curUser.attributes.email);
+
+
 
         // get the landlord object corresponding to current user
         const landlord = await API.graphql({
@@ -149,12 +153,8 @@ export default function properties({ navigation }) {
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "Start" }],
-        key: null,
-      });
-      //navigation.navigate("Start");
+      navigation.popToTop();
+      navigation.navigate("Start");
     } catch (error) {
       console.log("error signing out: ", error);
     }
@@ -163,7 +163,7 @@ export default function properties({ navigation }) {
   return (
     <View style={styles.container}>
       {/*add house*/}
-      <Modal visible={modalOpen} animationType="slide">
+      <Modal visible={modalOpen} animationType="slide"> 
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
             <MaterialIcons

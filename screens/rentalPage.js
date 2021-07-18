@@ -58,6 +58,7 @@ export default function rentalPage({ navigation }) {
   const [currentTenant, setCurrentTenant] = useState();
   const [editTenantModal, setEditTenantModal] = useState(false);
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
+  const [landlordBool, setLandlordBool] = useState(false);
 
   //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
   // const [tenants, setTenants] = useState([
@@ -177,7 +178,14 @@ export default function rentalPage({ navigation }) {
       state.people = [];
       setLoaded(true);
 
+      
       try {
+
+        // get user details
+        const curUser = await Auth.currentAuthenticatedUser();
+        if (curUser.attributes["custom:landlord"] == "true") setLandlordBool(true);
+
+        if (curUse)
         // get property data
         const propertyData = await API.graphql({
           query: getProperty,
@@ -465,168 +473,334 @@ export default function rentalPage({ navigation }) {
     setLoaded(false);
     loadData();
   }
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView>
-        <Modal
-          animationType="slide"
-          visible={state.addTicketVisible}
-          onRequestClose={() => toggleAddTicketModal()}
-        >
-          <AddTicketModal
-            closeModel={() => toggleAddTicketModal()}
-            addList={addList}
-          />
-        </Modal>
 
-        <Modal animationType="slide" visible={tenantModal}>
-          <View style={styles.Modal}>
-            <MaterialIcons
-              name="close"
-              size={24}
-              style={{ ...styles.modalToggle, ...styles.modalClose }}
-              onPress={() => setTenantModal(false)}
+  if (landlordBool) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView>
+          <Modal
+            animationType="slide"
+            visible={state.addTicketVisible}
+            onRequestClose={() => toggleAddTicketModal()}
+          >
+            <AddTicketModal
+              closeModel={() => toggleAddTicketModal()}
+              addList={addList}
             />
+          </Modal>
+
+          <Modal animationType="slide" visible={tenantModal}>
+            <View style={styles.Modal}>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setTenantModal(false)}
+              />
+              <FlatList
+                data={state.people}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => pressTenant(item)}>
+                    <Task text={item.name} />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </Modal>
+
+          {/* May not be nessesarry */}
+          <Modal animationType="slide" visible={editTenantModal}>
+            <View style={styles.Modal}>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setEditTenantModal(false)}
+              />
+              <TenantForm editTenant={editTenant} />
+            </View>
+          </Modal>
+
+          {/*menu options*/}
+          <Modal visible={modalMenuOpen} animationType="slide">
+            <View>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setModalMenuOpen(false)}
+              />
+              <Button
+                //style={styles.button}
+                title="Logout"
+                color="maroon"
+                onPress={signOut}
+              />
+              <Button
+                //style={styles.button}
+                title="Refresh"
+                color="blue"
+                onPress={refresh}
+              />
+              {/*<Options />*/}
+            </View>
+          </Modal>
+
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginTop: 64,
+            }}
+          >
+            <View style={styles.divider} />
+            <Text style={styles.title}>
+              {address}{" "}
+              <Text style={{ fontWeight: "300", color: colors.blue }}>
+                {" "}
+                Repairs
+              </Text>
+            </Text>
+            <View style={styles.divider} />
+          </View>
+
+          <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
+            <Text style={styles.sectionTitle}>Tenants</Text>
             <FlatList
               data={state.people}
-              renderItem={({ item }) => (
-                <TouchableOpacity onPress={() => pressTenant(item)}>
-                  <Task text={item.name} />
-                </TouchableOpacity>
-              )}
+              keyExtractor={(item) => item.name}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => renderPeople(item)}
+              keyboardShouldPersistTaps="always"
             />
           </View>
-        </Modal>
 
-        {/* May not be nessesarry */}
-        <Modal animationType="slide" visible={editTenantModal}>
-          <View style={styles.Modal}>
+          <View style={{ height: 275, paddingLeft: 32 }}>
+            <Text style={styles.sectionTitle}> Tickets</Text>
+            <FlatList
+              data={state.lists}
+              keyExtractor={(item) => item.name}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => renderList(item)}
+              keyboardShouldPersistTaps="always"
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginLeft: 10,
+            }}
+          >
+            <View style={{ marginVertical: 48, alignItems: "center" }}>
+              <TouchableOpacity
+                style={styles.Plus}
+                onPress={() => {
+                  setAddType(false);
+                  toggleAddTicketModal();
+                }}
+              >
+                <Text style={styles.add}>Add Ticket</Text>
+                <AntDesign name="plus" size={16} color={colors.blue} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+              <MaterialIcons name="home" size={128} color={colors.blue} />
+            </TouchableOpacity>
+
+            <View style={{ marginVertical: 48, alignItems: "center" }}>
+              <TouchableOpacity
+                style={styles.Plus}
+                onPress={() => {
+                  //setAddType(true);
+                  //toggleAddTicketModal();
+                  //setTenantModal(true);
+                  openAddTenant();
+                }}
+              >
+                <Text style={styles.add}>Add Tenant</Text>
+                <AntDesign name="plus" size={16} color={colors.blue} />
+              </TouchableOpacity>
+            </View>
+
             <MaterialIcons
-              name="close"
+              name="menu-open"
               size={24}
-              style={{ ...styles.modalToggle, ...styles.modalClose }}
-              onPress={() => setEditTenantModal(false)}
+              style={styles.modalMenuToggle}
+              onPress={() => setModalMenuOpen(true)}
             />
-            <TenantForm editTenant={editTenant} />
           </View>
-        </Modal>
-
-        {/*menu options*/}
-        <Modal visible={modalMenuOpen} animationType="slide">
-          <View>
-            <MaterialIcons
-              name="close"
-              size={24}
-              style={{ ...styles.modalToggle, ...styles.modalClose }}
-              onPress={() => setModalMenuOpen(false)}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  } else {
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView>
+          <Modal
+            animationType="slide"
+            visible={state.addTicketVisible}
+            onRequestClose={() => toggleAddTicketModal()}
+          >
+            <AddTicketModal
+              closeModel={() => toggleAddTicketModal()}
+              addList={addList}
             />
-            <Button
-              //style={styles.button}
-              title="Logout"
-              color="maroon"
-              onPress={signOut}
-            />
-            <Button
-              //style={styles.button}
-              title="Refresh"
-              color="blue"
-              onPress={refresh}
-            />
-            {/*<Options />*/}
-          </View>
-        </Modal>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-around",
-            marginTop: 64,
-          }}
-        >
-          <View style={styles.divider} />
-          <Text style={styles.title}>
-            {address}{" "}
-            <Text style={{ fontWeight: "300", color: colors.blue }}>
-              {" "}
-              Repairs
+          </Modal>
+  
+          <Modal animationType="slide" visible={tenantModal}>
+            <View style={styles.Modal}>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setTenantModal(false)}
+              />
+              <FlatList
+                data={state.people}
+                renderItem={({ item }) => (
+                  <TouchableOpacity onPress={() => pressTenant(item)}>
+                    <Task text={item.name} />
+                  </TouchableOpacity>
+                )}
+              />
+            </View>
+          </Modal>
+  
+          {/* May not be nessesarry */}
+          <Modal animationType="slide" visible={editTenantModal}>
+            <View style={styles.Modal}>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setEditTenantModal(false)}
+              />
+              <TenantForm editTenant={editTenant} />
+            </View>
+          </Modal>
+  
+          {/*menu options*/}
+          <Modal visible={modalMenuOpen} animationType="slide">
+            <View>
+              <MaterialIcons
+                name="close"
+                size={24}
+                style={{ ...styles.modalToggle, ...styles.modalClose }}
+                onPress={() => setModalMenuOpen(false)}
+              />
+              <Button
+                //style={styles.button}
+                title="Logout"
+                color="maroon"
+                onPress={signOut}
+              />
+              <Button
+                //style={styles.button}
+                title="Refresh"
+                color="blue"
+                onPress={refresh}
+              />
+              {/*<Options />*/}
+            </View>
+          </Modal>
+  
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              marginTop: 64,
+            }}
+          >
+            <View style={styles.divider} />
+            <Text style={styles.title}>
+              {address}{" "}
+              <Text style={{ fontWeight: "300", color: colors.blue }}>
+                {" "}
+                Repairs
+              </Text>
             </Text>
-          </Text>
-          <View style={styles.divider} />
-        </View>
-
-        <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
-          <Text style={styles.sectionTitle}>Tenants</Text>
-          <FlatList
-            data={state.people}
-            keyExtractor={(item) => item.name}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => renderPeople(item)}
-            keyboardShouldPersistTaps="always"
-          />
-        </View>
-
-        <View style={{ height: 275, paddingLeft: 32 }}>
-          <Text style={styles.sectionTitle}> Tickets</Text>
-          <FlatList
-            data={state.lists}
-            keyExtractor={(item) => item.name}
-            horizontal={true}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => renderList(item)}
-            keyboardShouldPersistTaps="always"
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            marginLeft: 10,
-          }}
-        >
-          <View style={{ marginVertical: 48, alignItems: "center" }}>
-            <TouchableOpacity
-              style={styles.Plus}
-              onPress={() => {
-                setAddType(false);
-                toggleAddTicketModal();
-              }}
-            >
-              <Text style={styles.add}>Add Ticket</Text>
-              <AntDesign name="plus" size={16} color={colors.blue} />
-            </TouchableOpacity>
+            <View style={styles.divider} />
           </View>
-
-          <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-            <MaterialIcons name="home" size={128} color={colors.blue} />
-          </TouchableOpacity>
-
-          <View style={{ marginVertical: 48, alignItems: "center" }}>
-            <TouchableOpacity
-              style={styles.Plus}
-              onPress={() => {
-                //setAddType(true);
-                //toggleAddTicketModal();
-                //setTenantModal(true);
-                openAddTenant();
-              }}
-            >
-              <Text style={styles.add}>Add Tenant</Text>
-              <AntDesign name="plus" size={16} color={colors.blue} />
-            </TouchableOpacity>
+  
+          <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
+            <Text style={styles.sectionTitle}>Tenants</Text>
+            <FlatList
+              data={state.people}
+              keyExtractor={(item) => item.name}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => renderPeople(item)}
+              keyboardShouldPersistTaps="always"
+            />
           </View>
-
-          <MaterialIcons
-            name="menu-open"
-            size={24}
-            style={styles.modalMenuToggle}
-            onPress={() => setModalMenuOpen(true)}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
+  
+          <View style={{ height: 275, paddingLeft: 32 }}>
+            <Text style={styles.sectionTitle}> Tickets</Text>
+            <FlatList
+              data={state.lists}
+              keyExtractor={(item) => item.name}
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              renderItem={({ item }) => renderList(item)}
+              keyboardShouldPersistTaps="always"
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              marginLeft: 10,
+            }}
+          >
+            <View style={{ marginVertical: 48, alignItems: "center" }}>
+              <TouchableOpacity
+                style={styles.Plus}
+                onPress={() => {
+                  setAddType(false);
+                  toggleAddTicketModal();
+                }}
+              >
+                <Text style={styles.add}>Add Ticket</Text>
+                <AntDesign name="plus" size={16} color={colors.blue} />
+              </TouchableOpacity>
+            </View>
+  
+            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+              <MaterialIcons name="home" size={128} color={colors.blue} />
+            </TouchableOpacity>
+  
+            <View style={{ marginVertical: 48, alignItems: "center" }}>
+              <TouchableOpacity
+                style={styles.Plus}
+                onPress={() => {
+                  //setAddType(true);
+                  //toggleAddTicketModal();
+                  //setTenantModal(true);
+                  openAddTenant();
+                }}
+              >
+                <Text style={styles.add}>Add Tenant</Text>
+                <AntDesign name="plus" size={16} color={colors.blue} />
+              </TouchableOpacity>
+            </View>
+  
+            <MaterialIcons
+              name="menu-open"
+              size={24}
+              style={styles.modalMenuToggle}
+              onPress={() => setModalMenuOpen(true)}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
 }
 
 const styles = StyleSheet.create({

@@ -12,6 +12,8 @@ import { emailValidator } from "../helpers/emailValidator";
 import { passwordValidator } from "../helpers/passwordValidator";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import properties from "./properties";
+import { CommonActions } from '@react-navigation/native';
+
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
@@ -33,7 +35,19 @@ export default function LoginScreen({ navigation }) {
       console.log(user);
       if (user.attributes["custom:landlord"] == "true") {
         console.log("signing in as landlord");
-        navigation.navigate("Home");
+        navigation.popToTop(); 
+        navigation.pop();
+        
+      //   navigation.dispatch(
+      //     CommonActions.reset({
+      //         index: 1,//the stack index
+      //         routes: [
+      //             { name: 'Home' },//to go to initial stack screen
+      //         ],
+      //     })
+          
+      // )
+      navigation.navigate("Home");
       } else {
         console.log("signing in as tenant");
         navigation.navigate("invitationPage");
