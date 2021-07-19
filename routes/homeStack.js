@@ -59,24 +59,27 @@ const screens = {
     screen: Register,
     navigationOptions: {
       title: "Register",
+      headerLeft: null,
     },
   },
   Start: {
     screen: Start,
     navigationOptions: {
       title: "Start",
+      headerLeft: null,
     },
   },
   Home: {
     screen: Home,
     navigationOptions: {
       title: "Home",
+      headerLeft: null,
     },
   },
   RentalDetails: {
     screen: RentalDetails,
     navigationOptions: {
-      title: "Rental Page",
+      title: "RentalDetails",
     },
   },
 };

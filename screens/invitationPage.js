@@ -40,7 +40,11 @@ export default function invitationPage({ navigation }) {
 
         // go through list of invitations
         for (const invitation of tenantData.data.getTenant.invitations) {
-          if (tenantData.data.getTenant.accepted != null && invitation == tenantData.data.getTenant.accepted) continue;
+          if (
+            tenantData.data.getTenant.accepted != null &&
+            invitation == tenantData.data.getTenant.accepted
+          )
+            continue;
           console.log(invitation);
           // get invitation object
           const invitationData = await API.graphql({
@@ -54,7 +58,8 @@ export default function invitationPage({ navigation }) {
             variables: { id: invitationData.data.getInvitation.propertyID },
           });
 
-          propertyData.data.getProperty.propertyID = propertyData.data.getProperty.id;
+          propertyData.data.getProperty.propertyID =
+            propertyData.data.getProperty.id;
           propertyData.data.getProperty.id = invitation;
 
           // add to invitation list
@@ -99,12 +104,12 @@ export default function invitationPage({ navigation }) {
       } else {
         const invitationData = await API.graphql({
           query: getInvitation,
-          variables: { id: tenantData.data.getTenant.accepted},
+          variables: { id: tenantData.data.getTenant.accepted },
         });
 
         const propertyData = await API.graphql({
           query: getProperty,
-          variables: { id: invitationData.data.getInvitation.propertyID},
+          variables: { id: invitationData.data.getInvitation.propertyID },
         });
         navigation.navigate("RentalDetails", propertyData.data.getProperty);
       }
@@ -160,7 +165,7 @@ export default function invitationPage({ navigation }) {
       );
 
       //navigate to tenant page after
-      navigation.navigate("Tenant");
+      navigation.navigate("RentalDetails");
     } catch (error) {
       console.log("error accepting invitation", error);
     }
