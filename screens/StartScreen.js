@@ -13,7 +13,8 @@ export default function StartScreen({ navigation }) {
     if (!loaded) {
       setLoaded(true);
       try {
-        const user = Auth.currentAuthenticatedUser();
+        const user = await Auth.currentAuthenticatedUser();
+        console.log(user.attributes);
         if (user.attributes["custom:landlord"] == "true") {
           console.log("signing in as landlord");
 
