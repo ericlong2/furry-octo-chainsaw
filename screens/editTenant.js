@@ -1,51 +1,28 @@
+import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import React, { useState } from "react";
-import { View, StyleSheet, TextInput, Text } from "react-native";
+import { View, StyleSheet, TextInput, Text, Button } from "react-native";
+import { updateInvitation } from "../src/graphql/mutations";
 
 function editTenant({ navigation }) {
-  const [loaded, setLoaded] = useState(false);
-  const [tenant, setTenant] = useState({});
-
-  const loadTenant = async() => {
-    if (!loaded) {
-      setLoaded(true);
-      try {
-        // get user details
-        const curUser = await Auth.currentAuthenticatedUser();
-        //setUser(curUser.attributes.email);
-        console.log(curUser.attributes);
-
-        // get tenant object
-        const tenantData = await API.graphql({
-          query: getTenant,
-          variables: { id: curUser.attributes.email },
-        });
-
-        const invitationData = await API.graphql({
-          query: getInvitation,
-          variables: { id: tenantData.data.getTenant.accepted},
-        });
-
-        tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
-        tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
-        tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
-        setTenant(tenantData.data.getTenant);
-      } catch (error) {
-        console.log("error loading tenant",error);
-      }
-    } 
-  }
-  loadTenant();
-
+  const tenant = navigation.getParam("tenant");
+  console.log(tenant);
   
   //onst email =tenant.email;
   const [leaseTerm, setLeaseTerm] = useState(tenant.leaseTerm);
   const [leaseStart, setLeaseStart] = useState(tenant.leaseStart);
   const [rentAmount, setRentAmount] = useState(tenant.rentAmount);
 
-  const makeChanges = () => {
+  const makeChanges = async() => {
     //make the changes to the tenant wiht the new stats
-
-    navigation.goBack();
+    try {
+      const invitation = {id:tenant.accepted,propertyID:tenant.propertyID,leaseTerm:tenant.leaseTerm,leaseStart:tenant.leaseStart,rentAmount:tenant.rentAmount};
+      await API.graphql(
+        graphqlOperation(updateInvitation, { input: invitation })
+      );
+      navigation.goBack();
+    } catch (error) {
+      console.log("error updating tenant", error);
+    }
   };
 
   return (

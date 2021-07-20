@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import Task from "../components/Task";
 import AddForm from "./AddForm";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons,MaterialCommunityIcons } from "@expo/vector-icons";
 import GooglePlacesInput from "./GooglePlacesInput";
 import { CommonActions } from '@react-navigation/native';
 
@@ -262,12 +262,9 @@ export default function properties({ navigation }) {
         onPress={() => setModal2Open(true)}
       />
 
-      <Button
-            //style={styles.button}
-            title="Submit"
-            color="maroon"
-            onPress={() => submitVerif(verification)}
-          />
+      <View style = {styles.buttonContainer}>
+        <MaterialCommunityIcons name = "chat" size = {28} color = "white"/>
+      </View>
     </View>
   );
 }
@@ -297,6 +294,15 @@ const styles = StyleSheet.create({
   },
   items: {
     marginTop: 30,
+  },
+  buttonContainer: {
+    backgroundColor: 'black',
+    borderRadius: 50,
+    width: 45,
+    height: 45, 
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 40,
   },
   modalToggle: {
     justifyContent: "center",

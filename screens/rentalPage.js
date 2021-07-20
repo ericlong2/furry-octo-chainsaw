@@ -452,7 +452,7 @@ export default function rentalPage({ navigation }) {
   const renderPeople = (person) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Tenant", { Tenant: person })}
+        onPress={() => navigation.navigate("Tenant", { id: person.id })}
       >
         <PeopleList person={person} />
       </TouchableOpacity>
@@ -770,11 +770,11 @@ export default function rentalPage({ navigation }) {
               </TouchableOpacity>
             </View>
   
-            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+            <TouchableOpacity onPress={() => console.log("open up chat with landlord")}>
               <MaterialIcons name="home" size={128} color={colors.blue} />
             </TouchableOpacity>
   
-            <View style={{ marginVertical: 48, alignItems: "center" }}>
+            {/* <View style={{ marginVertical: 48, alignItems: "center" }}>
               <TouchableOpacity
                 style={styles.Plus}
                 onPress={() => {
@@ -787,7 +787,7 @@ export default function rentalPage({ navigation }) {
                 <Text style={styles.add}>Add Tenant</Text>
                 <AntDesign name="plus" size={16} color={colors.blue} />
               </TouchableOpacity>
-            </View>
+            </View> */}
   
             <MaterialIcons
               name="menu-open"

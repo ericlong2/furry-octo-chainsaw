@@ -17,7 +17,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
 import colors from "./Colors";
-import { getInvitation } from "../src/graphql/queries";
+import { getInvitation, getTenant } from "../src/graphql/queries";
 export default function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
@@ -28,17 +28,14 @@ export default function Tenant({ navigation }) {
     if (!loaded) {
       setLoaded(true);
       try {
-        // get user details
-        const curUser = await Auth.currentAuthenticatedUser();
-        setUser(curUser.attributes.email);
-        console.log(curUser.attributes);
 
         // get tenant object
         const tenantData = await API.graphql({
           query: getTenant,
-          variables: { id: curUser.attributes.email },
+          variables: { id: navigation.getParam("id") },
         });
-
+        
+        console.log(tenantData);
         const invitationData = await API.graphql({
           query: getInvitation,
           variables: { id: tenantData.data.getTenant.accepted},
@@ -68,13 +65,28 @@ export default function Tenant({ navigation }) {
     loadTenant();
   }
 
-  const editTenant = () => {
-    //open modal to edit the tenant and save the information
-    navigation.navigate("editTenant", { Tenant: tenant });
+  const editTenant = async() => {
+    try {
+      // get user details
+      const curUser = await Auth.currentAuthenticatedUser();
+
+      // check if user is landlord
+      if (curUser.attributes["custom:landlord"]=="true") {
+
+        //open modal to edit the tenant and save the information
+        navigation.navigate("editTenant", { tenant: tenant });
+      }
+    } catch (error) {
+      console.log("error editing tenant",error);
+    }
   };
   return (
     <View>
       <Text>{tenant.name}</Text>
+      
+      <Text>{"Lease Start: " + tenant.leaseStart}</Text>
+      <Text>{"Lease Term: " + tenant.leaseTerm}</Text>
+      <Text>{"Rent Amount: " + tenant.rentAmount}</Text>
       {/*menu options*/}
       <Modal visible={modalMenuOpen} animationType="slide">
         <View>

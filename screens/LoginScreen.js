@@ -35,8 +35,6 @@ export default function LoginScreen({ navigation }) {
       console.log(user);
       if (user.attributes["custom:landlord"] == "true") {
         console.log("signing in as landlord");
-        navigation.popToTop(); 
-        navigation.pop();
         
       //   navigation.dispatch(
       //     CommonActions.reset({
