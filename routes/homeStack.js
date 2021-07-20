@@ -59,21 +59,21 @@ const screens = {
     screen: Register,
     navigationOptions: {
       title: "Register",
-      headerLeft: null,
+      //headerLeft: null,
     },
   },
   Start: {
     screen: Start,
     navigationOptions: {
       title: "Start",
-      headerLeft: null,
+      //headerLeft: null,
     },
   },
   Home: {
     screen: Home,
     navigationOptions: {
       title: "Home",
-      headerLeft: null,
+      //headerLeft: null,
     },
   },
   RentalDetails: {

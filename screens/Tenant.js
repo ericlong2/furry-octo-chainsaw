@@ -24,39 +24,42 @@ export default function Tenant({ navigation }) {
   const [tenant, setTenant] = useState({});
   const [loaded, setLoaded] = useState(false);
 
-  const loadTenant = async() => {
+  const loadTenant = async () => {
     if (!loaded) {
       setLoaded(true);
       try {
-
         // get tenant object
         const tenantData = await API.graphql({
           query: getTenant,
           variables: { id: navigation.getParam("id") },
         });
-        
+
         console.log(tenantData);
         const invitationData = await API.graphql({
           query: getInvitation,
-          variables: { id: tenantData.data.getTenant.accepted},
+          variables: { id: tenantData.data.getTenant.accepted },
         });
 
-        tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
-        tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
-        tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
-        tenantData.data.getTenant.propertyID = invitationData.data.getInvitation.propertyID;
+        tenantData.data.getTenant.leaseTerm =
+          invitationData.data.getInvitation.leaseTerm;
+        tenantData.data.getTenant.leaseStart =
+          invitationData.data.getInvitation.leaseStart;
+        tenantData.data.getTenant.rentAmount =
+          invitationData.data.getInvitation.rentAmount;
+        tenantData.data.getTenant.propertyID =
+          invitationData.data.getInvitation.propertyID;
         setTenant(tenantData.data.getTenant);
       } catch (error) {
-        console.log("error loading tenant",error);
+        console.log("error loading tenant", error);
       }
-    } 
-  }
+    }
+  };
   loadTenant();
 
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.navigate("Start");
+      navigation.reset([NavigationActions.navigate({ routeName: "Start" })]);
     } catch (error) {
       console.log("error signing out: ", error);
     }
@@ -66,25 +69,24 @@ export default function Tenant({ navigation }) {
     loadTenant();
   }
 
-  const editTenant = async() => {
+  const editTenant = async () => {
     try {
       // get user details
       const curUser = await Auth.currentAuthenticatedUser();
 
       // check if user is landlord
-      if (curUser.attributes["custom:landlord"]=="true") {
-
+      if (curUser.attributes["custom:landlord"] == "true") {
         //open modal to edit the tenant and save the information
         navigation.navigate("editTenant", { tenant: tenant });
       }
     } catch (error) {
-      console.log("error editing tenant",error);
+      console.log("error editing tenant", error);
     }
   };
   return (
     <View>
       <Text>{tenant.name}</Text>
-      
+
       <Text>{"Lease Start: " + tenant.leaseStart}</Text>
       <Text>{"Lease Term: " + tenant.leaseTerm}</Text>
       <Text>{"Rent Amount: " + tenant.rentAmount}</Text>

@@ -81,6 +81,10 @@ export default function invitationPage({ navigation }) {
     setInvitationModal(true);
   };
 
+  const reject = () => {
+    console.log("reject");
+  };
+
   const toRental = async () => {
     try {
       // get tenant data
@@ -188,8 +192,14 @@ export default function invitationPage({ navigation }) {
           <Button
             //style={styles.button}
             title="Accept"
-            color="maroon"
+            color="blue"
             onPress={accept}
+          />
+          <Button
+            //style={styles.button}
+            title="Reject"
+            color="maroon"
+            onPress={reject}
           />
           {/* <Button
             //style={styles.button}

@@ -15,9 +15,9 @@ import {
 } from "react-native";
 import Task from "../components/Task";
 import AddForm from "./AddForm";
-import { MaterialIcons,MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import GooglePlacesInput from "./GooglePlacesInput";
-import { CommonActions } from '@react-navigation/native';
+import { CommonActions } from "@react-navigation/native";
 
 import Options from "./options";
 
@@ -25,6 +25,7 @@ import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
 import { getLandlord, getProperty } from "../src/graphql/queries";
 import { createProperty, updateLandlord } from "../src/graphql/mutations";
+import { NavigationActions } from "react-navigation";
 
 export default function properties({ navigation }) {
   /*Constants*/
@@ -37,7 +38,6 @@ export default function properties({ navigation }) {
   const [user, setUser] = useState("");
   const [loaded, setLoaded] = useState(false);
 
-  
   const submitVerif = (code) => {
     console.log(code);
     //here you can verify and close window by using
@@ -54,8 +54,6 @@ export default function properties({ navigation }) {
         const curUser = await Auth.currentAuthenticatedUser();
         //console.log("user",curUser.attributes);
         setUser(curUser.attributes.email);
-
-
 
         // get the landlord object corresponding to current user
         const landlord = await API.graphql({
@@ -153,8 +151,9 @@ export default function properties({ navigation }) {
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.popToTop();
-      navigation.navigate("Start");
+      // navigation.popToTop();
+      // navigation.navigate("Start");
+      navigation.reset([NavigationActions.navigate({ routeName: "Start" })]);
     } catch (error) {
       console.log("error signing out: ", error);
     }
@@ -163,7 +162,7 @@ export default function properties({ navigation }) {
   return (
     <View style={styles.container}>
       {/*add house*/}
-      <Modal visible={modalOpen} animationType="slide"> 
+      <Modal visible={modalOpen} animationType="slide">
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalContent}>
             <MaterialIcons
@@ -262,8 +261,8 @@ export default function properties({ navigation }) {
         onPress={() => setModal2Open(true)}
       />
 
-      <View style = {styles.buttonContainer}>
-        <MaterialCommunityIcons name = "chat" size = {28} color = "white"/>
+      <View style={styles.buttonContainer}>
+        <MaterialCommunityIcons name="chat" size={28} color="white" />
       </View>
     </View>
   );
@@ -296,12 +295,12 @@ const styles = StyleSheet.create({
     marginTop: 30,
   },
   buttonContainer: {
-    backgroundColor: 'black',
+    backgroundColor: "black",
     borderRadius: 50,
     width: 45,
-    height: 45, 
-    justifyContent: 'center',
-    alignItems: 'center',
+    height: 45,
+    justifyContent: "center",
+    alignItems: "center",
     marginHorizontal: 40,
   },
   modalToggle: {

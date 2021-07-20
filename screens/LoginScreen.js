@@ -9,11 +9,11 @@ import TextInput from "../components/TextInput";
 import BackButton from "../components/BackButton";
 import { theme } from "../core/theme";
 import { emailValidator } from "../helpers/emailValidator";
+import { NavigationActions } from "react-navigation";
 import { passwordValidator } from "../helpers/passwordValidator";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import properties from "./properties";
-import { CommonActions } from '@react-navigation/native';
-
+import { CommonActions } from "@react-navigation/native";
 
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
@@ -35,23 +35,21 @@ export default function LoginScreen({ navigation }) {
       console.log(user);
       if (user.attributes["custom:landlord"] == "true") {
         console.log("signing in as landlord");
-        
-      //   navigation.dispatch(
-      //     CommonActions.reset({
-      //         index: 1,//the stack index
-      //         routes: [
-      //             { name: 'Home' },//to go to initial stack screen
-      //         ],
-      //     })
-          
-      // )
-      navigation.navigate("Home");
+
+        //   navigation.dispatch(
+        //     CommonActions.reset({
+        //         index: 1,//the stack index
+        //         routes: [
+        //             { name: 'Home' },//to go to initial stack screen
+        //         ],
+        //     })
+
+        // )
+        navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
       } else {
         console.log("signing in as tenant");
         navigation.navigate("invitationPage");
       }
-      //navigation.navigate("Home"); this is for landlord
-      //navigation.navigate("Tenant"); This is for tenant
     } catch (error) {
       console.log("error signing in", error);
     }

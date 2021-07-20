@@ -81,6 +81,9 @@ export default function rentalPage({ navigation }) {
     setEditTenantModal(true);
   };
 
+  const chat = () => {
+    console.log("open up chat page");
+  };
   const openAddTenant = () => {
     console.log("create tenant");
     setEditTenantModal(true);
@@ -97,27 +100,30 @@ export default function rentalPage({ navigation }) {
       console.log(propertyData);
 
       // create inviation
-      const invitation = {id: generateID(), propertyID: propertyData.data.getProperty.id, leaseTerm: tenant.leaseTerm, leaseStart: tenant.leaseStart, rentAmount: tenant.rentAmount}
-
+      const invitation = {
+        id: generateID(),
+        propertyID: propertyData.data.getProperty.id,
+        leaseTerm: tenant.leaseTerm,
+        leaseStart: tenant.leaseStart,
+        rentAmount: tenant.rentAmount,
+      };
 
       // check if tenant is already in the property
       for (const curTenant of propertyData.data.getProperty.tenants) {
         if (curTenant == null) break;
         if (curTenant == tenant.email) {
-          
           // if the tenant exists, get info
           const tenantData = await API.graphql({
             query: getTenant,
-            variables: { id: curTenant},
+            variables: { id: curTenant },
           });
 
           // change id to current tenant
-          invitation.id = tenantData.data.getTenant.accepted, 
-
-          // update database
-          await API.graphql(
-            graphqlOperation(updateInvitation, { input: invitation })
-          );
+          (invitation.id = tenantData.data.getTenant.accepted),
+            // update database
+            await API.graphql(
+              graphqlOperation(updateInvitation, { input: invitation })
+            );
           return;
         }
       }
@@ -125,30 +131,27 @@ export default function rentalPage({ navigation }) {
       // create new invitation
       console.log(invitation);
       await API.graphql(
-        graphqlOperation(createInvitation, {input: invitation})
+        graphqlOperation(createInvitation, { input: invitation })
       );
 
-      console.log("creating new tenant",tenant);
+      console.log("creating new tenant", tenant);
 
       // adding new tenant to property, check if tenant exists
       const tenantData = await API.graphql({
         query: getTenant,
-        variables: { id: tenant.email},
+        variables: { id: tenant.email },
       });
 
-
       // create new tenant object in database if not,
-      if (tenantData.data.getTenant==null) {
-        const newTenant = {id:tenant.email,name:"",invitations:[]}
-        await API.graphql(
-          graphqlOperation(createTenant, {input: newTenant})
-        );
+      if (tenantData.data.getTenant == null) {
+        const newTenant = { id: tenant.email, name: "", invitations: [] };
+        await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
       }
 
       // get tenant object
       const tenantObject = await API.graphql({
         query: getTenant,
-        variables: { id: tenant.email},
+        variables: { id: tenant.email },
       });
 
       tenantObject.data.getTenant.invitations.push(invitation.id);
@@ -159,15 +162,11 @@ export default function rentalPage({ navigation }) {
       await API.graphql(
         graphqlOperation(updateTenant, { input: tenantObject.data.getTenant })
       );
-
-
     } catch (error) {
-      console.log("error editing tenant",error);
+      console.log("error editing tenant", error);
     }
     //need to place a :new tenant at end if that was what was edited
   };
-
-  
 
   const address = navigation.getParam("address");
   //const address = "";
@@ -178,12 +177,11 @@ export default function rentalPage({ navigation }) {
       state.people = [];
       setLoaded(true);
 
-      
       try {
-
         // get user details
         const curUser = await Auth.currentAuthenticatedUser();
-        if (curUser.attributes["custom:landlord"] == "true") setLandlordBool(true);
+        if (curUser.attributes["custom:landlord"] == "true")
+          setLandlordBool(true);
 
         // get property data
         const propertyData = await API.graphql({
@@ -251,10 +249,14 @@ export default function rentalPage({ navigation }) {
 
           const invitationData = await API.graphql({
             query: getInvitation,
-            variables: {id:invitation},
+            variables: { id: invitation },
           });
 
-          if (invitationData.data.getInvitation.propertyID!=propertyData.data.getProperty.id) continue;
+          if (
+            invitationData.data.getInvitation.propertyID !=
+            propertyData.data.getProperty.id
+          )
+            continue;
           //remove later
           //tenantData.data.getTenant.subtasks = [];
 
@@ -340,12 +342,11 @@ export default function rentalPage({ navigation }) {
     } catch (error) {
       console.log("error adding list", error);
     }
-    
+
     console.log(state);
   };
 
   const updateList = async (list) => {
-
     // empty the list
     setTaskList([]);
     console.log("list", list);
@@ -379,7 +380,6 @@ export default function rentalPage({ navigation }) {
   };
 
   const deleteList = async (list) => {
-
     // empty task list
     setTaskList([]);
 
@@ -462,7 +462,7 @@ export default function rentalPage({ navigation }) {
   async function signOut() {
     try {
       await Auth.signOut();
-      navigation.navigate("Start");
+      navigation.reset([NavigationActions.navigate({ routeName: "Start" })]);
     } catch (error) {
       console.log("error signing out: ", error);
     }
@@ -607,8 +607,8 @@ export default function rentalPage({ navigation }) {
               </TouchableOpacity>
             </View>
 
-            <TouchableOpacity onPress={() => navigation.navigate("Home")}>
-              <MaterialIcons name="home" size={128} color={colors.blue} />
+            <TouchableOpacity onPress={() => chat()}>
+              <MaterialIcons name="chat" size={128} color={colors.blue} />
             </TouchableOpacity>
 
             <View style={{ marginVertical: 48, alignItems: "center" }}>
@@ -650,7 +650,7 @@ export default function rentalPage({ navigation }) {
               addList={addList}
             />
           </Modal>
-  
+
           <Modal animationType="slide" visible={tenantModal}>
             <View style={styles.Modal}>
               <MaterialIcons
@@ -669,7 +669,7 @@ export default function rentalPage({ navigation }) {
               />
             </View>
           </Modal>
-  
+
           {/* May not be nessesarry */}
           <Modal animationType="slide" visible={editTenantModal}>
             <View style={styles.Modal}>
@@ -682,7 +682,7 @@ export default function rentalPage({ navigation }) {
               <TenantForm editTenant={editTenant} />
             </View>
           </Modal>
-  
+
           {/*menu options*/}
           <Modal visible={modalMenuOpen} animationType="slide">
             <View>
@@ -707,7 +707,7 @@ export default function rentalPage({ navigation }) {
               {/*<Options />*/}
             </View>
           </Modal>
-  
+
           <View
             style={{
               flexDirection: "row",
@@ -725,7 +725,7 @@ export default function rentalPage({ navigation }) {
             </Text>
             <View style={styles.divider} />
           </View>
-  
+
           <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
             <Text style={styles.sectionTitle}>Tenants</Text>
             <FlatList
@@ -737,7 +737,7 @@ export default function rentalPage({ navigation }) {
               keyboardShouldPersistTaps="always"
             />
           </View>
-  
+
           <View style={{ height: 275, paddingLeft: 32 }}>
             <Text style={styles.sectionTitle}> Tickets</Text>
             <FlatList
@@ -769,11 +769,13 @@ export default function rentalPage({ navigation }) {
                 <AntDesign name="plus" size={16} color={colors.blue} />
               </TouchableOpacity>
             </View>
-  
-            <TouchableOpacity onPress={() => console.log("open up chat with landlord")}>
-              <MaterialIcons name="home" size={128} color={colors.blue} />
+
+            {/* Is this your chat button?
+             */}
+            <TouchableOpacity onPress={() => chat()}>
+              <MaterialIcons name="chat" size={128} color={colors.blue} />
             </TouchableOpacity>
-  
+
             {/* <View style={{ marginVertical: 48, alignItems: "center" }}>
               <TouchableOpacity
                 style={styles.Plus}
@@ -788,7 +790,7 @@ export default function rentalPage({ navigation }) {
                 <AntDesign name="plus" size={16} color={colors.blue} />
               </TouchableOpacity>
             </View> */}
-  
+
             <MaterialIcons
               name="menu-open"
               size={24}
