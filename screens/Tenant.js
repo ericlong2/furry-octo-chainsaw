@@ -44,6 +44,7 @@ export default function Tenant({ navigation }) {
         tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
         tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
         tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
+        tenantData.data.getTenant.propertyID = invitationData.data.getInvitation.propertyID;
         setTenant(tenantData.data.getTenant);
       } catch (error) {
         console.log("error loading tenant",error);
