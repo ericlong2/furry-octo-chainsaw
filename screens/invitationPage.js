@@ -21,8 +21,24 @@ export default function invitationPage({ navigation }) {
   const [invitations, setInvitations] = useState([]);
   const [invitationModal, setInvitationModal] = useState(false);
   const [currentInvitation, setCurrentInvitation] = useState();
+  const [modalMenuOpen, setModalMenuOpen] = useState(false);
+
   const [loaded, setLoaded] = useState(false);
   const [user, setUser] = useState("");
+
+  async function signOut() {
+    try {
+      await Auth.signOut();
+      navigation.reset([NavigationActions.navigate({ routeName: "Start" })]);
+    } catch (error) {
+      console.log("error signing out: ", error);
+    }
+  }
+
+  async function refresh() {
+    setLoaded(false);
+    loadData();
+  }
 
   const loadInvitations = async () => {
     if (!loaded) {
@@ -62,9 +78,12 @@ export default function invitationPage({ navigation }) {
             propertyData.data.getProperty.id;
           propertyData.data.getProperty.id = invitation;
 
-          propertyData.data.getProperty.rentAmount = invitationData.data.getInvitation.rentAmount;
-          propertyData.data.getProperty.leaseStart = invitationData.data.getInvitation.leaseStart;
-          propertyData.data.getProperty.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+          propertyData.data.getProperty.rentAmount =
+            invitationData.data.getInvitation.rentAmount;
+          propertyData.data.getProperty.leaseStart =
+            invitationData.data.getInvitation.leaseStart;
+          propertyData.data.getProperty.leaseTerm =
+            invitationData.data.getInvitation.leaseTerm;
 
           // add to invitation list
           setInvitations((currentInvitations) => {
@@ -85,40 +104,38 @@ export default function invitationPage({ navigation }) {
     setInvitationModal(true);
   };
 
-  const reject = async() => {
+  const reject = async () => {
     try {
-    
-    // new list of invitations
-    const tmpList = [];
+      // new list of invitations
+      const tmpList = [];
 
+      // get tenant object
+      const tenantData = await API.graphql({
+        query: getTenant,
+        variables: { id: user },
+      });
 
-    // get tenant object
-    const tenantData = await API.graphql({
-      query: getTenant,
-      variables: { id: user },
-    });
-
-    for (const invitation of tenantData.data.getTenant.invitations) {
-      if (invitation != currentInvitation.id) {
-        tmpList.push(invitation);
+      for (const invitation of tenantData.data.getTenant.invitations) {
+        if (invitation != currentInvitation.id) {
+          tmpList.push(invitation);
+        }
       }
-    }
-    
-    tenantData.data.getTenant.invitations = tmpList;
 
-    delete tenantData.data.getTenant.createdAt;
-    delete tenantData.data.getTenant.updatedAt;
+      tenantData.data.getTenant.invitations = tmpList;
 
-    await API.graphql(
-      graphqlOperation(updateTenant, {
-        input: tenantData.data.getTenant,
-      })
-    );
+      delete tenantData.data.getTenant.createdAt;
+      delete tenantData.data.getTenant.updatedAt;
 
-    setLoaded(false);
-    loadInvitations();
+      await API.graphql(
+        graphqlOperation(updateTenant, {
+          input: tenantData.data.getTenant,
+        })
+      );
 
-    console.log("reject");
+      setLoaded(false);
+      loadInvitations();
+
+      console.log("reject");
     } catch (error) {
       console.log("error rejecting invitation", error);
     }
@@ -316,9 +333,33 @@ export default function invitationPage({ navigation }) {
               }}
             /> */}
             {/*<Options />*/}
+            {/*menu options*/}
+            <Modal visible={modalMenuOpen} animationType="slide">
+              <View>
+                <MaterialIcons
+                  name="close"
+                  size={24}
+                  style={{ ...styles.modalToggle, ...styles.modalClose }}
+                  onPress={() => setModalMenuOpen(false)}
+                />
+                <Button
+                  //style={styles.button}
+                  title="Logout"
+                  color="maroon"
+                  onPress={signOut}
+                />
+                <Button
+                  //style={styles.button}
+                  title="Refresh"
+                  color="blue"
+                  onPress={refresh}
+                />
+                {/*<Options />*/}
+              </View>
+            </Modal>
           </View>
         </Modal>
-  
+
         <Text style={styles.sectionTitle}>Invitations</Text>
         <FlatList
           data={invitations}
@@ -340,7 +381,7 @@ export default function invitationPage({ navigation }) {
         </TouchableOpacity>
       </View>
     );
-  } 
+  }
 }
 
 const styles = StyleSheet.create({
