@@ -40,6 +40,7 @@ import {
   updateTenant,
 } from "../src/graphql/mutations";
 import TenantForm from "./TenantForm";
+import { NavigationActions } from "react-navigation";
 {
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
 }
@@ -598,7 +599,6 @@ export default function rentalPage({ navigation }) {
               <TouchableOpacity
                 style={styles.Plus}
                 onPress={() => {
-                  setAddType(false);
                   toggleAddTicketModal();
                 }}
               >
@@ -761,7 +761,6 @@ export default function rentalPage({ navigation }) {
               <TouchableOpacity
                 style={styles.Plus}
                 onPress={() => {
-                  setAddType(false);
                   toggleAddTicketModal();
                 }}
               >

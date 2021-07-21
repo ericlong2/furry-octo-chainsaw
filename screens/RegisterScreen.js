@@ -21,8 +21,9 @@ import { nameValidator } from "../helpers/nameValidator";
 import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import { createLandlord,createTenant } from "../src/graphql/mutations";
+import { createLandlord,createTenant, updateTenant } from "../src/graphql/mutations";
 import { getTenant } from "../src/graphql/queries";
+import { NavigationActions } from "react-navigation";
 
 export default function RegisterScreen({ navigation }) {
   const [verification, setVerification] = useState(false); //this might need to be changed
@@ -48,6 +49,7 @@ export default function RegisterScreen({ navigation }) {
     console.log(code);
     try {
       await Auth.confirmSignUp(email.value, code);
+      await Auth.signIn(email.value, password.value);
 
       // if sign up has been confirmed, close submit verification window
       setModal3Open(false);
@@ -62,7 +64,7 @@ export default function RegisterScreen({ navigation }) {
         await API.graphql(
           graphqlOperation(createLandlord, { input: tmp })
         );
-
+        navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
       } else {
 
         // If signing up as a tenant, check if email has received invitations
@@ -84,14 +86,16 @@ export default function RegisterScreen({ navigation }) {
         } else {
           // otherwise update object
             tenantData.data.getTenant.name = name.value;
+
+            delete tenantData.data.getTenant.createdAt;
+            delete tenantData.data.getTenant.updatedAt;
             await API.graphql(
               graphqlOperation(updateTenant, {input: tenantData.data.getTenant})
             );
         }
+        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage" })]);
       }
 
-      // goto login
-      navigation.navigate("Login");
     } catch (error) {
       console.log("error confirming sign up", error);
     }

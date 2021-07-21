@@ -62,6 +62,10 @@ export default function invitationPage({ navigation }) {
             propertyData.data.getProperty.id;
           propertyData.data.getProperty.id = invitation;
 
+          propertyData.data.getProperty.rentAmount = invitationData.data.getInvitation.rentAmount;
+          propertyData.data.getProperty.leaseStart = invitationData.data.getInvitation.leaseStart;
+          propertyData.data.getProperty.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+
           // add to invitation list
           setInvitations((currentInvitations) => {
             return [propertyData.data.getProperty, ...currentInvitations];
@@ -81,8 +85,43 @@ export default function invitationPage({ navigation }) {
     setInvitationModal(true);
   };
 
-  const reject = () => {
+  const reject = async() => {
+    try {
+    
+    // new list of invitations
+    const tmpList = [];
+
+
+    // get tenant object
+    const tenantData = await API.graphql({
+      query: getTenant,
+      variables: { id: user },
+    });
+
+    for (const invitation of tenantData.data.getTenant.invitations) {
+      if (invitation != currentInvitation.id) {
+        tmpList.push(invitation);
+      }
+    }
+    
+    tenantData.data.getTenant.invitations = tmpList;
+
+    delete tenantData.data.getTenant.createdAt;
+    delete tenantData.data.getTenant.updatedAt;
+
+    await API.graphql(
+      graphqlOperation(updateTenant, {
+        input: tenantData.data.getTenant,
+      })
+    );
+
+    setLoaded(false);
+    loadInvitations();
+
     console.log("reject");
+    } catch (error) {
+      console.log("error rejecting invitation", error);
+    }
   };
 
   const toRental = async () => {
@@ -169,72 +208,139 @@ export default function invitationPage({ navigation }) {
       );
 
       //navigate to tenant page after
-      navigation.navigate("RentalDetails");
+      navigation.navigate("RentalDetails", propertyData.data.getProperty);
     } catch (error) {
       console.log("error accepting invitation", error);
     }
   };
 
-  return (
-    <View>
-      {/*Invitation modal*/}
-      <Modal visible={invitationModal} animationType="slide">
-        <View>
-          <MaterialIcons
-            name="close"
-            size={24}
-            style={{ ...styles.modalToggle, ...styles.modalClose }}
-            onPress={() => {
-              setCurrentInvitation();
-              setInvitationModal(false);
-            }}
-          />
-          <Button
-            //style={styles.button}
-            title="Accept"
-            color="blue"
-            onPress={accept}
-          />
-          <Button
-            //style={styles.button}
-            title="Reject"
-            color="maroon"
-            onPress={reject}
-          />
-          {/* <Button
-            //style={styles.button}
-            title="Cancel"
-            color="maroon"
-            onPress={() => {
-              setCurrentInvitation();
-              setInvitationModal(false);
-            }}
-          /> */}
-          {/*<Options />*/}
-        </View>
-      </Modal>
-
-      <Text style={styles.sectionTitle}>Invitations</Text>
-      <FlatList
-        data={invitations}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => pressInvitation(item)}>
-            <Task
-              text={
-                item.address
-                // item.number == 0
-                //   ? item.address
-                //   : item.number + " " + item.address
-              }
+  if (currentInvitation == null) {
+    return (
+      <View>
+        {/*Invitation modal*/}
+        <Modal visible={invitationModal} animationType="slide">
+          <View>
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => {
+                setCurrentInvitation();
+                setInvitationModal(false);
+              }}
             />
-          </TouchableOpacity>
-        )}
-      />
-      <TouchableOpacity onPress={() => toRental()}>
-        <MaterialIcons name="home" size={128} color={colors.blue} />
-      </TouchableOpacity>
-    </View>
-  );
+            <Button
+              //style={styles.button}
+              title="Accept"
+              color="blue"
+              onPress={accept}
+            />
+            <Button
+              //style={styles.button}
+              title="Reject"
+              color="maroon"
+              onPress={reject}
+            />
+            {/* <Button
+              //style={styles.button}
+              title="Cancel"
+              color="maroon"
+              onPress={() => {
+                setCurrentInvitation();
+                setInvitationModal(false);
+              }}
+            /> */}
+            {/*<Options />*/}
+          </View>
+        </Modal>
+
+        <Text style={styles.sectionTitle}>Invitations</Text>
+        <FlatList
+          data={invitations}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => pressInvitation(item)}>
+              <Task
+                text={
+                  item.address
+                  // item.number == 0
+                  //   ? item.address
+                  //   : item.number + " " + item.address
+                }
+              />
+            </TouchableOpacity>
+          )}
+        />
+        <TouchableOpacity onPress={() => toRental()}>
+          <MaterialIcons name="home" size={128} color={colors.blue} />
+        </TouchableOpacity>
+      </View>
+    );
+  } else {
+    return (
+      <View>
+        {/*Invitation modal*/}
+        <Modal visible={invitationModal} animationType="slide">
+          <View>
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => {
+                setCurrentInvitation();
+                setInvitationModal(false);
+              }}
+            />
+            <Text>{currentInvitation.address}</Text>
+            <Text>{"Rent amount: " + currentInvitation.rentAmount}</Text>
+            <Text>{"Lease start: " + currentInvitation.leaseStart}</Text>
+            <Text>{"Lease term: " + currentInvitation.leaseTerm}</Text>
+            <Button
+              //style={styles.button}
+              title="Accept"
+              color="blue"
+              onPress={accept}
+            />
+            <Button
+              //style={styles.button}
+              title="Reject"
+              color="maroon"
+              onPress={reject}
+            />
+            {/* <Button
+              //style={styles.button}
+              title="Cancel"
+              color="maroon"
+              onPress={() => {
+                setCurrentInvitation();
+                setInvitationModal(false);
+              }}
+            /> */}
+            {/*<Options />*/}
+          </View>
+        </Modal>
+  
+        <Text style={styles.sectionTitle}>Invitations</Text>
+        <FlatList
+          data={invitations}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => pressInvitation(item)}>
+              <Task
+                text={
+                  item.address
+                  // item.number == 0
+                  //   ? item.address
+                  //   : item.number + " " + item.address
+                }
+              />
+            </TouchableOpacity>
+          )}
+        />
+        <TouchableOpacity onPress={() => toRental()}>
+          <MaterialIcons name="home" size={128} color={colors.blue} />
+        </TouchableOpacity>
+      </View>
+    );
+  } 
 }
 
 const styles = StyleSheet.create({

@@ -48,7 +48,7 @@ export default function LoginScreen({ navigation }) {
         navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
       } else {
         console.log("signing in as tenant");
-        navigation.navigate("invitationPage");
+        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage" })]);
       }
     } catch (error) {
       console.log("error signing in", error);

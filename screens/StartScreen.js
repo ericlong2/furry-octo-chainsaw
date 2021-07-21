@@ -5,6 +5,7 @@ import Header from "../components/Header";
 import Button from "../components/Button";
 import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
+import { NavigationActions } from "react-navigation";
 
 export default function StartScreen({ navigation }) {
   const [loaded, setLoaded] = useState(false);
@@ -20,10 +21,10 @@ export default function StartScreen({ navigation }) {
           navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
         } else {
           console.log("signing in as tenant");
-          navigation.navigate("invitationPage");
+          navigation.reset([NavigationActions.navigate({ routeName: "invitationPage" })]);
         }
       } catch (error) {
-        console.log("user is not logged in");
+        console.log("user is not logged in", error);
       }
     }
   };
