@@ -60,7 +60,7 @@ export default function rentalPage({ navigation }) {
   const [editTenantModal, setEditTenantModal] = useState(false);
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
   const [landlordBool, setLandlordBool] = useState(false);
-
+  const [property, setProperty] = useState({});
   //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
   // const [tenants, setTenants] = useState([
   //   {
@@ -93,49 +93,20 @@ export default function rentalPage({ navigation }) {
     console.log("edit tenant");
     setEditTenantModal(false);
     try {
-      // get property data
-      const propertyData = await API.graphql({
-        query: getProperty,
-        variables: { id: navigation.getParam("id") },
-      });
-      console.log(propertyData);
 
       // create inviation
       const invitation = {
         id: generateID(),
-        propertyID: propertyData.data.getProperty.id,
+        propertyID: property.id,
         leaseTerm: tenant.leaseTerm,
         leaseStart: tenant.leaseStart,
         rentAmount: tenant.rentAmount,
       };
 
-      // check if tenant is already in the property
-      for (const curTenant of propertyData.data.getProperty.tenants) {
-        if (curTenant == null) break;
-        if (curTenant == tenant.email) {
-          // if the tenant exists, get info
-          const tenantData = await API.graphql({
-            query: getTenant,
-            variables: { id: curTenant },
-          });
-
-          // change id to current tenant
-          (invitation.id = tenantData.data.getTenant.accepted),
-            // update database
-            await API.graphql(
-              graphqlOperation(updateInvitation, { input: invitation })
-            );
-          return;
-        }
-      }
-
       // create new invitation
-      console.log(invitation);
       await API.graphql(
         graphqlOperation(createInvitation, { input: invitation })
       );
-
-      console.log("creating new tenant", tenant);
 
       // adding new tenant to property, check if tenant exists
       const tenantData = await API.graphql({
@@ -146,15 +117,10 @@ export default function rentalPage({ navigation }) {
       // create new tenant object in database if not,
       if (tenantData.data.getTenant == null) {
         const newTenant = { id: tenant.email, name: "", invitations: [] };
-        await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
+        tenantData = await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
       }
 
-      // get tenant object
-      const tenantObject = await API.graphql({
-        query: getTenant,
-        variables: { id: tenant.email },
-      });
-
+      // send the invitation to tenant
       tenantObject.data.getTenant.invitations.push(invitation.id);
       delete tenantObject.data.getTenant.updatedAt;
       delete tenantObject.data.getTenant.createdAt;
@@ -163,14 +129,16 @@ export default function rentalPage({ navigation }) {
       await API.graphql(
         graphqlOperation(updateTenant, { input: tenantObject.data.getTenant })
       );
+
+      property.tenants.push(tenant.email);
+
     } catch (error) {
       console.log("error editing tenant", error);
     }
     //need to place a :new tenant at end if that was what was edited
   };
 
-  const address = navigation.getParam("address");
-  //const address = "";
+  const address = navigation.getParam("property").address;
   const loadData = async () => {
     if (!loaded) {
       // empty lists
@@ -178,24 +146,21 @@ export default function rentalPage({ navigation }) {
       state.people = [];
       setLoaded(true);
 
+      setProperty(navigation.getParam("property"));
+
+      console.log(navigation.getParam("property"));
       try {
         // get user details
-        const curUser = await Auth.currentAuthenticatedUser();
-        if (curUser.attributes["custom:landlord"] == "true")
+        if (navigation.getParam("custom:landlord") == "true")
           setLandlordBool(true);
-
-        // get property data
-        const propertyData = await API.graphql({
-          query: getProperty,
-          variables: { id: navigation.getParam("id") },
-        });
-        console.log(propertyData);
 
         // empty task list
         setTaskList([]);
 
+
         // loop through all tasks belonging to current property
-        for (const id of propertyData.data.getProperty.tasks) {
+        for (const id of navigation.getParam("property").tasks) {
+
           // get task data
           const taskData = await API.graphql({
             query: getTask,
@@ -205,12 +170,10 @@ export default function rentalPage({ navigation }) {
           // initialize new list to store subtasks
           const curTask = taskData.data.getTask;
           curTask.subtaskList = [];
-          console.log(curTask.subtasks);
 
           // loop through the ids of the subtasks
           for (const subtask of curTask.subtasks) {
             // retrieve subtask data from the id
-            console.log(subtask);
             const subtaskData = await API.graphql({
               query: getSubtask,
               variables: { id: subtask },
@@ -227,7 +190,6 @@ export default function rentalPage({ navigation }) {
           delete curTask.subtaskList;
 
           // push task into array
-          console.log("loading task", curTask);
           taskList.push(curTask);
           // setTaskList((currentTasks)=>{
           //   return [taskData.data.getTask, ...currentTasks];
@@ -238,29 +200,30 @@ export default function rentalPage({ navigation }) {
         setTenantList([]);
 
         // loop through ids of the tenants
-        for (const id of propertyData.data.getProperty.tenants) {
+        for (const id of navigation.getParam("property").tenants) {
           // get tenant data from tenant id
           const tenantData = await API.graphql({
             query: getTenant,
             variables: { id: id },
           });
-
+          
           const invitation = tenantData.data.getTenant.accepted;
-          if (!invitation) continue;
+          if (invitation==null) continue;
 
           const invitationData = await API.graphql({
             query: getInvitation,
             variables: { id: invitation },
           });
 
-          if (
-            invitationData.data.getInvitation.propertyID !=
-            propertyData.data.getProperty.id
-          )
-            continue;
+
+          if (invitationData.data.getInvitation.propertyID != navigation.getParam("property").id) continue;
+
           //remove later
           //tenantData.data.getTenant.subtasks = [];
-
+          
+          tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
+          tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
+          tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
           // add tenant data to tenant list
           tenantList.push(tenantData.data.getTenant);
           // setTenantList((currentTenants)=>{
@@ -275,9 +238,6 @@ export default function rentalPage({ navigation }) {
           people: tenantList,
         });
 
-        console.log(state);
-        console.log(taskList);
-        console.log(tenantList);
       } catch (error) {
         console.log("error retrieving property data", error);
       }
@@ -285,8 +245,6 @@ export default function rentalPage({ navigation }) {
   };
   // load data once when the page starts
   loadData();
-  //console.log(navigation.address);
-  //address = props.get("address");
 
   const toggleAddTicketModal = () => {
     setState({
@@ -294,7 +252,6 @@ export default function rentalPage({ navigation }) {
       lists: state.lists,
       people: state.people,
     });
-    console.log(state.addTicketVisible);
   };
 
   const renderList = (list) => {
@@ -315,21 +272,14 @@ export default function rentalPage({ navigation }) {
       // create the new task in the database
       await API.graphql(graphqlOperation(createTask, { input: list }));
 
-      // get the current propertys data
-      const propertyData = await API.graphql({
-        query: getProperty,
-        variables: { id: navigation.getParam("id") },
-      });
-
       // add this task to the propertys list of tasks
-      propertyData.data.getProperty.tasks.push(list.id);
-      delete propertyData.data.getProperty.createdAt;
-      delete propertyData.data.getProperty.updatedAt;
+      property.tasks.push(list.id);
+
 
       // update this property in the database
       await API.graphql(
         graphqlOperation(updateProperty, {
-          input: propertyData.data.getProperty,
+          input: property,
         })
       );
 
@@ -350,7 +300,6 @@ export default function rentalPage({ navigation }) {
   const updateList = async (list) => {
     // empty the list
     setTaskList([]);
-    console.log("list", list);
 
     // get a list of the ids of the subtasks
     for (let i = 0; i < list.subtasks.length; i++) {
@@ -374,7 +323,6 @@ export default function rentalPage({ navigation }) {
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
 
-      console.log("added subtask", taskData);
     } catch (error) {
       console.log("error updating", error);
     }
@@ -425,27 +373,21 @@ export default function rentalPage({ navigation }) {
     }
 
     try {
-      // get property data
-      const propertyData = await API.graphql({
-        query: getProperty,
-        variables: { id: navigation.getParam("id") },
-      });
 
       // update task list for current property
-      propertyData.data.getProperty.tasks = taskList;
-
-      delete propertyData.data.getProperty.createdAt;
-      delete propertyData.data.getProperty.updatedAt;
+      property.tasks = taskList;
 
       // update property object in database
       await API.graphql(
         graphqlOperation(updateProperty, {
-          id: propertyData.data.getProperty,
+          id: property,
         })
       );
     } catch (error) {
       console.log("error updating property", error);
     }
+
+    // can be optimized
     setLoaded(false);
     loadData();
   };
@@ -453,7 +395,7 @@ export default function rentalPage({ navigation }) {
   const renderPeople = (person) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Tenant", { id: person.id })}
+        onPress={() => navigation.navigate("Tenant", {email:navigation.getParam("email"),"custom:landlord":navigation.getParam("custom:landlord"),tenant:person })}
       >
         <PeopleList person={person} />
       </TouchableOpacity>

@@ -31,39 +31,31 @@ export default function properties({ navigation }) {
   /*Constants*/
   const [modalOpen, setModalOpen] = useState(false);
   const [modal2Open, setModal2Open] = useState(false);
-  const [modal3Open, setModal3Open] = useState(false);
-  const [verification, setVerification] = useState(false); //this might need to be changed
   const [number, setNumber] = useState(0);
   const [rentals, setRental] = useState([]);
-  const [user, setUser] = useState("");
   const [loaded, setLoaded] = useState(false);
-
-  const submitVerif = (code) => {
-    console.log(code);
-    //here you can verify and close window by using
-    //setModal3Open(false)
-    //also your gonna need to scan if the acc has been verified or not or smt
-  };
+  const [landlord, setLandlord] = useState({});
 
   const loadProperties = async () => {
     if (!loaded) {
       setLoaded(true);
       // load properties that have already been added previously
       try {
-        // get the current user
-        const curUser = await Auth.currentAuthenticatedUser();
-        //console.log("user",curUser.attributes);
-        setUser(curUser.attributes.email);
 
         // get the landlord object corresponding to current user
-        const landlord = await API.graphql({
+        const landlordData = await API.graphql({
           query: getLandlord,
-          variables: { id: curUser.attributes.email },
+          variables: { id: navigation.getParam("email") },
         });
 
-        //console.log("loading properties for",landlord.data.getLandlord);
+        delete landlordData.data.getLandlord.createdAt;
+        delete landlordData.data.getLandlord.updatedAt;
+
+        // set local landlord 
+        setLandlord(landlordData.data.getLandlord)
+
         // load properties into rental list
-        const properties = landlord.data.getLandlord.properties;
+        const properties = landlordData.data.getLandlord.properties;
 
         for (const property of properties) {
           // Load property details
@@ -73,6 +65,8 @@ export default function properties({ navigation }) {
             variables: { id: property },
           });
 
+          delete rental.data.getProperty.createdAt;
+          delete rental.data.getProperty.updatedAt;
           // output property details
           console.log(rental.data.getProperty);
 
@@ -93,29 +87,19 @@ export default function properties({ navigation }) {
   const generateID = () => {
     return Math.random().toString();
   };
+
   const addProperty = async (rental) => {
     try {
       console.log(rental);
       // create a new property object for rental
-      const rentalData = await API.graphql(
+      await API.graphql(
         graphqlOperation(createProperty, { input: rental })
       );
-
-      // get current landlord
-      const tmp = await API.graphql({
-        query: getLandlord,
-        variables: { id: user },
-      });
-
-      const landlord = tmp.data.getLandlord;
-      delete landlord.createdAt;
-      delete landlord.updatedAt;
 
       // add property to landlord's property list
       landlord.properties.push(rental.id);
 
-      console.log(landlord);
-      const landlordData = await API.graphql(
+      await API.graphql(
         graphqlOperation(updateLandlord, { input: landlord })
       );
 
@@ -143,16 +127,17 @@ export default function properties({ navigation }) {
 
   /*Functions */
   const pressRental = (item) => {
-    //let item = rentals[key];
-    navigation.navigate("RentalDetails", item);
-    //return <RentalPage address={item.address} />;
+    item.email = navigation.getParam("email");
+    item["custom:landlord"] = navigation.getParam("custom:landlord");
+    item.landlord = landlord;
+    //navigate to tenant page after
+    const info = {email:navigation.getParam("email"), "custom:landlord":navigation.getParam("custom:landlord"),property:item};
+    navigation.navigate("RentalDetails", info);
   };
 
   async function signOut() {
     try {
       await Auth.signOut();
-      // navigation.popToTop();
-      // navigation.navigate("Start");
       navigation.reset([NavigationActions.navigate({ routeName: "Start" })]);
     } catch (error) {
       console.log("error signing out: ", error);
@@ -201,26 +186,6 @@ export default function properties({ navigation }) {
             title="Logout"
             color="maroon"
             onPress={signOut}
-          />
-          {/*<Options />*/}
-        </View>
-      </Modal>
-
-      {/* email verification*/}
-      <Modal visible={modal3Open} animationType="slide">
-        <View>
-          <TextInput
-            style={styles.TextInput}
-            placeholder="email code verification"
-            onChangeText={(number) => setVerification(number)}
-            //defaultValue={number}
-            keyboardType="numeric"
-          />
-          <Button
-            //style={styles.button}
-            title="Submit"
-            color="maroon"
-            onPress={() => submitVerif(verification)}
           />
           {/*<Options />*/}
         </View>

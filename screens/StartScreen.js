@@ -18,10 +18,10 @@ export default function StartScreen({ navigation }) {
         if (user.attributes["custom:landlord"] == "true") {
           console.log("signing in as landlord");
 
-          navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
+          navigation.reset([NavigationActions.navigate({ routeName: "Home", params: user.attributes })]);
         } else {
           console.log("signing in as tenant");
-          navigation.reset([NavigationActions.navigate({ routeName: "invitationPage" })]);
+          navigation.reset([NavigationActions.navigate({ routeName: "invitationPage", params: user.attributes })]);
         }
       } catch (error) {
         console.log("user is not logged in", error);

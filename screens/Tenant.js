@@ -17,45 +17,10 @@ import { MaterialIcons } from "@expo/vector-icons";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
 import colors from "./Colors";
-import { getInvitation, getTenant } from "../src/graphql/queries";
 export default function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
-  const [tenant, setTenant] = useState({});
-  const [loaded, setLoaded] = useState(false);
-
-  const loadTenant = async () => {
-    if (!loaded) {
-      setLoaded(true);
-      try {
-        // get tenant object
-        const tenantData = await API.graphql({
-          query: getTenant,
-          variables: { id: navigation.getParam("id") },
-        });
-
-        console.log(tenantData);
-        const invitationData = await API.graphql({
-          query: getInvitation,
-          variables: { id: tenantData.data.getTenant.accepted },
-        });
-
-        tenantData.data.getTenant.leaseTerm =
-          invitationData.data.getInvitation.leaseTerm;
-        tenantData.data.getTenant.leaseStart =
-          invitationData.data.getInvitation.leaseStart;
-        tenantData.data.getTenant.rentAmount =
-          invitationData.data.getInvitation.rentAmount;
-        tenantData.data.getTenant.propertyID =
-          invitationData.data.getInvitation.propertyID;
-        setTenant(tenantData.data.getTenant);
-      } catch (error) {
-        console.log("error loading tenant", error);
-      }
-    }
-  };
-  loadTenant();
-
+  const tenant = navigation.getParam("tenant");
   async function signOut() {
     try {
       await Auth.signOut();
@@ -71,11 +36,9 @@ export default function Tenant({ navigation }) {
 
   const editTenant = async () => {
     try {
-      // get user details
-      const curUser = await Auth.currentAuthenticatedUser();
 
       // check if user is landlord
-      if (curUser.attributes["custom:landlord"] == "true") {
+      if (navigation.getParam("custom:landlord") == "true") {
         //open modal to edit the tenant and save the information
         navigation.navigate("editTenant", { tenant: tenant });
       }
