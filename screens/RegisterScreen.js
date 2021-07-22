@@ -21,7 +21,11 @@ import { nameValidator } from "../helpers/nameValidator";
 import Paragraph from "../components/Paragraph";
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import { createLandlord,createTenant, updateTenant } from "../src/graphql/mutations";
+import {
+  createLandlord,
+  createTenant,
+  updateTenant,
+} from "../src/graphql/mutations";
 import { getTenant } from "../src/graphql/queries";
 import { NavigationActions } from "react-navigation";
 
@@ -36,14 +40,14 @@ export default function RegisterScreen({ navigation }) {
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   // eslint-disable-next-line prettier/prettier
 
-  const resendVerif = async() => {
+  const resendVerif = async () => {
     console.log("resend verification");
     try {
       await Auth.resendSignUp(email.value);
-      console.log('code resent successfully');
-  } catch (err) {
-      console.log('error resending code: ', err);
-  }
+      console.log("code resent successfully");
+    } catch (err) {
+      console.log("error resending code: ", err);
+    }
   };
   const submitVerif = async (code) => {
     console.log(code);
@@ -51,54 +55,48 @@ export default function RegisterScreen({ navigation }) {
       await Auth.confirmSignUp(email.value, code);
       await Auth.signIn(email.value, password.value);
 
-      // if sign up has been confirmed, close submit verification window
-      setModal3Open(false);
-
       // if signing up as landlord
       if (isEnabled) {
         // create new landlord object
-        const tmp = {id:email.value,properties:[],name:name.value};
+        const tmp = { id: email.value, properties: [], name: name.value };
         console.log("adding new landlord:", email.value);
 
         // add the landlord object to the database
-        await API.graphql(
-          graphqlOperation(createLandlord, { input: tmp })
-        );
+        await API.graphql(graphqlOperation(createLandlord, { input: tmp }));
+
         navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
       } else {
-
         // If signing up as a tenant, check if email has received invitations
         const tenantData = await API.graphql(
-          graphqlOperation(getTenant, {id:email.value})
+          graphqlOperation(getTenant, { id: email.value })
         );
 
         // If no one sends invitation
-        if (tenantData.data.getTenant==null) {
+        if (tenantData.data.getTenant == null) {
+          // create tenant object
+          const tmp = { id: email.value, name: name.value, invitations: [] };
 
-            // create tenant object
-            const tmp = {id:email.value,name:name.value,invitations:[]};
-            
-            // add tenant object to database
-            await API.graphql(
-              graphqlOperation(createTenant, { input: tmp })
-            );
-
+          // add tenant object to database
+          await API.graphql(graphqlOperation(createTenant, { input: tmp }));
         } else {
           // otherwise update object
-            tenantData.data.getTenant.name = name.value;
+          tenantData.data.getTenant.name = name.value;
 
-            delete tenantData.data.getTenant.createdAt;
-            delete tenantData.data.getTenant.updatedAt;
-            await API.graphql(
-              graphqlOperation(updateTenant, {input: tenantData.data.getTenant})
-            );
+          delete tenantData.data.getTenant.createdAt;
+          delete tenantData.data.getTenant.updatedAt;
+          await API.graphql(
+            graphqlOperation(updateTenant, { input: tenantData.data.getTenant })
+          );
         }
-        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage" })]);
+        navigation.reset([
+          NavigationActions.navigate({ routeName: "invitationPage" }),
+        ]);
       }
-
     } catch (error) {
       console.log("error confirming sign up", error);
     }
+    // if sign up has been confirmed, close submit verification window
+    setModal3Open(false);
     //here you can verify and close window by using
     //setModal3Open(false)
     //also your gonna need to scan if the acc has been verified or not or smt
