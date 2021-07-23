@@ -84,6 +84,7 @@ export default function rentalPage({ navigation }) {
 
   const chat = () => {
     console.log("open up chat page");
+    navigation.navigate("Chat");
   };
   const openAddTenant = () => {
     console.log("create tenant");
@@ -93,7 +94,6 @@ export default function rentalPage({ navigation }) {
     console.log("edit tenant");
     setEditTenantModal(false);
     try {
-
       // create inviation
       const invitation = {
         id: generateID(),
@@ -117,7 +117,9 @@ export default function rentalPage({ navigation }) {
       // create new tenant object in database if not,
       if (tenantData.data.getTenant == null) {
         const newTenant = { id: tenant.email, name: "", invitations: [] };
-        tenantData = await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
+        tenantData = await API.graphql(
+          graphqlOperation(createTenant, { input: newTenant })
+        );
       }
 
       // send the invitation to tenant
@@ -131,7 +133,6 @@ export default function rentalPage({ navigation }) {
       );
 
       property.tenants.push(tenant.email);
-
     } catch (error) {
       console.log("error editing tenant", error);
     }
@@ -157,10 +158,8 @@ export default function rentalPage({ navigation }) {
         // empty task list
         setTaskList([]);
 
-
         // loop through all tasks belonging to current property
         for (const id of navigation.getParam("property").tasks) {
-
           // get task data
           const taskData = await API.graphql({
             query: getTask,
@@ -206,24 +205,30 @@ export default function rentalPage({ navigation }) {
             query: getTenant,
             variables: { id: id },
           });
-          
+
           const invitation = tenantData.data.getTenant.accepted;
-          if (invitation==null) continue;
+          if (invitation == null) continue;
 
           const invitationData = await API.graphql({
             query: getInvitation,
             variables: { id: invitation },
           });
 
-
-          if (invitationData.data.getInvitation.propertyID != navigation.getParam("property").id) continue;
+          if (
+            invitationData.data.getInvitation.propertyID !=
+            navigation.getParam("property").id
+          )
+            continue;
 
           //remove later
           //tenantData.data.getTenant.subtasks = [];
-          
-          tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
-          tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
-          tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+
+          tenantData.data.getTenant.rentAmount =
+            invitationData.data.getInvitation.rentAmount;
+          tenantData.data.getTenant.leaseStart =
+            invitationData.data.getInvitation.leaseStart;
+          tenantData.data.getTenant.leaseTerm =
+            invitationData.data.getInvitation.leaseTerm;
           // add tenant data to tenant list
           tenantList.push(tenantData.data.getTenant);
           // setTenantList((currentTenants)=>{
@@ -237,7 +242,6 @@ export default function rentalPage({ navigation }) {
           lists: taskList,
           people: tenantList,
         });
-
       } catch (error) {
         console.log("error retrieving property data", error);
       }
@@ -274,7 +278,6 @@ export default function rentalPage({ navigation }) {
 
       // add this task to the propertys list of tasks
       property.tasks.push(list.id);
-
 
       // update this property in the database
       await API.graphql(
@@ -322,7 +325,6 @@ export default function rentalPage({ navigation }) {
       await API.graphql(
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
-
     } catch (error) {
       console.log("error updating", error);
     }
@@ -373,7 +375,6 @@ export default function rentalPage({ navigation }) {
     }
 
     try {
-
       // update task list for current property
       property.tasks = taskList;
 
@@ -395,7 +396,13 @@ export default function rentalPage({ navigation }) {
   const renderPeople = (person) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Tenant", {email:navigation.getParam("email"),"custom:landlord":navigation.getParam("custom:landlord"),tenant:person })}
+        onPress={() =>
+          navigation.navigate("Tenant", {
+            email: navigation.getParam("email"),
+            "custom:landlord": navigation.getParam("custom:landlord"),
+            tenant: person,
+          })
+        }
       >
         <PeopleList person={person} />
       </TouchableOpacity>
@@ -712,10 +719,12 @@ export default function rentalPage({ navigation }) {
             </View>
 
             {/* Is this your chat button?
-             */}
+            no above is better imo
+             
             <TouchableOpacity onPress={() => chat()}>
               <MaterialIcons name="chat" size={128} color={colors.blue} />
             </TouchableOpacity>
+            */}
 
             {/* <View style={{ marginVertical: 48, alignItems: "center" }}>
               <TouchableOpacity
