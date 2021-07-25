@@ -9,7 +9,7 @@ import NewMessageButton from '../components/NewMessageButton';
 
 
 import { API, graphqlOperation } from 'aws-amplify';
-import {listUsers} from '../src/graphql/queries'
+import {listUsers} from '../../src/graphql/queries'
 import { useEffect, useState } from 'react';
 
 export default function ContactsScreen() {

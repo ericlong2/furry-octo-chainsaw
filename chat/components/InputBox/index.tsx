@@ -9,7 +9,7 @@ import {
     graphqlOperation,
 } from 'aws-amplify'
 
-import {createMessage, updateChatRoom } from '../../src/graphql/mutations'
+import {createMessage, updateChatRoom } from '../../../src/graphql/mutations'
 import { useEffect } from "react";
 
 const InputBox = (props) => {

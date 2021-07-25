@@ -9,11 +9,11 @@ import Navigation from './navigation';
 
 import {withAuthenticator} from 'aws-amplify-react-native';
 import Amplify, { Auth} from 'aws-amplify'
-import config from './src/aws-exports'
+import config from '.././src/aws-exports'
 Amplify.configure(config)
 
-import {getUser} from './src/graphql/queries'
-import {createUser} from './src/graphql/mutations'
+import {getUser} from '.././src/graphql/queries'
+import {createUser} from '.././src/graphql/mutations'
 import { API, graphqlOperation } from 'aws-amplify';
 
 function Chat({navigation}) {
@@ -71,7 +71,7 @@ function Chat({navigation}) {
   }
 }
 
-export default  withAuthenticator(Chat)
+export default Chat
 
 function effect(effect: any, arg1: () => any) {
   throw new Error('Function not implemented.');

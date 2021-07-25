@@ -135,7 +135,7 @@
             ]
           },
           "S3DeploymentBucket": "amplify-furryoctochainsaw-dev-161414-deployment",
-          "S3DeploymentRootKey": "amplify-appsync-files/2bbd19986d6bd04a82fdeec4111b4a8ed147e879",
+          "S3DeploymentRootKey": "amplify-appsync-files/821a900538d106bc5a532f406536ad513bc73827",
           "env": "dev"
         }
       }

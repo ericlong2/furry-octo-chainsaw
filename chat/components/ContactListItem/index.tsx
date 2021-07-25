@@ -6,7 +6,7 @@ import styles from './styles';
 import {useNavigation} from '@react-navigation/native';
 
 import {API, graphqlOperation, Auth} from "aws-amplify";
-import {createChatRoom, createChatRoomUser } from '../../src/graphql/mutations'
+import {createChatRoom, createChatRoomUser } from '../../../src/graphql/mutations'
 import { useState } from "react";
 
 

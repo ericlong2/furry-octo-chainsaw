@@ -8,8 +8,8 @@ import {
   Auth,
 } from 'aws-amplify';
 
-import { messagesByChatRoom } from '../src/graphql/queries';
-import { onCreateMessage } from '../src/graphql/subscriptions';
+import { messagesByChatRoom } from '../../src/graphql/queries';
+import { onCreateMessage } from '../../src/graphql/subscriptions';
 
 
 import ChatMessage from "../components/ChatMessage";
