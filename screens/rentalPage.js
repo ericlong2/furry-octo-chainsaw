@@ -8,6 +8,7 @@ import {
   FlatList,
   Modal,
   SafeAreaView,
+  Alert,
   ScrollView,
   Button,
 } from "react-native";
@@ -38,6 +39,7 @@ import {
   updateProperty,
   updateTask,
   updateTenant,
+  deleteProperty,
 } from "../src/graphql/mutations";
 import TenantForm from "./TenantForm";
 import { NavigationActions } from "react-navigation";
@@ -58,7 +60,8 @@ export default function rentalPage({ navigation }) {
   const [tenantModal, setTenantModal] = useState(false);
   const [currentTenant, setCurrentTenant] = useState();
   const [editTenantModal, setEditTenantModal] = useState(false);
-  const [modalMenuOpen, setModalMenuOpen] = useState(false);
+  const [modalLandlordMenuOpen, setmodalLandlordMenuOpen] = useState(false);
+  const [modalTenantMenuOpen, setmodalTenantMenuOpen] = useState(false);
   const [landlordBool, setLandlordBool] = useState(false);
   const [property, setProperty] = useState({});
   //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
@@ -75,6 +78,56 @@ export default function rentalPage({ navigation }) {
     return Math.random().toString();
   };
 
+  const leaveProperty = () => {
+    Alert.alert(
+      "Leave Property",
+      "You are about to leave " + navigation.getParam("property").address,
+      [
+        {
+          text: "Cancel",
+          onPress: () => Alert.alert("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Leave",
+          // here is where you should put the delete method
+          onPress: () => console.log("Delete Pressed"),
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () =>
+          Alert.alert(
+            "This alert was dismissed by tapping outside of the alert dialog."
+          ),
+      }
+    );
+  };
+  const removeProperty = () => {
+    Alert.alert(
+      "Delete Property",
+      "You are about to delete " + navigation.getParam("property").address,
+      [
+        {
+          text: "Cancel",
+          onPress: () => Alert.alert("Cancel Pressed"),
+          style: "cancel",
+        },
+        {
+          text: "Delete",
+          // here is where you should put the delete method
+          onPress: () => console.log("Delete Pressed"),
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () =>
+          Alert.alert(
+            "This alert was dismissed by tapping outside of the alert dialog."
+          ),
+      }
+    );
+  };
   //open modal with the tenant details
   const pressTenant = (item) => {
     //navigation.navigate("TenantForm", item);
@@ -93,7 +146,6 @@ export default function rentalPage({ navigation }) {
     console.log("edit tenant");
     setEditTenantModal(false);
     try {
-
       // create inviation
       const invitation = {
         id: generateID(),
@@ -117,7 +169,9 @@ export default function rentalPage({ navigation }) {
       // create new tenant object in database if not,
       if (tenantData.data.getTenant == null) {
         const newTenant = { id: tenant.email, name: "", invitations: [] };
-        tenantData = await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
+        tenantData = await API.graphql(
+          graphqlOperation(createTenant, { input: newTenant })
+        );
       }
 
       // send the invitation to tenant
@@ -131,7 +185,6 @@ export default function rentalPage({ navigation }) {
       );
 
       property.tenants.push(tenant.email);
-
     } catch (error) {
       console.log("error editing tenant", error);
     }
@@ -157,10 +210,8 @@ export default function rentalPage({ navigation }) {
         // empty task list
         setTaskList([]);
 
-
         // loop through all tasks belonging to current property
         for (const id of navigation.getParam("property").tasks) {
-
           // get task data
           const taskData = await API.graphql({
             query: getTask,
@@ -206,24 +257,30 @@ export default function rentalPage({ navigation }) {
             query: getTenant,
             variables: { id: id },
           });
-          
+
           const invitation = tenantData.data.getTenant.accepted;
-          if (invitation==null) continue;
+          if (invitation == null) continue;
 
           const invitationData = await API.graphql({
             query: getInvitation,
             variables: { id: invitation },
           });
 
-
-          if (invitationData.data.getInvitation.propertyID != navigation.getParam("property").id) continue;
+          if (
+            invitationData.data.getInvitation.propertyID !=
+            navigation.getParam("property").id
+          )
+            continue;
 
           //remove later
           //tenantData.data.getTenant.subtasks = [];
-          
-          tenantData.data.getTenant.rentAmount = invitationData.data.getInvitation.rentAmount;
-          tenantData.data.getTenant.leaseStart = invitationData.data.getInvitation.leaseStart;
-          tenantData.data.getTenant.leaseTerm = invitationData.data.getInvitation.leaseTerm;
+
+          tenantData.data.getTenant.rentAmount =
+            invitationData.data.getInvitation.rentAmount;
+          tenantData.data.getTenant.leaseStart =
+            invitationData.data.getInvitation.leaseStart;
+          tenantData.data.getTenant.leaseTerm =
+            invitationData.data.getInvitation.leaseTerm;
           // add tenant data to tenant list
           tenantList.push(tenantData.data.getTenant);
           // setTenantList((currentTenants)=>{
@@ -237,7 +294,6 @@ export default function rentalPage({ navigation }) {
           lists: taskList,
           people: tenantList,
         });
-
       } catch (error) {
         console.log("error retrieving property data", error);
       }
@@ -274,7 +330,6 @@ export default function rentalPage({ navigation }) {
 
       // add this task to the propertys list of tasks
       property.tasks.push(list.id);
-
 
       // update this property in the database
       await API.graphql(
@@ -322,7 +377,6 @@ export default function rentalPage({ navigation }) {
       await API.graphql(
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
-
     } catch (error) {
       console.log("error updating", error);
     }
@@ -373,7 +427,6 @@ export default function rentalPage({ navigation }) {
     }
 
     try {
-
       // update task list for current property
       property.tasks = taskList;
 
@@ -395,7 +448,13 @@ export default function rentalPage({ navigation }) {
   const renderPeople = (person) => {
     return (
       <TouchableOpacity
-        onPress={() => navigation.navigate("Tenant", {email:navigation.getParam("email"),"custom:landlord":navigation.getParam("custom:landlord"),tenant:person })}
+        onPress={() =>
+          navigation.navigate("Tenant", {
+            email: navigation.getParam("email"),
+            "custom:landlord": navigation.getParam("custom:landlord"),
+            tenant: person,
+          })
+        }
       >
         <PeopleList person={person} />
       </TouchableOpacity>
@@ -464,13 +523,13 @@ export default function rentalPage({ navigation }) {
           </Modal>
 
           {/*menu options*/}
-          <Modal visible={modalMenuOpen} animationType="slide">
+          <Modal visible={modalLandlordMenuOpen} animationType="slide">
             <View>
               <MaterialIcons
                 name="close"
                 size={24}
                 style={{ ...styles.modalToggle, ...styles.modalClose }}
-                onPress={() => setModalMenuOpen(false)}
+                onPress={() => setmodalLandlordMenuOpen(false)}
               />
               <Button
                 //style={styles.button}
@@ -483,6 +542,12 @@ export default function rentalPage({ navigation }) {
                 title="Refresh"
                 color="blue"
                 onPress={refresh}
+              />
+              <Button
+                //style={styles.button}
+                title="Delete Property"
+                color="yellow"
+                onPress={() => removeProperty()}
               />
               {/*<Options />*/}
             </View>
@@ -572,7 +637,7 @@ export default function rentalPage({ navigation }) {
               name="menu-open"
               size={24}
               style={styles.modalMenuToggle}
-              onPress={() => setModalMenuOpen(true)}
+              onPress={() => setmodalLandlordMenuOpen(true)}
             />
           </View>
         </ScrollView>
@@ -626,13 +691,13 @@ export default function rentalPage({ navigation }) {
           </Modal>
 
           {/*menu options*/}
-          <Modal visible={modalMenuOpen} animationType="slide">
+          <Modal visible={modalTenantMenuOpen} animationType="slide">
             <View>
               <MaterialIcons
                 name="close"
                 size={24}
                 style={{ ...styles.modalToggle, ...styles.modalClose }}
-                onPress={() => setModalMenuOpen(false)}
+                onPress={() => setmodalTenantMenuOpen(false)}
               />
               <Button
                 //style={styles.button}
@@ -645,6 +710,13 @@ export default function rentalPage({ navigation }) {
                 title="Refresh"
                 color="blue"
                 onPress={refresh}
+              />
+
+              <Button
+                //style={styles.button}
+                title="Leave Property"
+                color="yellow"
+                onPress={() => leaveProperty()}
               />
               {/*<Options />*/}
             </View>
@@ -714,7 +786,7 @@ export default function rentalPage({ navigation }) {
             {/* Is this your chat button?
              */}
             <TouchableOpacity onPress={() => chat()}>
-              <MaterialIcons name="chat" size={128} color={colors.blue} />
+              <MaterialIcons name="chat" size={50} color={colors.blue} />
             </TouchableOpacity>
 
             {/* <View style={{ marginVertical: 48, alignItems: "center" }}>
@@ -736,7 +808,7 @@ export default function rentalPage({ navigation }) {
               name="menu-open"
               size={24}
               style={styles.modalMenuToggle}
-              onPress={() => setModalMenuOpen(true)}
+              onPress={() => setmodalTenantMenuOpen(true)}
             />
           </View>
         </ScrollView>

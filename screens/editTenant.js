@@ -6,16 +6,27 @@ import { updateInvitation } from "../src/graphql/mutations";
 function editTenant({ navigation }) {
   const tenant = navigation.getParam("tenant");
   console.log(tenant);
-  
+
+  const removeTenant = () => {
+    console.log("removed " + tenant.name);
+    navigation.goBack();
+  };
+
   //onst email =tenant.email;
   const [leaseTerm, setLeaseTerm] = useState(tenant.leaseTerm);
   const [leaseStart, setLeaseStart] = useState(tenant.leaseStart);
   const [rentAmount, setRentAmount] = useState(tenant.rentAmount);
 
-  const makeChanges = async() => {
+  const makeChanges = async () => {
     //make the changes to the tenant wiht the new stats
     try {
-      const invitation = {id:tenant.accepted,propertyID:tenant.propertyID,leaseTerm:tenant.leaseTerm,leaseStart:tenant.leaseStart,rentAmount:tenant.rentAmount};
+      const invitation = {
+        id: tenant.accepted,
+        propertyID: tenant.propertyID,
+        leaseTerm: tenant.leaseTerm,
+        leaseStart: tenant.leaseStart,
+        rentAmount: tenant.rentAmount,
+      };
       await API.graphql(
         graphqlOperation(updateInvitation, { input: invitation })
       );
@@ -32,20 +43,20 @@ function editTenant({ navigation }) {
       <TextInput
         style={styles.input}
         placeholder={leaseStart}
-        onChangeText={(input => setLeaseStart(input))}
+        onChangeText={(input) => setLeaseStart(input)}
       />
       <Text>Lease Term in Months</Text>
       <TextInput
         style={styles.input}
         placeholder={leaseTerm}
-        onChangeText={(input => setLeaseTerm(input))}
+        onChangeText={(input) => setLeaseTerm(input)}
         keyboardType="numeric"
       />
       <Text>Monthly Rent amount</Text>
       <TextInput
         style={styles.input}
         placeholder={rentAmount}
-        onChangeText={(input => setRentAmount(input))}
+        onChangeText={(input) => setRentAmount(input)}
         keyboardType="numeric"
       />
 
@@ -54,6 +65,12 @@ function editTenant({ navigation }) {
         title="Change"
         color="maroon"
         onPress={() => makeChanges()}
+      />
+      <Button
+        //style={styles.button}
+        title={"Remove " + tenant.name}
+        color="yellow"
+        onPress={() => removeTenant()}
       />
     </View>
   );
