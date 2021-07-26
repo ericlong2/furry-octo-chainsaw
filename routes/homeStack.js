@@ -11,6 +11,7 @@ import invitationPage from "../screens/invitationPage";
 import editTenant from "../screens/editTenant";
 import tenantHome from "../screens/tenantHome";
 import { StackActions } from "@react-navigation/native";
+import Chat from "../chat/Chat";
 
 const screens = {
   // TenantForm: {
@@ -19,6 +20,12 @@ const screens = {
   //     title: "TenantForm",
   //   },
   // },
+  Chat: {
+    screen: Chat,
+    navigationOptions: {
+      title: "Chat",
+    },
+  },
   tenantHome: {
     screen: tenantHome,
     navigationOptions: {

@@ -137,6 +137,7 @@ export default function rentalPage({ navigation }) {
 
   const chat = () => {
     console.log("open up chat page");
+    navigation.navigate("Chat");
   };
   const openAddTenant = () => {
     console.log("create tenant");
@@ -784,10 +785,12 @@ export default function rentalPage({ navigation }) {
             </View>
 
             {/* Is this your chat button?
-             */}
+            no above is better imo
+             
             <TouchableOpacity onPress={() => chat()}>
               <MaterialIcons name="chat" size={50} color={colors.blue} />
             </TouchableOpacity>
+            */}
 
             {/* <View style={{ marginVertical: 48, alignItems: "center" }}>
               <TouchableOpacity

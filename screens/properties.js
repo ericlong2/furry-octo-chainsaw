@@ -41,6 +41,7 @@ export default function properties({ navigation }) {
       setLoaded(true);
       // load properties that have already been added previously
       try {
+
         // get the landlord object corresponding to current user
         const landlordData = await API.graphql({
           query: getLandlord,
@@ -50,7 +51,7 @@ export default function properties({ navigation }) {
         delete landlordData.data.getLandlord.createdAt;
         delete landlordData.data.getLandlord.updatedAt;
 
-        // set local landlord
+        // set local landlord 
         setLandlord(landlordData.data.getLandlord);
 
         // load properties into rental list
@@ -91,12 +92,16 @@ export default function properties({ navigation }) {
     try {
       console.log(rental);
       // create a new property object for rental
-      await API.graphql(graphqlOperation(createProperty, { input: rental }));
+      await API.graphql(
+        graphqlOperation(createProperty, { input: rental })
+      );
 
       // add property to landlord's property list
       landlord.properties.push(rental.id);
 
-      await API.graphql(graphqlOperation(updateLandlord, { input: landlord }));
+      await API.graphql(
+        graphqlOperation(updateLandlord, { input: landlord })
+      );
 
       // update the rental list
       setRental((currentRentals) => {
@@ -126,11 +131,7 @@ export default function properties({ navigation }) {
     item["custom:landlord"] = navigation.getParam("custom:landlord");
     item.landlord = landlord;
     //navigate to tenant page after
-    const info = {
-      email: navigation.getParam("email"),
-      "custom:landlord": navigation.getParam("custom:landlord"),
-      property: item,
-    };
+    const info = {email:navigation.getParam("email"), "custom:landlord":navigation.getParam("custom:landlord"),property:item};
     navigation.navigate("RentalDetails", info);
   };
 
