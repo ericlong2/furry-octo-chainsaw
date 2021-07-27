@@ -36,6 +36,7 @@ export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState({ value: "", error: "" });
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
+  const [confpassword, setconfPassword] = useState({ value: "", error: "" });
   const [isEnabled, setIsEnabled] = useState(false);
   const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   // eslint-disable-next-line prettier/prettier
@@ -202,6 +203,18 @@ export default function RegisterScreen({ navigation }) {
         errorText={password.error}
         secureTextEntry
       />
+
+      {/* confirm password */}
+      <TextInput
+        label="Confirm Password"
+        returnKeyType="done"
+        value={confpassword.value}
+        onChangeText={(text) => setconfPassword({ value: text, error: "" })}
+        error={!!confpassword.error}
+        errorText={confpassword.error}
+        secureTextEntry
+      />
+
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <Text style={styles.titleText}> Landlord: </Text>
         <Switch
