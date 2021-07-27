@@ -82,7 +82,7 @@ export default function rentalPage({ navigation }) {
         {
           text: "Leave",
           // here is where you should put the delete method
-          onPress: async() => {
+          onPress: async () => {
             console.log("Delete Pressed");
             try {
               // get list of tenant ids
@@ -90,7 +90,6 @@ export default function rentalPage({ navigation }) {
 
               // loop through current tenants
               for (const tenantID of property.tenants) {
-
                 // if tenant is not leaving, add to list
                 if (tenantID != navigation.getParam("user").email) {
                   tenantList.push(tenantID);
@@ -102,26 +101,32 @@ export default function rentalPage({ navigation }) {
 
               // update database
               await API.graphql(
-                graphqlOperation(updateProperty, {input: property})
+                graphqlOperation(updateProperty, { input: property })
               );
 
               navigation.goBack();
 
               const tenantData = await API.graphql({
                 query: getTenant,
-                variables: { id: navigation.getParam("user").email}, 
+                variables: { id: navigation.getParam("user").email },
               });
 
-              tenantData.data.getTenant.invitations.splice(tenantData.data.getTenant.invitations.indexOf(tenantData.data.getTenant.accepted),1);
+              tenantData.data.getTenant.invitations.splice(
+                tenantData.data.getTenant.invitations.indexOf(
+                  tenantData.data.getTenant.accepted
+                ),
+                1
+              );
               tenantData.data.getTenant.accepted = null;
 
               delete tenantData.data.getTenant.createdAt;
               delete tenantData.data.getTenant.updatedAt;
-              
-              await API.graphql(
-                graphqlOperation(updateTenant, {input : tenantData.data.getTenant})
-              );
 
+              await API.graphql(
+                graphqlOperation(updateTenant, {
+                  input: tenantData.data.getTenant,
+                })
+              );
             } catch (error) {
               console.log("error leaving property", error);
             }
@@ -150,35 +155,39 @@ export default function rentalPage({ navigation }) {
         {
           text: "Delete",
           // here is where you should put the delete method
-          onPress: async() => {
+          onPress: async () => {
             console.log("Delete Pressed");
             try {
               for (const task of state.lists) {
                 for (const subtask of task.subtasks) {
                   await API.graphql(
-                    graphqlOperation(deleteSubtask, { input: subtasks})
+                    graphqlOperation(deleteSubtask, { input: subtasks })
                   );
                 }
                 await API.graphql(
-                  graphqlOperation(deleteTask, { input: task})
+                  graphqlOperation(deleteTask, { input: task })
                 );
               }
 
               for (const tenant of state.people) {
-                tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted),1);
-          
+                tenant.invitations.splice(
+                  tenant.invitations.indexOf(tenant.accpeted),
+                  1
+                );
+
                 const invitationData = await API.graphql({
                   query: getInvitation,
                   variables: { id: tenant.accepted },
                 });
                 await API.graphql(
-                  graphqlOperation(deleteInvitation, { input: invitationData.data.getInvitation})
+                  graphqlOperation(deleteInvitation, {
+                    input: invitationData.data.getInvitation,
+                  })
                 );
                 tenant.accepted = null;
                 await API.graphql(
-                  graphqlOperation(updateTenant, {input: tenant})
+                  graphqlOperation(updateTenant, { input: tenant })
                 );
-
               }
 
               for (const invitation of property.invitations) {
@@ -188,17 +197,24 @@ export default function rentalPage({ navigation }) {
                 });
                 const tenantData = await API.graphql({
                   query: getTenant,
-                  variables: {id: invitationData.data.getInvitation.tenant},
+                  variables: { id: invitationData.data.getInvitation.tenant },
                 });
-                
-                tenant.data.getTenant.invitations.splice(tenant.data.getTenant.invitations.indexOf(invitation),1);
-                
-                await API.graphql(
-                  graphqlOperation(updateTenant, {input: tenantData.data.getTenant})
+
+                tenant.data.getTenant.invitations.splice(
+                  tenant.data.getTenant.invitations.indexOf(invitation),
+                  1
                 );
 
                 await API.graphql(
-                  graphqlOperation(deleteInvitation, { input: invitationData.data.getInvitation})
+                  graphqlOperation(updateTenant, {
+                    input: tenantData.data.getTenant,
+                  })
+                );
+
+                await API.graphql(
+                  graphqlOperation(deleteInvitation, {
+                    input: invitationData.data.getInvitation,
+                  })
                 );
               }
             } catch (error) {
@@ -260,9 +276,7 @@ export default function rentalPage({ navigation }) {
       // create new tenant object in database if not,
       if (tenantData.data.getTenant == null) {
         const newTenant = { id: tenant.email, name: "", invitations: [] };
-        await API.graphql(
-          graphqlOperation(createTenant, { input: newTenant })
-        );
+        await API.graphql(graphqlOperation(createTenant, { input: newTenant }));
         tenantData.data.getTenant = newTenant;
       }
 
@@ -278,9 +292,7 @@ export default function rentalPage({ navigation }) {
 
       property.invitations.push(invitation.id);
 
-      await API.graphql(
-        graphqlOperation(updateProperty, {input:property})
-      );
+      await API.graphql(graphqlOperation(updateProperty, { input: property }));
     } catch (error) {
       console.log("error editing tenant", error);
     }
@@ -304,7 +316,7 @@ export default function rentalPage({ navigation }) {
           setLandlordBool(true);
 
         // empty task list
-        const taskList = []
+        const taskList = [];
 
         // loop through all tasks belonging to current property
         for (const id of navigation.getParam("property").tasks) {
@@ -483,7 +495,6 @@ export default function rentalPage({ navigation }) {
         }
       }
       state.lists.push(list);
-
     } catch (error) {
       console.log("error updating", error);
     }
@@ -689,6 +700,23 @@ export default function rentalPage({ navigation }) {
             />
           </View>
 
+          {/* landlord Icon fix onpress */}
+          <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
+            <Text style={styles.sectionTitle}>Landlord</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Tenant", {
+                  user: navigation.getParam("user"),
+                  tenant: person,
+                  property: property,
+                  update: setProperty,
+                })
+              }
+            >
+              <PeopleList person={"landlord name"} />
+            </TouchableOpacity>
+          </View>
+
           <View style={{ height: 275, paddingLeft: 32 }}>
             <Text style={styles.sectionTitle}> Tickets</Text>
             <FlatList
@@ -856,6 +884,23 @@ export default function rentalPage({ navigation }) {
               renderItem={({ item }) => renderPeople(item)}
               keyboardShouldPersistTaps="always"
             />
+          </View>
+
+          {/* landlord Icon fix onpress */}
+          <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
+            <Text style={styles.sectionTitle}>Landlord</Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate("Tenant", {
+                  user: navigation.getParam("user"),
+                  tenant: person,
+                  property: property,
+                  update: setProperty,
+                })
+              }
+            >
+              <PeopleList person={"landlord name"} />
+            </TouchableOpacity>
           </View>
 
           <View style={{ height: 275, paddingLeft: 32 }}>
