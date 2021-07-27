@@ -32,7 +32,6 @@ export default function LoginScreen({ navigation }) {
     try {
       const user = await Auth.signIn(email.value, password.value);
       //////////////////////////////////WHER YOU NEED TO CHNAGE REDIRECt
-      console.log(user);
       if (user.attributes["custom:landlord"] == "true") {
         console.log("signing in as landlord");
 

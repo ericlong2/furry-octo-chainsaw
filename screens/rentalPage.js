@@ -127,6 +127,12 @@ export default function rentalPage({ navigation }) {
                   input: tenantData.data.getTenant,
                 })
               );
+
+              const tmp = navigation.getParam("refresh");
+              tmp();
+
+              navigation.goBack();
+              
             } catch (error) {
               console.log("error leaving property", error);
             }
@@ -216,7 +222,14 @@ export default function rentalPage({ navigation }) {
                     input: invitationData.data.getInvitation,
                   })
                 );
+
+                
               }
+
+              const tmp = navigation.getParam("refresh");
+              tmp();
+
+              navigation.goBack();
             } catch (error) {
               console.log("error removing property", error);
             }
@@ -890,16 +903,16 @@ export default function rentalPage({ navigation }) {
           <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
             <Text style={styles.sectionTitle}>Landlord</Text>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Tenant", {
-                  user: navigation.getParam("user"),
-                  tenant: person,
-                  property: property,
-                  update: setProperty,
-                })
-              }
+              // onPress={() =>
+              //   navigation.navigate("Tenant", {
+              //     user: navigation.getParam("user"),
+              //     tenant: person,
+              //     property: property,
+              //     update: setProperty,
+              //   })
+              // }
             >
-              <PeopleList person={"landlord name"} />
+              <PeopleList person={property.landlord} />
             </TouchableOpacity>
           </View>
 

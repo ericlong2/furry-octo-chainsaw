@@ -39,7 +39,7 @@ export default function Tenant({ navigation }) {
     try {
 
       // check if user is landlord
-      if (navigation.getParam("custom:landlord") == "true") {
+      if (navigation.getParam("user")["custom:landlord"] == "true") {
         //open modal to edit the tenant and save the information
         navigation.navigate("editTenant", { tenant: tenant, property: property, update: navigation.getParam("update"), });
       }

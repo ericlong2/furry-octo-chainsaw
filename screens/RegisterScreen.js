@@ -113,6 +113,10 @@ export default function RegisterScreen({ navigation }) {
       setPassword({ ...password, error: passwordError });
       return;
     }
+    if (password.value != confpassword.value) {
+      setconfPassword({...confpassword, error: "Passwords do not match"});
+      return;
+    }
     try {
       console.log({
         username: email.value,
@@ -135,6 +139,9 @@ export default function RegisterScreen({ navigation }) {
       setModal3Open(true);
     } catch (error) {
       console.log("error signing up:", error);
+      if (error.code=="UsernameExistsException") {
+        setEmail({ ...email, error: "Email is already registered"});
+      }
     }
     // navigation.reset({
     //   index: 0,
