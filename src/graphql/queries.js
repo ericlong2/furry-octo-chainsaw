@@ -98,6 +98,7 @@ export const getInvitation = /* GraphQL */ `
       leaseTerm
       leaseStart
       rentAmount
+      tenant
       createdAt
       updatedAt
     }
@@ -116,6 +117,7 @@ export const listInvitations = /* GraphQL */ `
         leaseTerm
         leaseStart
         rentAmount
+        tenant
         createdAt
         updatedAt
       }
@@ -169,6 +171,7 @@ export const getProperty = /* GraphQL */ `
       tasks
       tenants
       landlord
+      invitations
       createdAt
       updatedAt
     }
@@ -194,6 +197,7 @@ export const listProperties = /* GraphQL */ `
         tasks
         tenants
         landlord
+        invitations
         createdAt
         updatedAt
       }

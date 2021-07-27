@@ -23,6 +23,7 @@ type Invitation @model {
   leaseTerm: Int!
   leaseStart: String!
   rentAmount: Int!
+  tenant: String!
   
 }
 type Tenant @model {
@@ -45,6 +46,7 @@ type Property @model {
   tasks: [String]!
   tenants: [String]!
   landlord: String!
+  invitations: [String]!
 }
 
 type User @model {

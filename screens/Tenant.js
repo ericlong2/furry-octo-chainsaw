@@ -21,6 +21,7 @@ export default function Tenant({ navigation }) {
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
   const tenant = navigation.getParam("tenant");
+  const property = navigation.getParam("property");
   async function signOut() {
     try {
       await Auth.signOut();
@@ -40,7 +41,7 @@ export default function Tenant({ navigation }) {
       // check if user is landlord
       if (navigation.getParam("custom:landlord") == "true") {
         //open modal to edit the tenant and save the information
-        navigation.navigate("editTenant", { tenant: tenant });
+        navigation.navigate("editTenant", { tenant: tenant, property: property, update: navigation.getParam("update"), });
       }
     } catch (error) {
       console.log("error editing tenant", error);

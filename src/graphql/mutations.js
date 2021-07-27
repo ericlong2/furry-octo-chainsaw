@@ -141,6 +141,7 @@ export const createInvitation = /* GraphQL */ `
       leaseTerm
       leaseStart
       rentAmount
+      tenant
       createdAt
       updatedAt
     }
@@ -157,6 +158,7 @@ export const updateInvitation = /* GraphQL */ `
       leaseTerm
       leaseStart
       rentAmount
+      tenant
       createdAt
       updatedAt
     }
@@ -173,6 +175,7 @@ export const deleteInvitation = /* GraphQL */ `
       leaseTerm
       leaseStart
       rentAmount
+      tenant
       createdAt
       updatedAt
     }
@@ -241,6 +244,7 @@ export const createProperty = /* GraphQL */ `
       tasks
       tenants
       landlord
+      invitations
       createdAt
       updatedAt
     }
@@ -264,6 +268,7 @@ export const updateProperty = /* GraphQL */ `
       tasks
       tenants
       landlord
+      invitations
       createdAt
       updatedAt
     }
@@ -287,6 +292,7 @@ export const deleteProperty = /* GraphQL */ `
       tasks
       tenants
       landlord
+      invitations
       createdAt
       updatedAt
     }

@@ -45,10 +45,10 @@ export default function LoginScreen({ navigation }) {
         //     })
 
         // )
-        navigation.reset([NavigationActions.navigate({ routeName: "Home", params: user.attributes })]);
+        navigation.reset([NavigationActions.navigate({ routeName: "Home", params: {user:user.attributes} })]);
       } else {
         console.log("signing in as tenant");
-        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage", params: user.attributes })]);
+        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage", params: {user:user.attributes} })]);
       }
     } catch (error) {
       console.log("error signing in", error);

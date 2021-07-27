@@ -96,7 +96,7 @@ export default function RegisterScreen({ navigation }) {
       console.log("error confirming sign up", error);
     }
     // if sign up has been confirmed, close submit verification window
-    setModal3Open(false);
+    // setModal3Open(false);
     //here you can verify and close window by using
     //setModal3Open(false)
     //also your gonna need to scan if the acc has been verified or not or smt

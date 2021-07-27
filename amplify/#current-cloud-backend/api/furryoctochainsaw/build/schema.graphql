@@ -29,6 +29,7 @@ type Invitation {
   leaseTerm: Int!
   leaseStart: String!
   rentAmount: Int!
+  tenant: String!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -55,6 +56,7 @@ type Property {
   tasks: [String]!
   tenants: [String]!
   landlord: String!
+  invitations: [String]!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -410,6 +412,7 @@ input ModelInvitationFilterInput {
   leaseTerm: ModelIntInput
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
+  tenant: ModelStringInput
   and: [ModelInvitationFilterInput]
   or: [ModelInvitationFilterInput]
   not: ModelInvitationFilterInput
@@ -421,6 +424,7 @@ input CreateInvitationInput {
   leaseTerm: Int!
   leaseStart: String!
   rentAmount: Int!
+  tenant: String!
 }
 
 input UpdateInvitationInput {
@@ -429,6 +433,7 @@ input UpdateInvitationInput {
   leaseTerm: Int
   leaseStart: String
   rentAmount: Int
+  tenant: String
 }
 
 input DeleteInvitationInput {
@@ -440,6 +445,7 @@ input ModelInvitationConditionInput {
   leaseTerm: ModelIntInput
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
+  tenant: ModelStringInput
   and: [ModelInvitationConditionInput]
   or: [ModelInvitationConditionInput]
   not: ModelInvitationConditionInput
@@ -505,6 +511,7 @@ input ModelPropertyFilterInput {
   tasks: ModelStringInput
   tenants: ModelStringInput
   landlord: ModelStringInput
+  invitations: ModelStringInput
   and: [ModelPropertyFilterInput]
   or: [ModelPropertyFilterInput]
   not: ModelPropertyFilterInput
@@ -523,6 +530,7 @@ input CreatePropertyInput {
   tasks: [String]!
   tenants: [String]!
   landlord: String!
+  invitations: [String]!
 }
 
 input UpdatePropertyInput {
@@ -538,6 +546,7 @@ input UpdatePropertyInput {
   tasks: [String]
   tenants: [String]
   landlord: String
+  invitations: [String]
 }
 
 input DeletePropertyInput {
@@ -556,6 +565,7 @@ input ModelPropertyConditionInput {
   tasks: ModelStringInput
   tenants: ModelStringInput
   landlord: ModelStringInput
+  invitations: ModelStringInput
   and: [ModelPropertyConditionInput]
   or: [ModelPropertyConditionInput]
   not: ModelPropertyConditionInput

@@ -45,7 +45,7 @@ export default function properties({ navigation }) {
         // get the landlord object corresponding to current user
         const landlordData = await API.graphql({
           query: getLandlord,
-          variables: { id: navigation.getParam("email") },
+          variables: { id: navigation.getParam("user").email },
         });
 
         delete landlordData.data.getLandlord.createdAt;
@@ -119,7 +119,9 @@ export default function properties({ navigation }) {
     rental.number = number;
     rental.tasks = [];
     rental.tenants = [];
-    rental.landlord = navigation.getParam("email");
+    console.log(navigation.getParam("user"));
+    rental.landlord = navigation.getParam("user").email;
+    rental.invitations = [];
     setNumber(0);
     addProperty(rental);
     setModalOpen(false);
@@ -127,11 +129,8 @@ export default function properties({ navigation }) {
 
   /*Functions */
   const pressRental = (item) => {
-    item.email = navigation.getParam("email");
-    item["custom:landlord"] = navigation.getParam("custom:landlord");
-    item.landlord = landlord;
     //navigate to tenant page after
-    const info = {email:navigation.getParam("email"), "custom:landlord":navigation.getParam("custom:landlord"),property:item};
+    const info = {user:navigation.getParam("user"),property:item};
     navigation.navigate("RentalDetails", info);
   };
 

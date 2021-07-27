@@ -15,34 +15,28 @@ import {deleteSubtask,updateSubtask} from "../src/graphql/mutations";
 
 export default class TodoModal extends Component {
     state = {
-        newTodo: ""
+        newTodo: "",
     };
     
     toggleTodoCompleted = async(index) =>{
-        console.log("toggling",index);
-        let list = this.props.list;
+        
+        list = this.props.list;
         list.subtasks[index].inprogress = !list.subtasks[index].inprogress;
-
-        this.props.updateList(list);
+        
         try {
-            const subtaskData = await API.graphql({
-                query: getSubtask,
-                variables: { id: list.subtasks[index].id},
-            });
-
-            console.log(subtaskData);
-            subtaskData.data.getSubtask.inprogress = !subtaskData.data.getSubtask.inprogress;
-
-            delete subtaskData.data.getSubtask.createdAt;
-            delete subtaskData.data.getSubtask.updatedAt;
-
-            const tmp = await API.graphql(
-                graphqlOperation(updateSubtask, { input: subtaskData.data.getSubtask })
+            
+            await API.graphql(
+                graphqlOperation(updateSubtask, { input: list.subtasks[index] })
             );
-
+            
+            
         } catch (error) {
             console.log("error toggling todo",error);
         }
+        this.setState({newTodo:this.state.newTodo});
+        this.props.updateList(list);
+        console.log("toggling",index);
+
     };
 
     generateID = () => {
@@ -86,6 +80,7 @@ export default class TodoModal extends Component {
         list.subtasks.splice(index,1);
         
         this.props.updateList(list);
+
     }
     
     renderTodo = (todo,index) => {
@@ -142,10 +137,8 @@ export default class TodoModal extends Component {
 
     render() {
         const list = this.props.list
-
         const taskCount = list.subtasks.length
         const completedCount = list.subtasks.filter(todo => todo.inprogress).length
-
         return (
             <KeyboardAvoidingView style={{flex: 1}} behavior = "height">
                 <SafeAreaView style={styles.container}>

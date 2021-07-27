@@ -1,15 +1,42 @@
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import React, { useState } from "react";
 import { View, StyleSheet, TextInput, Text, Button } from "react-native";
-import { updateInvitation } from "../src/graphql/mutations";
+import { updateInvitation, updateProperty, updateTenant } from "../src/graphql/mutations";
 
 function editTenant({ navigation }) {
   const tenant = navigation.getParam("tenant");
+  const property = navigation.getParam("property");
   console.log(tenant);
 
-  const removeTenant = () => {
-    console.log("removed " + tenant.name);
-    navigation.goBack();
+  const removeTenant = async() => {
+    try {
+      console.log("removed " + tenant.name);
+
+      property.tenants.splice(property.tenants.indexOf(tenant.id),1);
+
+      // update database
+      await API.graphql(
+        graphqlOperation(updateProperty, {input : property})
+      );
+
+      // get updated invitation list
+      const invitationList = [];
+
+      tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted),1);
+      
+      tenant.accepted = null;
+
+      // update database
+      await API.graphql(
+        graphqlOperation(updateTenant, {input: property})
+      );
+
+      const update = navigation.getParam("update");
+      update(property);
+      navigation.goBack();
+    } catch (error) {
+      console.log("error removing tenant", error);
+    }
   };
 
   //onst email =tenant.email;

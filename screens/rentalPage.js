@@ -40,6 +40,8 @@ import {
   updateTask,
   updateTenant,
   deleteProperty,
+  deleteTask,
+  deleteInvitation,
 } from "../src/graphql/mutations";
 import TenantForm from "./TenantForm";
 import { NavigationActions } from "react-navigation";
@@ -55,8 +57,6 @@ export default function rentalPage({ navigation }) {
   });
 
   const [loaded, setLoaded] = useState(false);
-  const [taskList, setTaskList] = useState([]);
-  const [tenantList, setTenantList] = useState([]);
   const [tenantModal, setTenantModal] = useState(false);
   const [currentTenant, setCurrentTenant] = useState();
   const [editTenantModal, setEditTenantModal] = useState(false);
@@ -64,15 +64,6 @@ export default function rentalPage({ navigation }) {
   const [modalTenantMenuOpen, setmodalTenantMenuOpen] = useState(false);
   const [landlordBool, setLandlordBool] = useState(false);
   const [property, setProperty] = useState({});
-  //note: this needs to alwasy have a create new tenant at the end of the list cuz used instead of button
-  // const [tenants, setTenants] = useState([
-  //   {
-  //     name: "Bob",
-  //   },
-  //   {
-  //     name: "Create new tenant",
-  //   },
-  // ]);
 
   const generateID = () => {
     return Math.random().toString();
@@ -91,7 +82,50 @@ export default function rentalPage({ navigation }) {
         {
           text: "Leave",
           // here is where you should put the delete method
-          onPress: () => console.log("Delete Pressed"),
+          onPress: async() => {
+            console.log("Delete Pressed");
+            try {
+              // get list of tenant ids
+              const tenantList = [];
+
+              // loop through current tenants
+              for (const tenantID of property.tenants) {
+
+                // if tenant is not leaving, add to list
+                if (tenantID != navigation.getParam("user").email) {
+                  tenantList.push(tenantID);
+                }
+              }
+
+              // update property
+              property.tenants = tenantList;
+
+              // update database
+              await API.graphql(
+                graphqlOperation(updateProperty, {input: property})
+              );
+
+              navigation.goBack();
+
+              const tenantData = await API.graphql({
+                query: getTenant,
+                variables: { id: navigation.getParam("user").email}, 
+              });
+
+              tenantData.data.getTenant.invitations.splice(tenantData.data.getTenant.invitations.indexOf(tenantData.data.getTenant.accepted),1);
+              tenantData.data.getTenant.accepted = null;
+
+              delete tenantData.data.getTenant.createdAt;
+              delete tenantData.data.getTenant.updatedAt;
+              
+              await API.graphql(
+                graphqlOperation(updateTenant, {input : tenantData.data.getTenant})
+              );
+
+            } catch (error) {
+              console.log("error leaving property", error);
+            }
+          },
         },
       ],
       {
@@ -116,7 +150,61 @@ export default function rentalPage({ navigation }) {
         {
           text: "Delete",
           // here is where you should put the delete method
-          onPress: () => console.log("Delete Pressed"),
+          onPress: async() => {
+            console.log("Delete Pressed");
+            try {
+              for (const task of state.lists) {
+                for (const subtask of task.subtasks) {
+                  await API.graphql(
+                    graphqlOperation(deleteSubtask, { input: subtasks})
+                  );
+                }
+                await API.graphql(
+                  graphqlOperation(deleteTask, { input: task})
+                );
+              }
+
+              for (const tenant of state.people) {
+                tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted),1);
+          
+                const invitationData = await API.graphql({
+                  query: getInvitation,
+                  variables: { id: tenant.accepted },
+                });
+                await API.graphql(
+                  graphqlOperation(deleteInvitation, { input: invitationData.data.getInvitation})
+                );
+                tenant.accepted = null;
+                await API.graphql(
+                  graphqlOperation(updateTenant, {input: tenant})
+                );
+
+              }
+
+              for (const invitation of property.invitations) {
+                const invitationData = await API.graphql({
+                  query: getInvitation,
+                  variables: { id: invitation },
+                });
+                const tenantData = await API.graphql({
+                  query: getTenant,
+                  variables: {id: invitationData.data.getInvitation.tenant},
+                });
+                
+                tenant.data.getTenant.invitations.splice(tenant.data.getTenant.invitations.indexOf(invitation),1);
+                
+                await API.graphql(
+                  graphqlOperation(updateTenant, {input: tenantData.data.getTenant})
+                );
+
+                await API.graphql(
+                  graphqlOperation(deleteInvitation, { input: invitationData.data.getInvitation})
+                );
+              }
+            } catch (error) {
+              console.log("error removing property", error);
+            }
+          },
         },
       ],
       {
@@ -154,8 +242,10 @@ export default function rentalPage({ navigation }) {
         leaseTerm: tenant.leaseTerm,
         leaseStart: tenant.leaseStart,
         rentAmount: tenant.rentAmount,
+        tenant: tenant.email,
       };
 
+      //console.log(invitation);
       // create new invitation
       await API.graphql(
         graphqlOperation(createInvitation, { input: invitation })
@@ -170,22 +260,27 @@ export default function rentalPage({ navigation }) {
       // create new tenant object in database if not,
       if (tenantData.data.getTenant == null) {
         const newTenant = { id: tenant.email, name: "", invitations: [] };
-        tenantData = await API.graphql(
+        await API.graphql(
           graphqlOperation(createTenant, { input: newTenant })
         );
+        tenantData.data.getTenant = newTenant;
       }
 
       // send the invitation to tenant
-      tenantObject.data.getTenant.invitations.push(invitation.id);
-      delete tenantObject.data.getTenant.updatedAt;
-      delete tenantObject.data.getTenant.createdAt;
+      tenantData.data.getTenant.invitations.push(invitation.id);
+      delete tenantData.data.getTenant.updatedAt;
+      delete tenantData.data.getTenant.createdAt;
 
       // update tenant
       await API.graphql(
-        graphqlOperation(updateTenant, { input: tenantObject.data.getTenant })
+        graphqlOperation(updateTenant, { input: tenantData.data.getTenant })
       );
 
-      property.tenants.push(tenant.email);
+      property.invitations.push(invitation.id);
+
+      await API.graphql(
+        graphqlOperation(updateProperty, {input:property})
+      );
     } catch (error) {
       console.log("error editing tenant", error);
     }
@@ -205,11 +300,11 @@ export default function rentalPage({ navigation }) {
       console.log(navigation.getParam("property"));
       try {
         // get user details
-        if (navigation.getParam("custom:landlord") == "true")
+        if (navigation.getParam("user")["custom:landlord"] == "true")
           setLandlordBool(true);
 
         // empty task list
-        setTaskList([]);
+        const taskList = []
 
         // loop through all tasks belonging to current property
         for (const id of navigation.getParam("property").tasks) {
@@ -231,6 +326,8 @@ export default function rentalPage({ navigation }) {
               variables: { id: subtask },
             });
 
+            delete subtaskData.data.getSubtask.createdAt;
+            delete subtaskData.data.getSubtask.updatedAt;
             // add the data to the subtask array
             //console.log(subtaskData);
             curTask.subtaskList.push(subtaskData.data.getSubtask);
@@ -249,7 +346,7 @@ export default function rentalPage({ navigation }) {
         }
 
         // empty tenant list
-        setTenantList([]);
+        const tenantList = [];
 
         // loop through ids of the tenants
         for (const id of navigation.getParam("property").tenants) {
@@ -355,7 +452,7 @@ export default function rentalPage({ navigation }) {
 
   const updateList = async (list) => {
     // empty the list
-    setTaskList([]);
+    const taskList = [];
 
     // get a list of the ids of the subtasks
     for (let i = 0; i < list.subtasks.length; i++) {
@@ -378,6 +475,15 @@ export default function rentalPage({ navigation }) {
       await API.graphql(
         graphqlOperation(updateTask, { input: taskData.data.getTask })
       );
+
+      for (let i = 0; i < state.lists.length; i++) {
+        if (state.lists[i].id == list.id) {
+          state.lists[i] = list;
+          return;
+        }
+      }
+      state.lists.push(list);
+
     } catch (error) {
       console.log("error updating", error);
     }
@@ -385,14 +491,12 @@ export default function rentalPage({ navigation }) {
 
   const deleteList = async (list) => {
     // empty task list
-    setTaskList([]);
+    const taskList = [];
 
     // add all task ids for the property except the one that is being removed
     state.lists.forEach((x, i) => {
       if (x.id != list.id) {
-        setTaskList((currentTasks) => {
-          return [x.id, ...currentTasks];
-        });
+        taskList.push(x.id);
       }
     });
 
@@ -451,9 +555,10 @@ export default function rentalPage({ navigation }) {
       <TouchableOpacity
         onPress={() =>
           navigation.navigate("Tenant", {
-            email: navigation.getParam("email"),
-            "custom:landlord": navigation.getParam("custom:landlord"),
+            user: navigation.getParam("user"),
             tenant: person,
+            property: property,
+            update: setProperty,
           })
         }
       >
