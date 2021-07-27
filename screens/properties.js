@@ -26,6 +26,7 @@ import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import { getLandlord, getProperty } from "../src/graphql/queries";
 import { createProperty, updateLandlord } from "../src/graphql/mutations";
 import { NavigationActions } from "react-navigation";
+import { set } from "react-native-reanimated";
 
 export default function properties({ navigation }) {
   /*Constants*/
@@ -39,6 +40,7 @@ export default function properties({ navigation }) {
   const loadProperties = async () => {
     if (!loaded) {
       setLoaded(true);
+      const tmp = [];
       // load properties that have already been added previously
       try {
         // get the landlord object corresponding to current user
@@ -70,11 +72,9 @@ export default function properties({ navigation }) {
           console.log(rental.data.getProperty);
 
           // add to rentals
-          setRental((currentRentals) => {
-            return [rental.data.getProperty, ...currentRentals];
-          });
+          tmp.push(rental.data.getProperty);
         }
-
+        setRental(tmp);
         //console.log("finished retrieving properties");
       } catch (error) {
         console.log("error loading properties:", error);
@@ -88,8 +88,8 @@ export default function properties({ navigation }) {
   };
 
   function refresh() {
-    // setLoaded(false);
-    // loadTenant();
+    setLoaded(false);
+    loadProperties();
     console.log("refresh");
   }
 

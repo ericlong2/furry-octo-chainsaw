@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import Task from "../components/Task";
 import { MaterialIcons } from "@expo/vector-icons";
+import { NavigationActions } from 'react-navigation';
 import colors from "./Colors";
 import { updateProperty, updateTenant } from "../src/graphql/mutations";
 import { getInvitation, getProperty, getTenant } from "../src/graphql/queries";
@@ -38,6 +39,8 @@ export default function invitationPage({ navigation }) {
 
   const loadInvitations = async () => {
     if (!loaded) {
+      setInvitations([]);
+      setCurrentInvitation();
       setLoaded(true);
       try {
         // get tenant object
@@ -152,6 +155,7 @@ export default function invitationPage({ navigation }) {
           variables: { id: tenant.accepted },
         });
 
+        if (invitationData.data.getInvitation==null) return;
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: invitationData.data.getInvitation.propertyID },
@@ -174,6 +178,7 @@ export default function invitationPage({ navigation }) {
 
   const accept = async () => {
     // if no invitation selected, do nothing
+    console.log(currentInvitation);
     if (currentInvitation == null) return;
     try {
       console.log("accept");
@@ -208,7 +213,6 @@ export default function invitationPage({ navigation }) {
     }
   };
 
-  if (currentInvitation == null) {
     return (
       <View>
         {/*Invitation modal*/}
@@ -223,73 +227,12 @@ export default function invitationPage({ navigation }) {
                 setInvitationModal(false);
               }}
             />
-            <Button
-              //style={styles.button}
-              title="Accept"
-              color="blue"
-              onPress={accept}
-            />
-            <Button
-              //style={styles.button}
-              title="Reject"
-              color="maroon"
-              onPress={reject}
-            />
-            {/* <Button
-              //style={styles.button}
-              title="Cancel"
-              color="maroon"
-              onPress={() => {
-                setCurrentInvitation();
-                setInvitationModal(false);
-              }}
-            /> */}
-            {/*<Options />*/}
-          </View>
-        </Modal>
-
-        <Text style={styles.sectionTitle}>Invitations</Text>
-        <FlatList
-          data={invitations}
-          renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => pressInvitation(item)}>
-              <Task
-                text={
-                  //item.address
-                  item.property.number == 0
-                    ? item.property.address
-                    : item.property.number + " " + item.property.address
-                }
-              />
-            </TouchableOpacity>
-          )}
-        />
-        <TouchableOpacity onPress={() => toRental()}>
-          <MaterialIcons name="home" size={128} color={colors.blue} />
-        </TouchableOpacity>
-      </View>
-    );
-  } else {
-    return (
-      <View>
-        {/*Invitation modal*/}
-        <Modal visible={invitationModal} animationType="slide">
-          <View>
-            <MaterialIcons
-              name="close"
-              size={24}
-              style={{ ...styles.modalToggle, ...styles.modalClose }}
-              onPress={() => {
-                setCurrentInvitation();
-                setInvitationModal(false);
-              }}
-            />
-            <Text>{currentInvitation.property.number == 0
+            <Text>{currentInvitation == null ? "" : (currentInvitation.property.number == 0
                     ? currentInvitation.property.address
-                    : currentInvitation.property.number + " " + currentInvitation.property.address}</Text>
-            <Text>{"Rent amount: " + currentInvitation.invitation.rentAmount}</Text>
-            <Text>{"Lease start: " + currentInvitation.invitation.leaseStart}</Text>
-            <Text>{"Lease term: " + currentInvitation.invitation.leaseTerm}</Text>
+                    : currentInvitation.property.number + " " + currentInvitation.property.address)}</Text>
+            <Text>{currentInvitation == null ? "" : ("Rent amount: " + currentInvitation.invitation.rentAmount)}</Text>
+            <Text>{currentInvitation == null ? "" : ("Lease start: " + currentInvitation.invitation.leaseStart)}</Text>
+            <Text>{currentInvitation == null ? "" : ("Lease term: " + currentInvitation.invitation.leaseTerm)}</Text>
             <Button
               //style={styles.button}
               title="Accept"
@@ -346,10 +289,9 @@ export default function invitationPage({ navigation }) {
             <TouchableOpacity onPress={() => pressInvitation(item)}>
               <Task
                 text={
-                  item.address
-                  // item.number == 0
-                  //   ? item.address
-                  //   : item.number + " " + item.address
+                  item.property.number == 0
+                    ? item.property.address
+                    : item.property.number + " " + item.address
                 }
               />
             </TouchableOpacity>
@@ -367,7 +309,7 @@ export default function invitationPage({ navigation }) {
       </View>
     );
   }
-}
+
 
 const styles = StyleSheet.create({
   sectionTitle: {

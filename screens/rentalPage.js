@@ -29,6 +29,7 @@ import {
   getTask,
   getSubtask,
   getInvitation,
+  getLandlord,
 } from "../src/graphql/queries";
 import {
   createTask,
@@ -38,6 +39,7 @@ import {
   updateInvitation,
   updateProperty,
   updateTask,
+  updateLandlord,
   updateTenant,
   deleteProperty,
   deleteTask,
@@ -57,6 +59,7 @@ export default function rentalPage({ navigation }) {
   });
 
   const [loaded, setLoaded] = useState(false);
+  const [landlord, setLandlord] = useState({});
   const [tenantModal, setTenantModal] = useState(false);
   const [currentTenant, setCurrentTenant] = useState();
   const [editTenantModal, setEditTenantModal] = useState(false);
@@ -117,6 +120,13 @@ export default function rentalPage({ navigation }) {
                 ),
                 1
               );
+
+              await API.graphql(
+                graphqlOperation(deleteInvitation, {
+                  input: {id:tenantData.data.getTenant.accepted},
+                })
+              );
+
               tenantData.data.getTenant.accepted = null;
 
               delete tenantData.data.getTenant.createdAt;
@@ -132,7 +142,7 @@ export default function rentalPage({ navigation }) {
               tmp();
 
               navigation.goBack();
-              
+
             } catch (error) {
               console.log("error leaving property", error);
             }
@@ -165,19 +175,24 @@ export default function rentalPage({ navigation }) {
             console.log("Delete Pressed");
             try {
               for (const task of state.lists) {
+                const subtasks = [];
+                console.log(task);
                 for (const subtask of task.subtasks) {
+                  subtasks.push(subtask.id);
                   await API.graphql(
-                    graphqlOperation(deleteSubtask, { input: subtasks })
+                    graphqlOperation(deleteSubtask, { input: {id:subtask.id} })
                   );
                 }
+                task.subtasks = subtasks;
                 await API.graphql(
-                  graphqlOperation(deleteTask, { input: task })
+                  graphqlOperation(deleteTask, { input: {id:task.id} })
                 );
               }
 
               for (const tenant of state.people) {
+                console.log(tenant);
                 tenant.invitations.splice(
-                  tenant.invitations.indexOf(tenant.accpeted),
+                  tenant.invitations.indexOf(tenant.accepted),
                   1
                 );
 
@@ -187,10 +202,13 @@ export default function rentalPage({ navigation }) {
                 });
                 await API.graphql(
                   graphqlOperation(deleteInvitation, {
-                    input: invitationData.data.getInvitation,
+                    input: {id:invitationData.data.getInvitation.id},
                   })
                 );
                 tenant.accepted = null;
+                delete tenant.rentAmount;
+                delete tenant.leaseStart;
+                delete tenant.leaseTerm;
                 await API.graphql(
                   graphqlOperation(updateTenant, { input: tenant })
                 );
@@ -201,6 +219,8 @@ export default function rentalPage({ navigation }) {
                   query: getInvitation,
                   variables: { id: invitation },
                 });
+
+                if (invitationData.data.getInvitation == null) continue;
                 const tenantData = await API.graphql({
                   query: getTenant,
                   variables: { id: invitationData.data.getInvitation.tenant },
@@ -211,6 +231,13 @@ export default function rentalPage({ navigation }) {
                   1
                 );
 
+                delete tenantData.data.getTenant.createdAt;
+                delete tenantData.data.getTenant.updatedAt;
+
+                delete tenantData.data.getTenant.rentAmount;
+                delete tenantData.data.getTenant.leaseStart;
+                delete tenantData.data.getTenant.leaseTerm;
+
                 await API.graphql(
                   graphqlOperation(updateTenant, {
                     input: tenantData.data.getTenant,
@@ -219,13 +246,26 @@ export default function rentalPage({ navigation }) {
 
                 await API.graphql(
                   graphqlOperation(deleteInvitation, {
-                    input: invitationData.data.getInvitation,
+                    input: {id:invitationData.data.getInvitation.id},
                   })
                 );
 
                 
               }
 
+              await API.graphql(
+                graphqlOperation(deleteProperty, {
+                  input: {id:property.id},
+                })
+              );
+
+              landlord.properties.splice(landlord.properties.indexOf(property.id),1);
+
+              await API.graphql(
+                graphqlOperation(updateLandlord, {
+                  input: landlord,
+                })
+              );
               const tmp = navigation.getParam("refresh");
               tmp();
 
@@ -322,8 +362,19 @@ export default function rentalPage({ navigation }) {
 
       setProperty(navigation.getParam("property"));
 
-      console.log(navigation.getParam("property"));
       try {
+
+        
+        const landlordData = await API.graphql({
+          query: getLandlord,
+          variables: { id: navigation.getParam("property").landlord },
+        });
+
+        delete landlordData.data.getLandlord.createdAt;
+        delete landlordData.data.getLandlord.updatedAt;
+
+        setLandlord(landlordData.data.getLandlord);
+
         // get user details
         if (navigation.getParam("user")["custom:landlord"] == "true")
           setLandlordBool(true);
@@ -341,6 +392,11 @@ export default function rentalPage({ navigation }) {
 
           // initialize new list to store subtasks
           const curTask = taskData.data.getTask;
+
+          if (curTask == null) continue;
+
+          delete curTask.createdAt;
+          delete curTask.updatedAt;
           curTask.subtaskList = [];
 
           // loop through the ids of the subtasks
@@ -350,7 +406,7 @@ export default function rentalPage({ navigation }) {
               query: getSubtask,
               variables: { id: subtask },
             });
-
+            if (subtaskData.data.getSubtask==null) continue;
             delete subtaskData.data.getSubtask.createdAt;
             delete subtaskData.data.getSubtask.updatedAt;
             // add the data to the subtask array
@@ -381,6 +437,9 @@ export default function rentalPage({ navigation }) {
             variables: { id: id },
           });
 
+          delete tenantData.data.getTenant.createdAt;
+          delete tenantData.data.getTenant.updatedAt;
+
           const invitation = tenantData.data.getTenant.accepted;
           if (invitation == null) continue;
 
@@ -389,11 +448,7 @@ export default function rentalPage({ navigation }) {
             variables: { id: invitation },
           });
 
-          if (
-            invitationData.data.getInvitation.propertyID !=
-            navigation.getParam("property").id
-          )
-            continue;
+          console.log(invitationData);
 
           //remove later
           //tenantData.data.getTenant.subtasks = [];
