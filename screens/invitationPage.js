@@ -43,11 +43,10 @@ export default function invitationPage({ navigation }) {
     if (!loaded) {
       setLoaded(true);
       try {
-
         // get tenant object
         const tenantData = await API.graphql({
           query: getTenant,
-          variables: { id: navigation.getParam("user").email },
+          variables: { id: navigation.getParam("email") },
         });
 
         delete tenantData.data.getTenant.createdAt;
@@ -57,7 +56,6 @@ export default function invitationPage({ navigation }) {
 
         // go through list of invitations
         for (const invitation of tenantData.data.getTenant.invitations) {
-          
           if (
             tenantData.data.getTenant.accepted != null &&
             invitation == tenantData.data.getTenant.accepted
@@ -70,21 +68,27 @@ export default function invitationPage({ navigation }) {
             variables: { id: invitation },
           });
 
-          delete invitationData.data.getInvitation.createdAt;
-          delete invitationData.data.getInvitation.updatedAt;
-
           // get corresponding property
           const propertyData = await API.graphql({
             query: getProperty,
             variables: { id: invitationData.data.getInvitation.propertyID },
           });
 
-          delete propertyData.data.getProperty.createdAt;
-          delete propertyData.data.getProperty.updatedAt;
+          // combine the property with invitation
+          propertyData.data.getProperty.propertyID =
+            propertyData.data.getProperty.id;
+          propertyData.data.getProperty.id = invitation;
+
+          propertyData.data.getProperty.rentAmount =
+            invitationData.data.getInvitation.rentAmount;
+          propertyData.data.getProperty.leaseStart =
+            invitationData.data.getInvitation.leaseStart;
+          propertyData.data.getProperty.leaseTerm =
+            invitationData.data.getInvitation.leaseTerm;
 
           // add to invitation list
           setInvitations((currentInvitations) => {
-            return [{invitation:invitationData.data.getInvitation,property:propertyData.data.getProperty}, ...currentInvitations];
+            return [propertyData.data.getProperty, ...currentInvitations];
           });
         }
       } catch (error) {
@@ -106,7 +110,7 @@ export default function invitationPage({ navigation }) {
         });
       }
     }
-  }
+  };
 
   const pressInvitation = (item) => {
     console.log(item);
@@ -133,16 +137,14 @@ export default function invitationPage({ navigation }) {
         })
       );
 
-      removeInvitation(currentInvitation.invitation.id);
-
+      removeInvitation(currentInvitation.id);
     } catch (error) {
       console.log("error rejecting invitation", error);
     }
   };
 
-  const toRental = async() => {
+  const toRental = async () => {
     try {
-
       if (tenant.accepted == null) {
         //is not apart of any house place alert
         Alert.alert(
@@ -161,17 +163,19 @@ export default function invitationPage({ navigation }) {
           variables: { id: tenant.accepted },
         });
 
-        // get corresponding property
         const propertyData = await API.graphql({
           query: getProperty,
           variables: { id: invitationData.data.getInvitation.propertyID },
         });
 
-        delete propertyData.data.getProperty.createdAt;
         delete propertyData.data.getProperty.updatedAt;
-
+        delete propertyData.data.getProperty.createdAt;
         //navigate to tenant page after
-        const item = {user:navigation.getParam("user"),property:propertyData.data.getProperty};
+        const item = {
+          email: navigation.getParam("email"),
+          "custom:landlord": navigation.getParam("custom:landlord"),
+          property: propertyData.data.getProperty,
+        };
         navigation.navigate("RentalDetails", item);
       }
     } catch (error) {
@@ -190,25 +194,23 @@ export default function invitationPage({ navigation }) {
       if (tenant.accepted != null) return;
 
       // update tenants accepted
-      tenant.accepted = currentInvitation.inviation.id;
+      tenant.accepted = currentInvitation.id;
 
       // update in database
       await API.graphql(
         graphqlOperation(updateTenant, {
-          input: tenant,
+          input: tenantData.data.getTenant,
         })
       );
 
-      currentInvitation.property.tenants.push(navigation.getParam("user").email);
-      await API.graphql(
-        graphqlOperation(updateProperty, {
-          input: currentInvitation.property,
-        })
-      );
-      removeInvitation(currentInvitation.invitation.id);
+      removeInvitation(currentInvitation.id);
 
       //navigate to tenant page after
-      const item = {user:navigation.getParam("user"),property:propertyData.data.getProperty};
+      const item = {
+        email: navigation.getParam("email"),
+        "custom:landlord": navigation.getParam("custom:landlord"),
+        property: propertyData.data.getProperty,
+      };
       navigation.navigate("RentalDetails", item);
     } catch (error) {
       console.log("error accepting invitation", error);
@@ -262,10 +264,10 @@ export default function invitationPage({ navigation }) {
             <TouchableOpacity onPress={() => pressInvitation(item)}>
               <Task
                 text={
-                  //item.address
-                  item.property.number == 0
-                    ? item.property.address
-                    : item.property.number + " " + item.property.address
+                  item.address
+                  // item.number == 0
+                  //   ? item.address
+                  //   : item.number + " " + item.address
                 }
               />
             </TouchableOpacity>
@@ -291,12 +293,10 @@ export default function invitationPage({ navigation }) {
                 setInvitationModal(false);
               }}
             />
-            <Text>{currentInvitation.property.number == 0
-                    ? currentInvitation.property.address
-                    : currentInvitation.property.number + " " + currentInvitation.property.address}</Text>
-            <Text>{"Rent amount: " + currentInvitation.invitation.rentAmount}</Text>
-            <Text>{"Lease start: " + currentInvitation.invitation.leaseStart}</Text>
-            <Text>{"Lease term: " + currentInvitation.invitation.leaseTerm}</Text>
+            <Text>{currentInvitation.address}</Text>
+            <Text>{"Rent amount: " + currentInvitation.rentAmount}</Text>
+            <Text>{"Lease start: " + currentInvitation.leaseStart}</Text>
+            <Text>{"Lease term: " + currentInvitation.leaseTerm}</Text>
             <Button
               //style={styles.button}
               title="Accept"
@@ -365,6 +365,12 @@ export default function invitationPage({ navigation }) {
         <TouchableOpacity onPress={() => toRental()}>
           <MaterialIcons name="home" size={128} color={colors.blue} />
         </TouchableOpacity>
+        <MaterialIcons
+          name="menu-open"
+          size={24}
+          style={styles.modalMenuToggle}
+          onPress={() => setModalMenuOpen(true)}
+        />
       </View>
     );
   }

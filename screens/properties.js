@@ -41,17 +41,16 @@ export default function properties({ navigation }) {
       setLoaded(true);
       // load properties that have already been added previously
       try {
-
         // get the landlord object corresponding to current user
         const landlordData = await API.graphql({
           query: getLandlord,
-          variables: { id: navigation.getParam("user").email },
+          variables: { id: navigation.getParam("email") },
         });
 
         delete landlordData.data.getLandlord.createdAt;
         delete landlordData.data.getLandlord.updatedAt;
 
-        // set local landlord 
+        // set local landlord
         setLandlord(landlordData.data.getLandlord);
 
         // load properties into rental list
@@ -88,20 +87,22 @@ export default function properties({ navigation }) {
     return Math.random().toString();
   };
 
+  function refresh() {
+    // setLoaded(false);
+    // loadTenant();
+    console.log("refresh");
+  }
+
   const addProperty = async (rental) => {
     try {
       console.log(rental);
       // create a new property object for rental
-      await API.graphql(
-        graphqlOperation(createProperty, { input: rental })
-      );
+      await API.graphql(graphqlOperation(createProperty, { input: rental }));
 
       // add property to landlord's property list
       landlord.properties.push(rental.id);
 
-      await API.graphql(
-        graphqlOperation(updateLandlord, { input: landlord })
-      );
+      await API.graphql(graphqlOperation(updateLandlord, { input: landlord }));
 
       // update the rental list
       setRental((currentRentals) => {
@@ -119,9 +120,7 @@ export default function properties({ navigation }) {
     rental.number = number;
     rental.tasks = [];
     rental.tenants = [];
-    console.log(navigation.getParam("user"));
-    rental.landlord = navigation.getParam("user").email;
-    rental.invitations = [];
+    rental.landlord = navigation.getParam("email");
     setNumber(0);
     addProperty(rental);
     setModalOpen(false);
@@ -129,8 +128,15 @@ export default function properties({ navigation }) {
 
   /*Functions */
   const pressRental = (item) => {
+    item.email = navigation.getParam("email");
+    item["custom:landlord"] = navigation.getParam("custom:landlord");
+    item.landlord = landlord;
     //navigate to tenant page after
-    const info = {user:navigation.getParam("user"),property:item};
+    const info = {
+      email: navigation.getParam("email"),
+      "custom:landlord": navigation.getParam("custom:landlord"),
+      property: item,
+    };
     navigation.navigate("RentalDetails", info);
   };
 
@@ -185,6 +191,12 @@ export default function properties({ navigation }) {
             title="Logout"
             color="maroon"
             onPress={signOut}
+          />
+          <Button
+            //style={styles.button}
+            title="Refresh"
+            color="blue"
+            onPress={refresh}
           />
           {/*<Options />*/}
         </View>
