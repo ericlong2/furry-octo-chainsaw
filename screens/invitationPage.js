@@ -35,8 +35,6 @@ export default function invitationPage({ navigation }) {
     }
   }
 
-  
-
   const loadInvitations = async () => {
     if (!loaded) {
       setInvitations([]);
@@ -82,7 +80,13 @@ export default function invitationPage({ navigation }) {
 
           // add to invitation list
           setInvitations((currentInvitations) => {
-            return [{invitation:invitationData.data.getInvitation,property:propertyData.data.getProperty}, ...currentInvitations];
+            return [
+              {
+                invitation: invitationData.data.getInvitation,
+                property: propertyData.data.getProperty,
+              },
+              ...currentInvitations,
+            ];
           });
         }
       } catch (error) {
@@ -120,7 +124,10 @@ export default function invitationPage({ navigation }) {
       // new list of invitations
       const tmpList = [];
 
-      tenant.invitations.splice(tenant.invitations.indexOf(currentInvitation.invitation.id),1);
+      tenant.invitations.splice(
+        tenant.invitations.indexOf(currentInvitation.invitation.id),
+        1
+      );
 
       await API.graphql(
         graphqlOperation(updateTenant, {
@@ -197,7 +204,9 @@ export default function invitationPage({ navigation }) {
         })
       );
 
-      currentInvitation.property.tenants.push(navigation.getParam("user").email);
+      currentInvitation.property.tenants.push(
+        navigation.getParam("user").email
+      );
       await API.graphql(
         graphqlOperation(updateProperty, {
           input: currentInvitation.property,
@@ -206,7 +215,11 @@ export default function invitationPage({ navigation }) {
       removeInvitation(currentInvitation.invitation.id);
 
       //navigate to tenant page after
-      const item = {user:navigation.getParam("user"),property:currentInvitation.property, refresh:refresh};
+      const item = {
+        user: navigation.getParam("user"),
+        property: currentInvitation.property,
+        refresh: refresh,
+      };
       navigation.navigate("RentalDetails", item);
     } catch (error) {
       console.log("error accepting invitation", error);
@@ -315,6 +328,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 24,
     fontWeight: "bold",
+  },
+  modalMenuToggle: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: "baseline",
   },
   modalToggle: {
     justifyContent: "center",
