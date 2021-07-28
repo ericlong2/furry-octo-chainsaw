@@ -15,6 +15,7 @@ import { onCreateMessage } from '../../src/graphql/subscriptions';
 import ChatMessage from "../components/ChatMessage";
 import BG from '../assets/images/bg.jpg';
 import InputBox from "../components/InputBox";
+import { Platform } from 'react-native';
 
 const ChatRoomScreen = () => {
 
@@ -73,6 +74,7 @@ const ChatRoomScreen = () => {
 
   return (
     <ImageBackground style={{width: '100%', height: '100%'}} source={BG}>
+
       <FlatList
         data={messages}
         renderItem={({ item }) => <ChatMessage myId={myId} message={item} />}
