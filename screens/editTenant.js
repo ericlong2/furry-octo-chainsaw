@@ -28,6 +28,12 @@ function editTenant({ navigation }) {
 
       tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted), 1);
 
+      await API.graphql(
+        graphqlOperation(deleteInvitation, {
+          input: {id:tenant.accepted},
+        })
+      );
+
       tenant.accepted = null;
 
       // update database
@@ -35,6 +41,7 @@ function editTenant({ navigation }) {
 
       const update = navigation.getParam("update");
       update(property);
+      navigation.goBack();
       navigation.goBack();
     } catch (error) {
       console.log("error removing tenant", error);
@@ -59,6 +66,8 @@ function editTenant({ navigation }) {
       await API.graphql(
         graphqlOperation(updateInvitation, { input: invitation })
       );
+      const refresh = navigation.getParam("refresh");
+      refresh();
       navigation.goBack();
     } catch (error) {
       console.log("error updating tenant", error);

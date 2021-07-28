@@ -207,6 +207,8 @@ export default function invitationPage({ navigation }) {
       currentInvitation.property.tenants.push(
         navigation.getParam("user").email
       );
+
+      currentInvitation.property.invitations.splice(currentInvitation.property.invitations.indexOf(currentInvitation.invitation.id));
       await API.graphql(
         graphqlOperation(updateProperty, {
           input: currentInvitation.property,

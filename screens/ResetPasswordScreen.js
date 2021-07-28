@@ -7,6 +7,7 @@ import Header from "../components/Header";
 import TextInput from "../components/TextInput";
 import Button from "../components/Button";
 import { emailValidator } from "../helpers/emailValidator";
+import { Auth } from "aws-amplify";
 
 export default function ResetPasswordScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
@@ -20,18 +21,36 @@ export default function ResetPasswordScreen({ navigation }) {
     console.log("resend code to email");
   };
 
-  const submitVerif = () => {
+  const submitVerif = async() => {
     console.log("new pw set and close modal");
+    if (newPass.pw == newPass.confPW) {
+      try {
+        await Auth.forgotPasswordSubmit(email.value, verifNum,newPass.pw);
+      } catch (error) {
+        console.log("error changing password",error);
+      }
+    } else {
+      console.log("passwords dont match");
+    }
     setModalEmailOpen(false);
     setModalLogOpen(false);
   };
-  const sendResetPasswordEmail = () => {
+  const sendResetPasswordEmail = async() => {
     const emailError = emailValidator(email.value);
     if (emailError) {
       setEmail({ ...email, error: emailError });
       return;
     }
-    navigation.navigate("Login");
+    try {
+      await Auth.forgotPassword(email.value);
+      setModalEmailOpen(true);
+      // setModalLogOpen(true);
+    } catch (error) {
+      console.log("error sending reset password code", error);
+      if (error.code == "UserNotFoundException") {
+        email.error = "Email has not been registered yet";
+      }
+    }
   };
 
   return (

@@ -65,7 +65,7 @@ export default function RegisterScreen({ navigation }) {
         // add the landlord object to the database
         await API.graphql(graphqlOperation(createLandlord, { input: tmp }));
 
-        navigation.reset([NavigationActions.navigate({ routeName: "Home" })]);
+        navigation.reset([NavigationActions.navigate({ routeName: "Home", params: {user:user.attributes} })]);
       } else {
         // If signing up as a tenant, check if email has received invitations
         const tenantData = await API.graphql(
@@ -89,9 +89,7 @@ export default function RegisterScreen({ navigation }) {
             graphqlOperation(updateTenant, { input: tenantData.data.getTenant })
           );
         }
-        navigation.reset([
-          NavigationActions.navigate({ routeName: "invitationPage" }),
-        ]);
+        navigation.reset([NavigationActions.navigate({ routeName: "invitationPage", params: {user:user.attributes} })]);
       }
     } catch (error) {
       console.log("error confirming sign up", error);
