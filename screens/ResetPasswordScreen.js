@@ -10,9 +10,20 @@ import { emailValidator } from "../helpers/emailValidator";
 export default function ResetPasswordScreen({ navigation }) {
   const [email, setEmail] = useState({ value: "", error: "" });
   const [modalEmailOpen, setModalEmailOpen] = useState(false);
+  const [modalLogOpen, setModalLogOpen] = useState(false);
   const [verifNum, setVerification] = useState();
+  const [verifPW,setVerificationPW]=useState("");
   const [newPass, setNewPass] = useState({ pw: "", confPW: "" });
 
+  const resendVerif=()=>{
+    console.log("resend code to email");
+  }
+
+  const submitVerif=()=>{
+    console.log("new pw set and close modal");
+    setModalEmailOpen(false);
+    setModalLogOpen(false);
+  }
   const sendResetPasswordEmail = () => {
     const emailError = emailValidator(email.value);
     if (emailError) {
@@ -63,10 +74,49 @@ export default function ResetPasswordScreen({ navigation }) {
               //style={styles.button}
               title="Submit"
               color="maroon"
-              onPress={() => submitVerif(verification)}
+              onPress={() => submitVerif()}
             />
           </View>
         </Modal>
+
+
+
+        {/* already loged in pw change verification modal*/}
+        <Modal visible={modalLogOpen} animationType="slide">
+          <View>
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Enter you current password"
+              onChangeText={(pw) => {
+                setVerificationPW(pw);
+              }}
+            />
+
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Enter new password"
+              onChangeText={(pw) => {
+                setNewPass({ pw: pw, confPW: newPass.confPW });
+              }}
+            />
+
+            <TextInput
+              style={styles.TextInput}
+              placeholder="Confirm new Password"
+              onChangeText={(confpw) => {
+                setNewPass({ pw: newPass.pw, confPW: confpw });
+              }}
+            />
+
+            <Button
+              //style={styles.button}
+              title="Submit"
+              color="maroon"
+              onPress={() => submitVerif()}
+            />
+          </View>
+        </Modal>
+
 
         <BackButton goBack={navigation.goBack} />
         <Logo />
@@ -95,3 +145,23 @@ export default function ResetPasswordScreen({ navigation }) {
     </Background>
   );
 }
+const styles = StyleSheet.create({
+  TextInput: {
+    paddingBottom: 10,
+    backgroundColor: "grey",
+    color: "white",
+  },
+  row: {
+    flexDirection: "row",
+    marginTop: 4,
+  },
+  link: {
+    fontWeight: "bold",
+    color: theme.colors.primary,
+  },
+
+  titleText: {
+    fontSize: 24,
+    fontWeight: "bold",
+  },
+});

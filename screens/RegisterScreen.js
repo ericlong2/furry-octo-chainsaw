@@ -178,6 +178,7 @@ export default function RegisterScreen({ navigation }) {
           {/*<Options />*/}
         </View>
       </Modal>
+
       <BackButton goBack={navigation.goBack} />
       <Logo />
       <Header>Create Account</Header>
@@ -252,6 +253,11 @@ export default function RegisterScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  TextInput: {
+    paddingBottom: 10,
+    backgroundColor: "grey",
+    color: "white",
+  },
   row: {
     flexDirection: "row",
     marginTop: 4,
