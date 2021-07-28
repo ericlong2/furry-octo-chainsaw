@@ -1,35 +1,37 @@
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import React, { useState } from "react";
 import { View, StyleSheet, TextInput, Text, Button } from "react-native";
-import { updateInvitation, updateProperty, updateTenant } from "../src/graphql/mutations";
+import { ScrollView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  updateInvitation,
+  updateProperty,
+  updateTenant,
+} from "../src/graphql/mutations";
 
 function editTenant({ navigation }) {
   const tenant = navigation.getParam("tenant");
   const property = navigation.getParam("property");
   console.log(tenant);
 
-  const removeTenant = async() => {
+  const removeTenant = async () => {
     try {
       console.log("removed " + tenant.name);
 
-      property.tenants.splice(property.tenants.indexOf(tenant.id),1);
+      property.tenants.splice(property.tenants.indexOf(tenant.id), 1);
 
       // update database
-      await API.graphql(
-        graphqlOperation(updateProperty, {input : property})
-      );
+      await API.graphql(graphqlOperation(updateProperty, { input: property }));
 
       // get updated invitation list
       const invitationList = [];
 
-      tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted),1);
-      
+      tenant.invitations.splice(tenant.invitations.indexOf(tenant.accpeted), 1);
+
       tenant.accepted = null;
 
       // update database
-      await API.graphql(
-        graphqlOperation(updateTenant, {input: property})
-      );
+      await API.graphql(graphqlOperation(updateTenant, { input: property }));
 
       const update = navigation.getParam("update");
       update(property);
@@ -64,42 +66,44 @@ function editTenant({ navigation }) {
   };
 
   return (
-    <View>
-      <Text>{tenant.name}</Text>
-      <Text>Lease Start</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={leaseStart}
-        onChangeText={(input) => setLeaseStart(input)}
-      />
-      <Text>Lease Term in Months</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={leaseTerm}
-        onChangeText={(input) => setLeaseTerm(input)}
-        keyboardType="numeric"
-      />
-      <Text>Monthly Rent amount</Text>
-      <TextInput
-        style={styles.input}
-        placeholder={rentAmount}
-        onChangeText={(input) => setRentAmount(input)}
-        keyboardType="numeric"
-      />
+    <SafeAreaView>
+      <ScrollView>
+        <Text>{tenant.name}</Text>
+        <Text>Lease Start</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={leaseStart}
+          onChangeText={(input) => setLeaseStart(input)}
+        />
+        <Text>Lease Term in Months</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={leaseTerm.toString()}
+          onChangeText={(input) => setLeaseTerm(input)}
+          keyboardType="numeric"
+        />
+        <Text>Monthly Rent amount</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={rentAmount.toString()}
+          onChangeText={(input) => setRentAmount(input)}
+          keyboardType="numeric"
+        />
 
-      <Button
-        //style={styles.button}
-        title="Change"
-        color="maroon"
-        onPress={() => makeChanges()}
-      />
-      <Button
-        //style={styles.button}
-        title={"Remove " + tenant.name}
-        color="yellow"
-        onPress={() => removeTenant()}
-      />
-    </View>
+        <Button
+          //style={styles.button}
+          title="Change"
+          color="maroon"
+          onPress={() => makeChanges()}
+        />
+        <Button
+          //style={styles.button}
+          title={"Remove " + tenant.name}
+          color="navy"
+          onPress={() => removeTenant()}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({

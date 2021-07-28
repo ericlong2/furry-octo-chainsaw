@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { StyleSheet, View, Modal } from "react-native";
 import Background from "../components/Background";
 import BackButton from "../components/BackButton";
 import Logo from "../components/Logo";
@@ -12,18 +13,18 @@ export default function ResetPasswordScreen({ navigation }) {
   const [modalEmailOpen, setModalEmailOpen] = useState(false);
   const [modalLogOpen, setModalLogOpen] = useState(false);
   const [verifNum, setVerification] = useState();
-  const [verifPW,setVerificationPW]=useState("");
+  const [verifPW, setVerificationPW] = useState("");
   const [newPass, setNewPass] = useState({ pw: "", confPW: "" });
 
-  const resendVerif=()=>{
+  const resendVerif = () => {
     console.log("resend code to email");
-  }
+  };
 
-  const submitVerif=()=>{
+  const submitVerif = () => {
     console.log("new pw set and close modal");
     setModalEmailOpen(false);
     setModalLogOpen(false);
-  }
+  };
   const sendResetPasswordEmail = () => {
     const emailError = emailValidator(email.value);
     if (emailError) {
@@ -79,8 +80,6 @@ export default function ResetPasswordScreen({ navigation }) {
           </View>
         </Modal>
 
-
-
         {/* already loged in pw change verification modal*/}
         <Modal visible={modalLogOpen} animationType="slide">
           <View>
@@ -116,7 +115,6 @@ export default function ResetPasswordScreen({ navigation }) {
             />
           </View>
         </Modal>
-
 
         <BackButton goBack={navigation.goBack} />
         <Logo />
@@ -154,10 +152,6 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     marginTop: 4,
-  },
-  link: {
-    fontWeight: "bold",
-    color: theme.colors.primary,
   },
 
   titleText: {

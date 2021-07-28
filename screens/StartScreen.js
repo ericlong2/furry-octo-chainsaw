@@ -15,14 +15,24 @@ export default function StartScreen({ navigation }) {
       try {
         const user = await Auth.currentAuthenticatedUser();
         console.log(user.attributes);
-        // if (user.attributes["custom:landlord"] == "true") {
-        //   console.log("signing in as landlord");
+        if (user.attributes["custom:landlord"] == "true") {
+          console.log("signing in as landlord");
 
-        //   navigation.reset([NavigationActions.navigate({ routeName: "Home", params: {user: user.attributes} })]);
-        // } else {
-        //   console.log("signing in as tenant");
-        //   navigation.reset([NavigationActions.navigate({ routeName: "invitationPage", params: {user: user.attributes} })]);
-        // }
+          navigation.reset([
+            NavigationActions.navigate({
+              routeName: "Home",
+              params: { user: user.attributes },
+            }),
+          ]);
+        } else {
+          console.log("signing in as tenant");
+          navigation.reset([
+            NavigationActions.navigate({
+              routeName: "invitationPage",
+              params: { user: user.attributes },
+            }),
+          ]);
+        }
       } catch (error) {
         console.log("user is not logged in", error);
       }
