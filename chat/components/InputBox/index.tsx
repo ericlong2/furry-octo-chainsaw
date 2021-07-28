@@ -89,8 +89,11 @@ const InputBox = (props) => {
 
 
     return (
-        <KeyboardAvoidingView behavior={"padding"}>
-            <View style = {styles.container}>
+     <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={98}
+        style={styles.container}
+      >
                 <View style = {styles.mainContainer}>
                     <FontAwesome5 name = "laugh-beam" size = {24} color = "grey"/>
 
@@ -124,8 +127,7 @@ const InputBox = (props) => {
                     
                         
                 </View> 
-            </View>
-            </KeyboardAvoidingView>
+     </KeyboardAvoidingView>
     )
 }
 

@@ -41,9 +41,9 @@ function Chat({navigation}) {
 
         const newUser = {
           id: userInfo.attributes.sub,
-          name: userInfo.username,
+          name: userInfo.attributes.name,
           imageUri: 'https://media.vanityfair.com/photos/575026f2c0f054944b554e89/master/pass/506802698.jpg',
-          status: 'Hey, I am using WhatsApp',
+          status: 'Hello welcome to the app',
         }
 
         await API.graphql(
