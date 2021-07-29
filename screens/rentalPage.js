@@ -47,6 +47,7 @@ import {
 } from "../src/graphql/mutations";
 import TenantForm from "./TenantForm";
 import { NavigationActions } from "react-navigation";
+import { RotationGestureHandler } from "react-native-gesture-handler";
 {
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
 }
@@ -67,6 +68,17 @@ export default function rentalPage({ navigation }) {
   const [modalTenantMenuOpen, setmodalTenantMenuOpen] = useState(false);
   const [landlordBool, setLandlordBool] = useState(false);
   const [property, setProperty] = useState({});
+  const [invitationModal, setInvitationModal] = useState(false);
+  const [invitations, setinvitations] = useState([
+    {
+      name: "Roger",
+      status: "no",
+    },
+    {
+      name: "eric",
+      status: "no",
+    },
+  ]);
 
   const generateID = () => {
     return Math.random().toString();
@@ -123,7 +135,7 @@ export default function rentalPage({ navigation }) {
 
               await API.graphql(
                 graphqlOperation(deleteInvitation, {
-                  input: {id:tenantData.data.getTenant.accepted},
+                  input: { id: tenantData.data.getTenant.accepted },
                 })
               );
 
@@ -142,7 +154,6 @@ export default function rentalPage({ navigation }) {
               tmp();
 
               navigation.goBack();
-
             } catch (error) {
               console.log("error leaving property", error);
             }
@@ -180,12 +191,14 @@ export default function rentalPage({ navigation }) {
                 for (const subtask of task.subtasks) {
                   subtasks.push(subtask.id);
                   await API.graphql(
-                    graphqlOperation(deleteSubtask, { input: {id:subtask.id} })
+                    graphqlOperation(deleteSubtask, {
+                      input: { id: subtask.id },
+                    })
                   );
                 }
                 task.subtasks = subtasks;
                 await API.graphql(
-                  graphqlOperation(deleteTask, { input: {id:task.id} })
+                  graphqlOperation(deleteTask, { input: { id: task.id } })
                 );
               }
 
@@ -202,7 +215,7 @@ export default function rentalPage({ navigation }) {
                 });
                 await API.graphql(
                   graphqlOperation(deleteInvitation, {
-                    input: {id:invitationData.data.getInvitation.id},
+                    input: { id: invitationData.data.getInvitation.id },
                   })
                 );
                 tenant.accepted = null;
@@ -246,20 +259,21 @@ export default function rentalPage({ navigation }) {
 
                 await API.graphql(
                   graphqlOperation(deleteInvitation, {
-                    input: {id:invitationData.data.getInvitation.id},
+                    input: { id: invitationData.data.getInvitation.id },
                   })
                 );
-
-                
               }
 
               await API.graphql(
                 graphqlOperation(deleteProperty, {
-                  input: {id:property.id},
+                  input: { id: property.id },
                 })
               );
 
-              landlord.properties.splice(landlord.properties.indexOf(property.id),1);
+              landlord.properties.splice(
+                landlord.properties.indexOf(property.id),
+                1
+              );
 
               await API.graphql(
                 graphqlOperation(updateLandlord, {
@@ -363,8 +377,6 @@ export default function rentalPage({ navigation }) {
       setProperty(navigation.getParam("property"));
 
       try {
-
-        
         const landlordData = await API.graphql({
           query: getLandlord,
           variables: { id: navigation.getParam("property").landlord },
@@ -406,7 +418,7 @@ export default function rentalPage({ navigation }) {
               query: getSubtask,
               variables: { id: subtask },
             });
-            if (subtaskData.data.getSubtask==null) continue;
+            if (subtaskData.data.getSubtask == null) continue;
             delete subtaskData.data.getSubtask.createdAt;
             delete subtaskData.data.getSubtask.updatedAt;
             // add the data to the subtask array
@@ -706,6 +718,29 @@ export default function rentalPage({ navigation }) {
               <TenantForm editTenant={editTenant} />
             </View>
           </Modal>
+          <Modal visible={invitationModal} animationType="slide">
+            <MaterialIcons
+              name="close"
+              size={24}
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              onPress={() => setInvitationModal(false)}
+            />
+            <FlatList
+              data={invitations}
+              renderItem={({ item }) => (
+                <TouchableOpacity onPress={() => console.log(item)}>
+                  <Task
+                    text={
+                      item.name + "     " + item.status
+                      // item.property.number == 0
+                      //   ? item.property.address
+                      //   : item.property.number + " " + item.address
+                    }
+                  />
+                </TouchableOpacity>
+              )}
+            />
+          </Modal>
 
           {/*menu options*/}
           <Modal visible={modalLandlordMenuOpen} animationType="slide">
@@ -841,6 +876,12 @@ export default function rentalPage({ navigation }) {
               style={styles.modalMenuToggle}
               onPress={() => setmodalLandlordMenuOpen(true)}
             />
+            <MaterialIcons
+              name="team"
+              size={24}
+              style={styles.modalInvitationToggle}
+              onPress={() => setInvitationModal(true)}
+            />
           </View>
         </ScrollView>
       </SafeAreaView>
@@ -958,14 +999,14 @@ export default function rentalPage({ navigation }) {
           <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
             <Text style={styles.sectionTitle}>Landlord</Text>
             <TouchableOpacity
-              // onPress={() =>
-              //   navigation.navigate("Tenant", {
-              //     user: navigation.getParam("user"),
-              //     tenant: person,
-              //     property: property,
-              //     update: setProperty,
-              //   })
-              // }
+            // onPress={() =>
+            //   navigation.navigate("Tenant", {
+            //     user: navigation.getParam("user"),
+            //     tenant: person,
+            //     property: property,
+            //     update: setProperty,
+            //   })
+            // }
             >
               <PeopleList person={property.landlord} />
             </TouchableOpacity>
@@ -1062,6 +1103,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 64,
   },
   modalMenuToggle: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: "baseline",
+  },
+  modalInvitationToggle: {
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
