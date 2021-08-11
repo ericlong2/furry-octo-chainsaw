@@ -14,7 +14,7 @@ import Task from "../components/Task";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NavigationActions } from "react-navigation";
 import colors from "./Colors";
-import { updateProperty, updateTenant } from "../src/graphql/mutations";
+import { updateInvitation, updateProperty, updateTenant } from "../src/graphql/mutations";
 import { getInvitation, getProperty, getTenant } from "../src/graphql/queries";
 
 export default function invitationPage({ navigation }) {
@@ -135,6 +135,12 @@ export default function invitationPage({ navigation }) {
         })
       );
 
+      currentInvitation.invitation.rejected = true;
+      await API.graphql(
+        graphqlOperation(updateInvitation, {
+          input: currentInvitation.invitation,
+        })
+      )
       removeInvitation(currentInvitation.invitation.id);
       setInvitationModal(false);
     } catch (error) {

@@ -142,6 +142,7 @@ export const createInvitation = /* GraphQL */ `
       leaseStart
       rentAmount
       tenant
+      rejected
       createdAt
       updatedAt
     }
@@ -159,6 +160,7 @@ export const updateInvitation = /* GraphQL */ `
       leaseStart
       rentAmount
       tenant
+      rejected
       createdAt
       updatedAt
     }
@@ -176,6 +178,7 @@ export const deleteInvitation = /* GraphQL */ `
       leaseStart
       rentAmount
       tenant
+      rejected
       createdAt
       updatedAt
     }

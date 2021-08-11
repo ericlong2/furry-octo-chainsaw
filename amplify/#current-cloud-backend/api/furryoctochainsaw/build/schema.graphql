@@ -30,6 +30,7 @@ type Invitation {
   leaseStart: String!
   rentAmount: Int!
   tenant: String!
+  rejected: Boolean!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -413,6 +414,7 @@ input ModelInvitationFilterInput {
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
   tenant: ModelStringInput
+  rejected: ModelBooleanInput
   and: [ModelInvitationFilterInput]
   or: [ModelInvitationFilterInput]
   not: ModelInvitationFilterInput
@@ -425,6 +427,7 @@ input CreateInvitationInput {
   leaseStart: String!
   rentAmount: Int!
   tenant: String!
+  rejected: Boolean!
 }
 
 input UpdateInvitationInput {
@@ -434,6 +437,7 @@ input UpdateInvitationInput {
   leaseStart: String
   rentAmount: Int
   tenant: String
+  rejected: Boolean
 }
 
 input DeleteInvitationInput {
@@ -446,6 +450,7 @@ input ModelInvitationConditionInput {
   leaseStart: ModelStringInput
   rentAmount: ModelIntInput
   tenant: ModelStringInput
+  rejected: ModelBooleanInput
   and: [ModelInvitationConditionInput]
   or: [ModelInvitationConditionInput]
   not: ModelInvitationConditionInput

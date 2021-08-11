@@ -69,16 +69,7 @@ export default function rentalPage({ navigation }) {
   const [landlordBool, setLandlordBool] = useState(false);
   const [property, setProperty] = useState({});
   const [invitationModal, setInvitationModal] = useState(false);
-  const [invitations, setinvitations] = useState([
-    {
-      name: "Roger",
-      status: "no",
-    },
-    {
-      name: "eric",
-      status: "no",
-    },
-  ]);
+  const [invitations, setInvitations] = useState([]);
 
   const generateID = () => {
     return Math.random().toString();
@@ -326,7 +317,10 @@ export default function rentalPage({ navigation }) {
         leaseStart: tenant.leaseStart,
         rentAmount: tenant.rentAmount,
         tenant: tenant.email,
+        rejected: false,
       };
+
+      invitations.push(invitation);
 
       //console.log(invitation);
       // create new invitation
@@ -478,12 +472,31 @@ export default function rentalPage({ navigation }) {
           // });
         }
 
+        const invitationList = [];
+        for (const invitation of navigation.getParam("property").invitations) {
+          const invitationData = await API.graphql({
+            query: getInvitation,
+            variables: { id: invitation },
+          });
+
+          // delete invitationData.data.getInvitation.createdAt;
+          // delete invitationData.data.getInvitation.updatedAt;
+          // invitations.push(invitationData.data.getInvitation);
+          // setInvitations((currentInvitations)=>{
+          //   return [invitationData.data.getInvitation, ...currentInvitations];
+          // });
+          invitationList.push(invitationData.data.getInvitation);
+        }
+        setInvitations(invitationList);
+        console.log("invitations",invitationList);
         // update state
         setState({
           addTicketVisible: state.addTicketVisible,
           lists: taskList,
           people: tenantList,
         });
+
+        
       } catch (error) {
         console.log("error retrieving property data", error);
       }
@@ -731,7 +744,7 @@ export default function rentalPage({ navigation }) {
                 <TouchableOpacity onPress={() => console.log(item)}>
                   <Task
                     text={
-                      item.name + "     " + item.status
+                      item.tenant + "     " + (item.rejected?"(rejected)":"")
                       // item.property.number == 0
                       //   ? item.property.address
                       //   : item.property.number + " " + item.address
@@ -877,7 +890,7 @@ export default function rentalPage({ navigation }) {
               onPress={() => setmodalLandlordMenuOpen(true)}
             />
             <MaterialIcons
-              name="team"
+              name="menu-open"
               size={24}
               style={styles.modalInvitationToggle}
               onPress={() => setInvitationModal(true)}

@@ -24,7 +24,7 @@ type Invitation @model {
   leaseStart: String!
   rentAmount: Int!
   tenant: String!
-  
+  rejected: Boolean!
 }
 type Tenant @model {
   id: ID!

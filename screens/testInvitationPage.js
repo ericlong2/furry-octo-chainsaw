@@ -55,6 +55,7 @@ function testInvitationPage({ navigation }) {
         leaseTerm: tenant.leaseTerm,
         leaseStart: tenant.leaseStart,
         rentAmount: tenant.rentAmount,
+        rejected: false,
       };
       await API.graphql(
         graphqlOperation(updateInvitation, { input: invitation })

@@ -7,6 +7,7 @@ import {
   updateInvitation,
   updateProperty,
   updateTenant,
+  deleteInvitation
 } from "../src/graphql/mutations";
 
 function editTenant({ navigation }) {
@@ -62,6 +63,7 @@ function editTenant({ navigation }) {
         leaseTerm: tenant.leaseTerm,
         leaseStart: tenant.leaseStart,
         rentAmount: tenant.rentAmount,
+        rejected: false,
       };
       await API.graphql(
         graphqlOperation(updateInvitation, { input: invitation })

@@ -99,6 +99,7 @@ export const getInvitation = /* GraphQL */ `
       leaseStart
       rentAmount
       tenant
+      rejected
       createdAt
       updatedAt
     }
@@ -118,6 +119,7 @@ export const listInvitations = /* GraphQL */ `
         leaseStart
         rentAmount
         tenant
+        rejected
         createdAt
         updatedAt
       }
