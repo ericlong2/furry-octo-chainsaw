@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "todoList",
-    "slug": "todoList",
+    "name": "AA",
+    "slug": "AA",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -18,8 +18,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ApexAffinity.AA",
-      "buildNumber": "1.0.0"
+      "bundleIdentifier": "ApexAffinity",
+      "buildNumber":"1.0.0"
     },
     "android": {
       "package": "com.ApexAffinity.AA",
