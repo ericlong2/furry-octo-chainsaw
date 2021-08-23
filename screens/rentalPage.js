@@ -1,5 +1,5 @@
 import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -30,6 +30,8 @@ import {
   getSubtask,
   getInvitation,
   getLandlord,
+  getChatRoom,
+  getUser,
 } from "../src/graphql/queries";
 import {
   createTask,
@@ -44,10 +46,15 @@ import {
   deleteProperty,
   deleteTask,
   deleteInvitation,
+  deleteChatRoom,
+  updateChatRoom,
+  updateUser,
+  deleteMessage,
 } from "../src/graphql/mutations";
 import TenantForm from "./TenantForm";
 import { NavigationActions } from "react-navigation";
 import { RotationGestureHandler } from "react-native-gesture-handler";
+import { onUpdateProperty, onUpdateTask, onUpdateTenant } from "../src/graphql/subscriptions";
 {
   /* https://www.youtube.com/watch?v=ce-ancZvtKE&list=PLqtWgQ5BRLPvbmeIYf769yb25g4W8NUZo&index=3 */
 }
@@ -59,7 +66,6 @@ export default function rentalPage({ navigation }) {
     people: [],
   });
 
-  const [loaded, setLoaded] = useState(false);
   const [landlord, setLandlord] = useState({});
   const [tenantModal, setTenantModal] = useState(false);
   const [currentTenant, setCurrentTenant] = useState();
@@ -67,7 +73,7 @@ export default function rentalPage({ navigation }) {
   const [modalLandlordMenuOpen, setmodalLandlordMenuOpen] = useState(false);
   const [modalTenantMenuOpen, setmodalTenantMenuOpen] = useState(false);
   const [landlordBool, setLandlordBool] = useState(false);
-  const [property, setProperty] = useState({});
+  const [property, setProperty] = useState(navigation.getParam("property"));
   const [invitationModal, setInvitationModal] = useState(false);
   const [invitations, setInvitations] = useState([]);
 
@@ -78,7 +84,7 @@ export default function rentalPage({ navigation }) {
   const leaveProperty = () => {
     Alert.alert(
       "Leave Property",
-      "You are about to leave " + navigation.getParam("property").address,
+      "You are about to leave " + property.address,
       [
         {
           text: "Cancel",
@@ -91,6 +97,14 @@ export default function rentalPage({ navigation }) {
           onPress: async () => {
             console.log("Delete Pressed");
             try {
+
+              const chatRoomData = await API.graphql(graphqlOperation(getChatRoom,{id:property.chatRoomID}));
+              chatRoomData.data.getChatRoom.chatRoomUsers.splice(chatRoomData.data.getChatRoom.chatRoomUsers.indexOf(navigation.getParam("user").email,1));
+              delete chatRoomData.data.getChatRoom.createdAt;
+              delete chatRoomData.data.getChatRoom.updatedAt;
+              await API.graphql(graphqlOperation(updateChatRoom,{input:chatRoomData.data.getChatRoom}));
+
+
               // get list of tenant ids
               const tenantList = [];
 
@@ -124,6 +138,8 @@ export default function rentalPage({ navigation }) {
                 1
               );
 
+              
+
               await API.graphql(
                 graphqlOperation(deleteInvitation, {
                   input: { id: tenantData.data.getTenant.accepted },
@@ -141,10 +157,15 @@ export default function rentalPage({ navigation }) {
                 })
               );
 
-              const tmp = navigation.getParam("refresh");
-              tmp();
+              const userData = await API.graphql({
+                query: getUser,
+                variables: { id: navigation.getParam("user").email },
+              });
+              userData.data.getUser.chatRooms.splice(userData.data.getUser.chatRooms.indexOf(property.chatRoomID));
+              delete userData.data.getUser.createdAt;
+              delete userData.data.getUser.updatedAt;
+              await API.graphql(graphqlOperation(updateUser,{input:userData.data.getUser}));
 
-              navigation.goBack();
             } catch (error) {
               console.log("error leaving property", error);
             }
@@ -163,7 +184,7 @@ export default function rentalPage({ navigation }) {
   const removeProperty = () => {
     Alert.alert(
       "Delete Property",
-      "You are about to delete " + navigation.getParam("property").address,
+      "You are about to delete " + property.address,
       [
         {
           text: "Cancel",
@@ -176,6 +197,16 @@ export default function rentalPage({ navigation }) {
           onPress: async () => {
             console.log("Delete Pressed");
             try {
+
+              const chatRoomData = await API.graphql(graphqlOperation(getChatRoom,{id:property.chatRoomID}));
+              delete chatRoomData.data.getChatRoom.createdAt;
+              delete chatRoomData.data.getChatRoom.updatedAt;
+              for (const messageID of chatRoomData.data.getChatRoom.messages) {
+                await API.graphql(graphqlOperation(deleteMessage,{input:{id:messageID}}));
+              }
+
+              await API.graphql(graphqlOperation(deleteChatRoom,{input:{id:property.chatRoomID}}));
+
               for (const task of state.lists) {
                 const subtasks = [];
                 console.log(task);
@@ -216,6 +247,13 @@ export default function rentalPage({ navigation }) {
                 await API.graphql(
                   graphqlOperation(updateTenant, { input: tenant })
                 );
+
+                const userData = await API.graphql(graphqlOperation(getUser, {id:tenant.id}));
+                delete userData.data.getUser.createdAt;
+                delete userData.data.getUser.updatedAt;
+                userData.data.getUser.chatRooms.splice(userData.data.getUser.chatRooms.indexOf(property.chatRoomID),1);
+                await API.graphql(graphqlOperation(updateUser,{input:userData.data.getUser}));
+
               }
 
               for (const invitation of property.invitations) {
@@ -230,8 +268,8 @@ export default function rentalPage({ navigation }) {
                   variables: { id: invitationData.data.getInvitation.tenant },
                 });
 
-                tenant.data.getTenant.invitations.splice(
-                  tenant.data.getTenant.invitations.indexOf(invitation),
+                tenantData.data.getTenant.invitations.splice(
+                  tenantData.data.getTenant.invitations.indexOf(invitation),
                   1
                 );
 
@@ -271,8 +309,12 @@ export default function rentalPage({ navigation }) {
                   input: landlord,
                 })
               );
-              const tmp = navigation.getParam("refresh");
-              tmp();
+
+              const userData = await API.graphql(graphqlOperation(getUser, {id:navigation.getParam("user").email}));
+              delete userData.data.getUser.createdAt;
+              delete userData.data.getUser.updatedAt;
+              userData.data.getUser.chatRooms.splice(userData.data.getUser.chatRooms.indexOf(property.chatRoomID),1);
+              await API.graphql(graphqlOperation(updateUser,{input:userData.data.getUser}));
 
               navigation.goBack();
             } catch (error) {
@@ -352,7 +394,7 @@ export default function rentalPage({ navigation }) {
       );
 
       property.invitations.push(invitation.id);
-
+      console.log(property);
       await API.graphql(graphqlOperation(updateProperty, { input: property }));
     } catch (error) {
       console.log("error editing tenant", error);
@@ -361,19 +403,18 @@ export default function rentalPage({ navigation }) {
   };
 
   const address = navigation.getParam("property").address;
-  const loadData = async () => {
-    if (!loaded) {
+  const loadData = async (data) => {
+      console.log(navigation.getParam("user").email);
       // empty lists
       state.lists = [];
       state.people = [];
-      setLoaded(true);
 
-      setProperty(navigation.getParam("property"));
-
+      setProperty(data);
+      console.log(data);
       try {
         const landlordData = await API.graphql({
           query: getLandlord,
-          variables: { id: navigation.getParam("property").landlord },
+          variables: { id: data.landlord },
         });
 
         delete landlordData.data.getLandlord.createdAt;
@@ -389,7 +430,7 @@ export default function rentalPage({ navigation }) {
         const taskList = [];
 
         // loop through all tasks belonging to current property
-        for (const id of navigation.getParam("property").tasks) {
+        for (const id of data.tasks) {
           // get task data
           const taskData = await API.graphql({
             query: getTask,
@@ -436,7 +477,7 @@ export default function rentalPage({ navigation }) {
         const tenantList = [];
 
         // loop through ids of the tenants
-        for (const id of navigation.getParam("property").tenants) {
+        for (const id of data.tenants) {
           // get tenant data from tenant id
           const tenantData = await API.graphql({
             query: getTenant,
@@ -473,7 +514,7 @@ export default function rentalPage({ navigation }) {
         }
 
         const invitationList = [];
-        for (const invitation of navigation.getParam("property").invitations) {
+        for (const invitation of data.invitations) {
           const invitationData = await API.graphql({
             query: getInvitation,
             variables: { id: invitation },
@@ -500,10 +541,67 @@ export default function rentalPage({ navigation }) {
       } catch (error) {
         console.log("error retrieving property data", error);
       }
-    }
   };
   // load data once when the page starts
-  loadData();
+  useEffect(() => {
+    loadData(navigation.getParam("property"));
+  }, [])
+  useEffect(() => {
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateProperty)
+    ).subscribe({
+      next: async (data) => {
+        const newProperty = data.value.data.onUpdateProperty;
+
+        if (newProperty.id !== property.id) {
+          console.log("Message is in another room!")
+          return;
+        }
+        loadData(newProperty);
+        // setMessages([newMessage, ...messages]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [])
+
+  useEffect(() => {
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateTenant)
+    ).subscribe({
+      next: (data) => {
+        const newTenant= data.value.data.onUpdateTenant;
+
+        if (newTenant.id !== navigation.getParam("user").id) {
+          console.log("Message is in another room!")
+          return;
+        }
+        navigation.goBack();
+        // setMessages([newMessage, ...messages]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [])
+
+  useEffect(() => {
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateTask)
+    ).subscribe({
+      next: (data) => {
+        const newTask = data.value.data.onUpdateTask;
+        console.log(property);
+        if (!property.tasks || property.tasks.indexOf(newTask.id) == -1) {
+          console.log("Message is in another room!")
+          return;
+        }
+        loadData(property);
+        // setMessages([newMessage, ...messages]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [])
 
   const toggleAddTicketModal = () => {
     setState({
@@ -650,7 +748,6 @@ export default function rentalPage({ navigation }) {
     }
 
     // can be optimized
-    setLoaded(false);
     loadData();
   };
 
@@ -678,11 +775,6 @@ export default function rentalPage({ navigation }) {
     } catch (error) {
       console.log("error signing out: ", error);
     }
-  }
-
-  async function refresh() {
-    setLoaded(false);
-    loadData();
   }
 
   if (landlordBool) {
@@ -774,7 +866,7 @@ export default function rentalPage({ navigation }) {
                 //style={styles.button}
                 title="Refresh"
                 color="blue"
-                onPress={refresh}
+                onPress={loadData}
               />
               <Button
                 //style={styles.button}
@@ -820,16 +912,16 @@ export default function rentalPage({ navigation }) {
           <View style={{ height: 200, paddingLeft: 32, paddingVertical: 32 }}>
             <Text style={styles.sectionTitle}>Landlord</Text>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate("Tenant", {
-                  user: navigation.getParam("user"),
-                  tenant: person,
-                  property: property,
-                  update: setProperty,
-                })
-              }
+              // onPress={() =>
+              //   navigation.navigate("Tenant", {
+              //     user: navigation.getParam("user"),
+              //     tenant: person,
+              //     property: property,
+              //     update: setProperty,
+              //   })
+              // }
             >
-              <PeopleList person={"landlord name"} />
+              <PeopleList person={landlord} />
             </TouchableOpacity>
           </View>
 
@@ -965,7 +1057,7 @@ export default function rentalPage({ navigation }) {
                 //style={styles.button}
                 title="Refresh"
                 color="blue"
-                onPress={refresh}
+                onPress={loadData}
               />
 
               <Button
@@ -1021,7 +1113,7 @@ export default function rentalPage({ navigation }) {
             //   })
             // }
             >
-              <PeopleList person={property.landlord} />
+              <PeopleList person={landlord} />
             </TouchableOpacity>
           </View>
 
@@ -1055,6 +1147,10 @@ export default function rentalPage({ navigation }) {
                 <AntDesign name="plus" size={16} color={colors.blue} />
               </TouchableOpacity>
             </View>
+
+            <TouchableOpacity onPress={() => chat()}>
+              <MaterialIcons name="chat" size={128} color={colors.blue} />
+            </TouchableOpacity>
 
             {/* Is this your chat button?
             no above is better imo

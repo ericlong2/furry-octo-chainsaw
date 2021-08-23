@@ -25,6 +25,7 @@ import {
   createLandlord,
   createTenant,
   updateTenant,
+  createUser,
 } from "../src/graphql/mutations";
 import { getTenant } from "../src/graphql/queries";
 import { NavigationActions } from "react-navigation";
@@ -54,7 +55,23 @@ export default function RegisterScreen({ navigation }) {
     console.log(code);
     try {
       await Auth.confirmSignUp(email.value, code);
-      await Auth.signIn(email.value, password.value);
+      const user = await Auth.signIn(email.value, password.value);
+
+      const newUser = {
+        id: email.value,
+        name: name.value,
+        imageUri: 'https://media.vanityfair.com/photos/575026f2c0f054944b554e89/master/pass/506802698.jpg',
+        status: 'Hello welcome to the app',
+        contacts: [],
+        chatRooms: [],
+      }
+
+      await API.graphql(
+        graphqlOperation(
+          createUser,
+          { input: newUser }
+        )
+      )
 
       // if signing up as landlord
       if (isEnabled) {

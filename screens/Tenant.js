@@ -30,10 +30,6 @@ export default function Tenant({ navigation }) {
       console.log("error signing out: ", error);
     }
   }
-  function refresh() {
-    setLoaded(false);
-    loadTenant();
-  }
 
   const editTenant = async () => {
     try {
@@ -42,7 +38,7 @@ export default function Tenant({ navigation }) {
       if (navigation.getParam("user")["custom:landlord"] == "true") {
         //open modal to edit the tenant and save the information
         // should probably name it better
-        navigation.navigate("editTenant", { tenant: tenant, property: property, update: navigation.getParam("update"), refresh:refresh});
+        navigation.navigate("editTenant", { tenant: tenant, property: property, update: navigation.getParam("update")});
       }
     } catch (error) {
       console.log("error editing tenant", error);
@@ -76,12 +72,12 @@ export default function Tenant({ navigation }) {
             color="maroon"
             onPress={signOut}
           />
-          <Button
+          {/* <Button
             //style={styles.button}
             title="Refresh"
             color="blue"
-            onPress={refresh}
-          />
+            onPress={loadTenant}
+          /> */}
           {/*<Options />*/}
         </View>
       </Modal>

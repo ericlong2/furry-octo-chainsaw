@@ -58,6 +58,7 @@ type Property {
   tenants: [String]!
   landlord: String!
   invitations: [String]!
+  chatRoomID: String!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
@@ -67,39 +68,29 @@ type User {
   name: String!
   imageUri: String
   status: String
-  chatRoomUser(chatRoomID: ModelIDKeyConditionInput, filter: ModelChatRoomUserFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelChatRoomUserConnection
-  createdAt: AWSDateTime!
-  updatedAt: AWSDateTime!
-}
-
-type ChatRoomUser {
-  id: ID!
-  userID: ID!
-  chatRoomID: ID!
-  user: User
-  chatRoom: ChatRoom
+  contacts: [String]!
+  chatRooms: [String]!
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
 type ChatRoom {
   id: ID!
-  chatRoomUsers(userID: ModelIDKeyConditionInput, filter: ModelChatRoomUserFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelChatRoomUserConnection
-  messages(createdAt: ModelStringKeyConditionInput, filter: ModelMessageFilterInput, sortDirection: ModelSortDirection, limit: Int, nextToken: String): ModelMessageConnection
-  lastMessageID: ID
-  lastMessage: Message
+  name: String
+  chatRoomUsers: [String]!
+  messages: [String]!
+  lastMessageID: String
   createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
 type Message {
   id: ID!
-  createdAt: String!
   content: String!
-  userID: ID!
-  chatRoomID: ID!
-  user: User
-  chatRoom: ChatRoom
+  userID: String!
+  userName: String!
+  chatRoomID: String!
+  createdAt: AWSDateTime!
   updatedAt: AWSDateTime!
 }
 
@@ -223,13 +214,10 @@ type Query {
   listProperties(filter: ModelPropertyFilterInput, limit: Int, nextToken: String): ModelPropertyConnection
   getUser(id: ID!): User
   listUsers(filter: ModelUserFilterInput, limit: Int, nextToken: String): ModelUserConnection
-  getChatRoomUser(id: ID!): ChatRoomUser
-  listChatRoomUsers(filter: ModelChatRoomUserFilterInput, limit: Int, nextToken: String): ModelChatRoomUserConnection
   getChatRoom(id: ID!): ChatRoom
   listChatRooms(filter: ModelChatRoomFilterInput, limit: Int, nextToken: String): ModelChatRoomConnection
   getMessage(id: ID!): Message
   listMessages(filter: ModelMessageFilterInput, limit: Int, nextToken: String): ModelMessageConnection
-  messagesByChatRoom(chatRoomID: ID, createdAt: ModelStringKeyConditionInput, sortDirection: ModelSortDirection, filter: ModelMessageFilterInput, limit: Int, nextToken: String): ModelMessageConnection
 }
 
 input CreateLandlordInput {
@@ -270,9 +258,6 @@ type Mutation {
   createUser(input: CreateUserInput!, condition: ModelUserConditionInput): User
   updateUser(input: UpdateUserInput!, condition: ModelUserConditionInput): User
   deleteUser(input: DeleteUserInput!, condition: ModelUserConditionInput): User
-  createChatRoomUser(input: CreateChatRoomUserInput!, condition: ModelChatRoomUserConditionInput): ChatRoomUser
-  updateChatRoomUser(input: UpdateChatRoomUserInput!, condition: ModelChatRoomUserConditionInput): ChatRoomUser
-  deleteChatRoomUser(input: DeleteChatRoomUserInput!, condition: ModelChatRoomUserConditionInput): ChatRoomUser
   createChatRoom(input: CreateChatRoomInput!, condition: ModelChatRoomConditionInput): ChatRoom
   updateChatRoom(input: UpdateChatRoomInput!, condition: ModelChatRoomConditionInput): ChatRoom
   deleteChatRoom(input: DeleteChatRoomInput!, condition: ModelChatRoomConditionInput): ChatRoom
@@ -311,9 +296,6 @@ type Subscription {
   onCreateUser: User @aws_subscribe(mutations: ["createUser"])
   onUpdateUser: User @aws_subscribe(mutations: ["updateUser"])
   onDeleteUser: User @aws_subscribe(mutations: ["deleteUser"])
-  onCreateChatRoomUser: ChatRoomUser @aws_subscribe(mutations: ["createChatRoomUser"])
-  onUpdateChatRoomUser: ChatRoomUser @aws_subscribe(mutations: ["updateChatRoomUser"])
-  onDeleteChatRoomUser: ChatRoomUser @aws_subscribe(mutations: ["deleteChatRoomUser"])
   onCreateChatRoom: ChatRoom @aws_subscribe(mutations: ["createChatRoom"])
   onUpdateChatRoom: ChatRoom @aws_subscribe(mutations: ["updateChatRoom"])
   onDeleteChatRoom: ChatRoom @aws_subscribe(mutations: ["deleteChatRoom"])
@@ -517,6 +499,7 @@ input ModelPropertyFilterInput {
   tenants: ModelStringInput
   landlord: ModelStringInput
   invitations: ModelStringInput
+  chatRoomID: ModelStringInput
   and: [ModelPropertyFilterInput]
   or: [ModelPropertyFilterInput]
   not: ModelPropertyFilterInput
@@ -536,6 +519,7 @@ input CreatePropertyInput {
   tenants: [String]!
   landlord: String!
   invitations: [String]!
+  chatRoomID: String!
 }
 
 input UpdatePropertyInput {
@@ -552,6 +536,7 @@ input UpdatePropertyInput {
   tenants: [String]
   landlord: String
   invitations: [String]
+  chatRoomID: String
 }
 
 input DeletePropertyInput {
@@ -571,6 +556,7 @@ input ModelPropertyConditionInput {
   tenants: ModelStringInput
   landlord: ModelStringInput
   invitations: ModelStringInput
+  chatRoomID: ModelStringInput
   and: [ModelPropertyConditionInput]
   or: [ModelPropertyConditionInput]
   not: ModelPropertyConditionInput
@@ -586,6 +572,8 @@ input ModelUserFilterInput {
   name: ModelStringInput
   imageUri: ModelStringInput
   status: ModelStringInput
+  contacts: ModelStringInput
+  chatRooms: ModelStringInput
   and: [ModelUserFilterInput]
   or: [ModelUserFilterInput]
   not: ModelUserFilterInput
@@ -596,6 +584,8 @@ input CreateUserInput {
   name: String!
   imageUri: String
   status: String
+  contacts: [String]!
+  chatRooms: [String]!
 }
 
 input UpdateUserInput {
@@ -603,6 +593,8 @@ input UpdateUserInput {
   name: String
   imageUri: String
   status: String
+  contacts: [String]
+  chatRooms: [String]
 }
 
 input DeleteUserInput {
@@ -613,47 +605,11 @@ input ModelUserConditionInput {
   name: ModelStringInput
   imageUri: ModelStringInput
   status: ModelStringInput
+  contacts: ModelStringInput
+  chatRooms: ModelStringInput
   and: [ModelUserConditionInput]
   or: [ModelUserConditionInput]
   not: ModelUserConditionInput
-}
-
-type ModelChatRoomUserConnection {
-  items: [ChatRoomUser]
-  nextToken: String
-}
-
-input ModelChatRoomUserFilterInput {
-  id: ModelIDInput
-  userID: ModelIDInput
-  chatRoomID: ModelIDInput
-  and: [ModelChatRoomUserFilterInput]
-  or: [ModelChatRoomUserFilterInput]
-  not: ModelChatRoomUserFilterInput
-}
-
-input CreateChatRoomUserInput {
-  id: ID
-  userID: ID!
-  chatRoomID: ID!
-}
-
-input UpdateChatRoomUserInput {
-  id: ID!
-  userID: ID
-  chatRoomID: ID
-}
-
-input DeleteChatRoomUserInput {
-  id: ID!
-}
-
-input ModelChatRoomUserConditionInput {
-  userID: ModelIDInput
-  chatRoomID: ModelIDInput
-  and: [ModelChatRoomUserConditionInput]
-  or: [ModelChatRoomUserConditionInput]
-  not: ModelChatRoomUserConditionInput
 }
 
 type ModelChatRoomConnection {
@@ -663,7 +619,10 @@ type ModelChatRoomConnection {
 
 input ModelChatRoomFilterInput {
   id: ModelIDInput
-  lastMessageID: ModelIDInput
+  name: ModelStringInput
+  chatRoomUsers: ModelStringInput
+  messages: ModelStringInput
+  lastMessageID: ModelStringInput
   and: [ModelChatRoomFilterInput]
   or: [ModelChatRoomFilterInput]
   not: ModelChatRoomFilterInput
@@ -671,12 +630,18 @@ input ModelChatRoomFilterInput {
 
 input CreateChatRoomInput {
   id: ID
-  lastMessageID: ID
+  name: String
+  chatRoomUsers: [String]!
+  messages: [String]!
+  lastMessageID: String
 }
 
 input UpdateChatRoomInput {
   id: ID!
-  lastMessageID: ID
+  name: String
+  chatRoomUsers: [String]
+  messages: [String]
+  lastMessageID: String
 }
 
 input DeleteChatRoomInput {
@@ -684,7 +649,10 @@ input DeleteChatRoomInput {
 }
 
 input ModelChatRoomConditionInput {
-  lastMessageID: ModelIDInput
+  name: ModelStringInput
+  chatRoomUsers: ModelStringInput
+  messages: ModelStringInput
+  lastMessageID: ModelStringInput
   and: [ModelChatRoomConditionInput]
   or: [ModelChatRoomConditionInput]
   not: ModelChatRoomConditionInput
@@ -697,10 +665,10 @@ type ModelMessageConnection {
 
 input ModelMessageFilterInput {
   id: ModelIDInput
-  createdAt: ModelStringInput
   content: ModelStringInput
-  userID: ModelIDInput
-  chatRoomID: ModelIDInput
+  userID: ModelStringInput
+  userName: ModelStringInput
+  chatRoomID: ModelStringInput
   and: [ModelMessageFilterInput]
   or: [ModelMessageFilterInput]
   not: ModelMessageFilterInput
@@ -708,18 +676,18 @@ input ModelMessageFilterInput {
 
 input CreateMessageInput {
   id: ID
-  createdAt: String
   content: String!
-  userID: ID!
-  chatRoomID: ID!
+  userID: String!
+  userName: String!
+  chatRoomID: String!
 }
 
 input UpdateMessageInput {
   id: ID!
-  createdAt: String
   content: String
-  userID: ID
-  chatRoomID: ID
+  userID: String
+  userName: String
+  chatRoomID: String
 }
 
 input DeleteMessageInput {
@@ -727,31 +695,11 @@ input DeleteMessageInput {
 }
 
 input ModelMessageConditionInput {
-  createdAt: ModelStringInput
   content: ModelStringInput
-  userID: ModelIDInput
-  chatRoomID: ModelIDInput
+  userID: ModelStringInput
+  userName: ModelStringInput
+  chatRoomID: ModelStringInput
   and: [ModelMessageConditionInput]
   or: [ModelMessageConditionInput]
   not: ModelMessageConditionInput
-}
-
-input ModelIDKeyConditionInput {
-  eq: ID
-  le: ID
-  lt: ID
-  ge: ID
-  gt: ID
-  between: [ID]
-  beginsWith: ID
-}
-
-input ModelStringKeyConditionInput {
-  eq: String
-  le: String
-  lt: String
-  ge: String
-  gt: String
-  between: [String]
-  beginsWith: String
 }

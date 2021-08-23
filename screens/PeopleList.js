@@ -7,7 +7,7 @@ export default class PeopleList extends Component {
       <View style={{ paddingHorizontal: 7 }}>
         <UserAvatar
           size={80}
-          name={this.props.person.name}
+          name={this.props.person&&this.props.person.name?this.props.person.name:""}
           style={styles.avatar}
           borderRadius={6}
         />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   KeyboardAvoidingView,
   StyleSheet,
@@ -23,10 +23,11 @@ import Options from "./options";
 
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 
-import { getLandlord, getProperty } from "../src/graphql/queries";
-import { createProperty, updateLandlord } from "../src/graphql/mutations";
+import { getLandlord, getProperty, getUser } from "../src/graphql/queries";
+import { createChatRoom, createProperty, updateLandlord, updateUser } from "../src/graphql/mutations";
 import { NavigationActions } from "react-navigation";
 import { set } from "react-native-reanimated";
+import { onUpdateLandlord } from "../src/graphql/subscriptions";
 
 export default function properties({ navigation }) {
   /*Constants*/
@@ -34,12 +35,9 @@ export default function properties({ navigation }) {
   const [modal2Open, setModal2Open] = useState(false);
   const [number, setNumber] = useState(0);
   const [rentals, setRental] = useState([]);
-  const [loaded, setLoaded] = useState(false);
   const [landlord, setLandlord] = useState({});
 
   const loadProperties = async () => {
-    if (!loaded) {
-      setLoaded(true);
       const tmp = [];
       // load properties that have already been added previously
       try {
@@ -79,23 +77,49 @@ export default function properties({ navigation }) {
       } catch (error) {
         console.log("error loading properties:", error);
       }
-    }
+    
   };
-  loadProperties();
+  useEffect(() => {
+    loadProperties();
+  }, [])
+
+  useEffect(() => {
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateLandlord)
+    ).subscribe({
+      next: (data) => {
+        const newLandlord = data.value.data.onUpdateLandlord;
+
+        if (newLandlord.id !== navigation.getParam("user").email) {
+          console.log("Message is in another room!")
+          return;
+        }
+        loadProperties();
+        // setMessages([newMessage, ...messages]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [])
 
   const generateID = () => {
     return Math.random().toString();
   };
 
-  function refresh() {
-    setLoaded(false);
-    loadProperties();
-    console.log("refresh");
-  }
-
   const addProperty = async (rental) => {
     try {
       console.log(rental);
+      const chatRoom = {id: generateID(),name:rental.address,chatRoomUsers:[navigation.getParam("user").email],messages:[]};
+    
+      rental.chatRoomID = chatRoom.id;
+      await API.graphql(graphqlOperation(createChatRoom, {input: chatRoom}));
+
+      const userData = await API.graphql(graphqlOperation(getUser,{id:navigation.getParam("user").email}));
+      delete userData.data.getUser.createdAt;
+      delete userData.data.getUser.updatedAt;
+      userData.data.getUser.chatRooms.push(chatRoom.id);
+      await API.graphql(graphqlOperation(updateUser,{input:userData.data.getUser}));
+
       // create a new property object for rental
       await API.graphql(graphqlOperation(createProperty, { input: rental }));
 
@@ -114,6 +138,7 @@ export default function properties({ navigation }) {
   };
 
   const addRental = (rental) => {
+    
     //change this to not random
     rental.id = generateID();
     rental.issues = 0;
@@ -129,7 +154,7 @@ export default function properties({ navigation }) {
 
   /*Functions */
   const pressRental = (item) => {
-    const info = {user:navigation.getParam("user"),property:item, refresh:refresh};
+    const info = {user:navigation.getParam("user"),property:item};
     navigation.navigate("RentalDetails", info);
   };
 
@@ -189,7 +214,7 @@ export default function properties({ navigation }) {
             //style={styles.button}
             title="Refresh"
             color="blue"
-            onPress={refresh}
+            onPress={loadProperties}
           />
           {/*<Options />*/}
         </View>

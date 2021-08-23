@@ -15,7 +15,7 @@ const chatMessage = (props: ChatMessageProps) => {
 
     const isMyMessage = () => {
         //determine if my message or not
-        return message.user.id === myId;
+        return message.userID === myId;
     }
 
     return (
@@ -29,7 +29,7 @@ const chatMessage = (props: ChatMessageProps) => {
                 }  
             ]}>
                 {/* if it is my message then display the username */}
-                {!isMyMessage() && <Text style = {styles.name}>{message.user.name}</Text>}
+                {!isMyMessage() && <Text style = {styles.name}>{message.userName}</Text>}
                 <Text style = {styles.message} >{message.content}</Text>
                 <Text style = {styles.time}>{moment(message.createdAt).fromNow()}</Text>
             </View>

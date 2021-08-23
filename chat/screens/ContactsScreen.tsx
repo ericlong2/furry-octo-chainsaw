@@ -8,8 +8,8 @@ import ContactListItem from '../components/ContactListItem';
 import NewMessageButton from '../components/NewMessageButton';
 
 
-import { API, graphqlOperation } from 'aws-amplify';
-import {listUsers} from '../../src/graphql/queries'
+import { API, graphqlOperation, Auth } from 'aws-amplify';
+import {getUser, listUsers} from '../../src/graphql/queries'
 import { useEffect, useState } from 'react';
 
 export default function ContactsScreen() {
@@ -19,12 +19,15 @@ export default function ContactsScreen() {
   useEffect(() => {
     const fetchUsers = async() => {
       try{
-        const usersData = await API.graphql(graphqlOperation(
-          listUsers
-        ))
-        console.log(usersData);
+        const userInfo = await Auth.currentAuthenticatedUser();
+        const userData = await API.graphql(graphqlOperation(getUser,{id:userInfo.attributes.email}));
+        const arr = [];
+        for (const userID of userData.data.getUser.contacts) {
+          const contactData = await API.graphql(graphqlOperation(getUser,{id:userID}));
+          arr.push(contactData.data.getUser);
+        }
 
-        setUsers(usersData.data.listUsers.items);
+        setUsers(arr);
       }catch(e){
           console.log(e);
       }

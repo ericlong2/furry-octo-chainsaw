@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Background from "../components/Background";
 import Logo from "../components/Logo";
 import Header from "../components/Header";
@@ -8,10 +8,7 @@ import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
 import { NavigationActions } from "react-navigation";
 
 export default function StartScreen({ navigation }) {
-  const [loaded, setLoaded] = useState(false);
   const loadUser = async () => {
-    if (!loaded) {
-      setLoaded(true);
       try {
         const user = await Auth.currentAuthenticatedUser();
         console.log(user.attributes);
@@ -36,9 +33,11 @@ export default function StartScreen({ navigation }) {
       } catch (error) {
         console.log("user is not logged in", error);
       }
-    }
+    
   };
-  loadUser();
+  useEffect(() => {
+    loadUser();
+  }, [])
   return (
     <Background>
       <Logo />

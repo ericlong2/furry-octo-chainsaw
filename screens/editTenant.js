@@ -7,8 +7,11 @@ import {
   updateInvitation,
   updateProperty,
   updateTenant,
-  deleteInvitation
+  deleteInvitation,
+  updateChatRoom,
+  updateUser
 } from "../src/graphql/mutations";
+import { getChatRoom, getUser } from "../src/graphql/queries";
 
 function editTenant({ navigation }) {
   const tenant = navigation.getParam("tenant");
@@ -17,6 +20,13 @@ function editTenant({ navigation }) {
 
   const removeTenant = async () => {
     try {
+
+      const chatRoomData = await API.graphql(graphqlOperation(getChatRoom,{id:navigation.getParam("property").chatRoomID}));
+      chatRoomData.data.getChatRoom.chatRoomUsers.splice(chatRoomData.data.getChatRoom.chatRoomUsers.indexOf(tenant.name,1));
+      delete chatRoomData.data.getChatRoom.createdAt;
+      delete chatRoomData.data.getChatRoom.updatedAt;
+      await API.graphql(graphqlOperation(updateChatRoom,{input:chatRoomData.data.getChatRoom}));
+
       console.log("removed " + tenant.name);
 
       property.tenants.splice(property.tenants.indexOf(tenant.id), 1);
@@ -37,8 +47,15 @@ function editTenant({ navigation }) {
 
       tenant.accepted = null;
 
+      const userData = await API.graphql(graphqlOperation(getUser,{id:tenant.id}));
+      
+      userData.data.getUser.chatRooms.splice(userData.data.getUser.chatRooms.indexOf(property.chatRoomID),1);
+      delete userData.data.getUser.createdAt;
+      delete userData.data.getUser.updatedAt;
+      await API.graphql(graphqlOperation(updateUser, {input: userData.data.getUser}));
+
       // update database
-      await API.graphql(graphqlOperation(updateTenant, { input: property }));
+      await API.graphql(graphqlOperation(updateTenant, { input: tenant }));
 
       const update = navigation.getParam("update");
       update(property);
@@ -68,8 +85,7 @@ function editTenant({ navigation }) {
       await API.graphql(
         graphqlOperation(updateInvitation, { input: invitation })
       );
-      const refresh = navigation.getParam("refresh");
-      refresh();
+
       navigation.goBack();
     } catch (error) {
       console.log("error updating tenant", error);

@@ -14,16 +14,15 @@ import { useEffect } from "react";
 
 const InputBox = (props) => {
 
-    const {chatRoomID} = props;
-    
+    const chatRoom = props.chatRoomID;
     const [message, setMessage] = useState('');
 
-    const [myUserId, setMyUserId] = useState(null);
+    const [user, setUser] = useState({});
 
     useEffect(() =>{
         const fetchUser = async () =>{
             const userInfo = await Auth.currentAuthenticatedUser();
-            setMyUserId(userInfo.attributes.sub);
+            setUser(userInfo.attributes);
 
         }   
         fetchUser();
@@ -36,11 +35,15 @@ const InputBox = (props) => {
 
     const updateChatRoomLastMesage = async (messageId: string) => {
         try{
+            chatRoom.messages.push(messageId);
             await API.graphql(
                 graphqlOperation(
                     updateChatRoom,{
                         input: {
-                            id: chatRoomID,
+                            id: chatRoom.id,
+                            name: chatRoom.name,
+                            chatRoomUsers: chatRoom.chatRoomUsers,
+                            messages: chatRoom.messages,
                             lastMessageID: messageId,
                         }
                     }
@@ -52,6 +55,10 @@ const InputBox = (props) => {
     }
     
 
+    const generateID = () => {
+        return Math.random().toString();
+    }
+
     const onSendPress = async () =>{
 
 
@@ -60,15 +67,16 @@ const InputBox = (props) => {
                 graphqlOperation(
                     createMessage, {
                         input: {
+                            id: generateID(),
                             content: message,
-                            userID: myUserId,
-                            chatRoomID
+                            userID: user.email,
+                            userName: user.name,
+                            chatRoomID: chatRoom.id
                         }
                     }
                 )
             )
             
-
            await updateChatRoomLastMesage(newMessageData.data.createMessage.id)
         }catch(e){
             console.log(e);

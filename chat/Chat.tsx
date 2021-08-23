@@ -30,7 +30,7 @@ function Chat({navigation}) {
         const userData = await API.graphql(
           graphqlOperation(
             getUser,
-            { id: userInfo.attributes.sub }
+            { id: userInfo.attributes.email }
             )
         )
 
@@ -39,19 +39,7 @@ function Chat({navigation}) {
           return;
         }
 
-        const newUser = {
-          id: userInfo.attributes.sub,
-          name: userInfo.attributes.name,
-          imageUri: 'https://media.vanityfair.com/photos/575026f2c0f054944b554e89/master/pass/506802698.jpg',
-          status: 'Hello welcome to the app',
-        }
-
-        await API.graphql(
-          graphqlOperation(
-            createUser,
-            { input: newUser }
-          )
-        )
+        
       }
     }
 

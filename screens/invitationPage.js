@@ -1,5 +1,5 @@
 import Amplify, { API, Auth, graphqlOperation } from "aws-amplify";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   View,
@@ -14,8 +14,9 @@ import Task from "../components/Task";
 import { MaterialIcons } from "@expo/vector-icons";
 import { NavigationActions } from "react-navigation";
 import colors from "./Colors";
-import { updateInvitation, updateProperty, updateTenant } from "../src/graphql/mutations";
-import { getInvitation, getProperty, getTenant } from "../src/graphql/queries";
+import { updateInvitation, updateProperty, updateTenant, updateUser, updateChatRoom } from "../src/graphql/mutations";
+import { getChatRoom, getInvitation, getProperty, getTenant, getUser } from "../src/graphql/queries";
+import { onUpdateTenant } from "../src/graphql/subscriptions";
 
 export default function invitationPage({ navigation }) {
   const [invitations, setInvitations] = useState([]);
@@ -23,7 +24,6 @@ export default function invitationPage({ navigation }) {
   const [currentInvitation, setCurrentInvitation] = useState();
   const [modalMenuOpen, setModalMenuOpen] = useState(false);
 
-  const [loaded, setLoaded] = useState(false);
   const [tenant, setTenant] = useState({});
 
   async function signOut() {
@@ -36,70 +36,84 @@ export default function invitationPage({ navigation }) {
   }
 
   const loadInvitations = async () => {
-    if (!loaded) {
-      setInvitations([]);
-      setCurrentInvitation();
-      setLoaded(true);
-      try {
-        // get tenant object
-        const tenantData = await API.graphql({
-          query: getTenant,
-          variables: { id: navigation.getParam("user").email },
+    setInvitations([]);
+    setCurrentInvitation();
+    try {
+      // get tenant object
+      const tenantData = await API.graphql({
+        query: getTenant,
+        variables: { id: navigation.getParam("user").email },
+      });
+
+      delete tenantData.data.getTenant.createdAt;
+      delete tenantData.data.getTenant.updatedAt;
+
+      setTenant(tenantData.data.getTenant);
+
+      // go through list of invitations
+      for (const invitation of tenantData.data.getTenant.invitations) {
+        if (
+          tenantData.data.getTenant.accepted != null &&
+          invitation == tenantData.data.getTenant.accepted
+        )
+          continue;
+
+        // get invitation object
+        const invitationData = await API.graphql({
+          query: getInvitation,
+          variables: { id: invitation },
         });
 
-        delete tenantData.data.getTenant.createdAt;
-        delete tenantData.data.getTenant.updatedAt;
+        delete invitationData.data.getInvitation.createdAt;
+        delete invitationData.data.getInvitation.updatedAt;
 
-        setTenant(tenantData.data.getTenant);
+        // get corresponding property
+        const propertyData = await API.graphql({
+          query: getProperty,
+          variables: { id: invitationData.data.getInvitation.propertyID },
+        });
 
-        // go through list of invitations
-        for (const invitation of tenantData.data.getTenant.invitations) {
-          if (
-            tenantData.data.getTenant.accepted != null &&
-            invitation == tenantData.data.getTenant.accepted
-          )
-            continue;
+        delete propertyData.data.getProperty.createdAt;
+        delete propertyData.data.getProperty.updatedAt;
 
-          // get invitation object
-          const invitationData = await API.graphql({
-            query: getInvitation,
-            variables: { id: invitation },
-          });
-
-          delete invitationData.data.getInvitation.createdAt;
-          delete invitationData.data.getInvitation.updatedAt;
-
-          // get corresponding property
-          const propertyData = await API.graphql({
-            query: getProperty,
-            variables: { id: invitationData.data.getInvitation.propertyID },
-          });
-
-          delete propertyData.data.getProperty.createdAt;
-          delete propertyData.data.getProperty.updatedAt;
-
-          // add to invitation list
-          setInvitations((currentInvitations) => {
-            return [
-              {
-                invitation: invitationData.data.getInvitation,
-                property: propertyData.data.getProperty,
-              },
-              ...currentInvitations,
-            ];
-          });
-        }
-      } catch (error) {
-        console.log("error loading invitations", error);
+        // add to invitation list
+        setInvitations((currentInvitations) => {
+          return [
+            {
+              invitation: invitationData.data.getInvitation,
+              property: propertyData.data.getProperty,
+            },
+            ...currentInvitations,
+          ];
+        });
       }
+    } catch (error) {
+      console.log("error loading invitations", error);
     }
   };
-
-  loadInvitations();
-  async function refresh() {
-    setLoaded(false);
+  useEffect(() => {
     loadInvitations();
-  }
+  }, [])
+
+  useEffect(() => {
+    const subscription = API.graphql(
+      graphqlOperation(onUpdateTenant)
+    ).subscribe({
+      next: (data) => {
+        const newTenant = data.value.data.onUpdateTenant;
+
+        if (newTenant.id !== navigation.getParam("user").email) {
+          console.log("Message is in another room!")
+          return;
+        }
+        loadInvitations();
+        // setMessages([newMessage, ...messages]);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [])
+
   const removeInvitation = (id) => {
     const list = invitations;
     setInvitations([]);
@@ -180,7 +194,6 @@ export default function invitationPage({ navigation }) {
         const item = {
           user: navigation.getParam("user"),
           property: propertyData.data.getProperty,
-          refresh: refresh,
         };
         navigation.navigate("RentalDetails", item);
       }
@@ -221,12 +234,35 @@ export default function invitationPage({ navigation }) {
         })
       );
       removeInvitation(currentInvitation.invitation.id);
+      const chatRoomData = await API.graphql(graphqlOperation(getChatRoom,{id:currentInvitation.property.chatRoomID}));
+      const userData = await API.graphql(graphqlOperation(getUser,{id:navigation.getParam("user").email}));
+      
+
+      for (const userID of chatRoomData.data.getChatRoom.chatRoomUsers) {
+          if (userData.data.getUser.contacts.indexOf(userID) != -1) continue; 
+          userData.data.getUser.contacts.push(userID);
+          const contactData = await API.graphql(graphqlOperation(getUser,{id:userID}));
+          contactData.data.getUser.contacts.push(navigation.getParam("user").email);
+          delete contactData.data.getUser.createdAt;
+          delete contactData.data.getUser.updatedAt;
+          await API.graphql(graphqlOperation(updateUser,{input:contactData.data.getUser}));
+      }
+
+      userData.data.getUser.chatRooms.push(currentInvitation.property.chatRoomID);
+      delete userData.data.getUser.createdAt;
+      delete userData.data.getUser.updatedAt;
+      await API.graphql(graphqlOperation(updateUser,{input:userData.data.getUser}));
+
+      chatRoomData.data.getChatRoom.chatRoomUsers.push(navigation.getParam("user").email);
+      delete chatRoomData.data.getChatRoom.createdAt;
+      delete chatRoomData.data.getChatRoom.updatedAt;
+
+      await API.graphql(graphqlOperation(updateChatRoom,{input:chatRoomData.data.getChatRoom}));
 
       //navigate to tenant page after
       const item = {
         user: navigation.getParam("user"),
         property: currentInvitation.property,
-        refresh: refresh,
       };
       navigation.navigate("RentalDetails", item);
     } catch (error) {
@@ -316,7 +352,7 @@ export default function invitationPage({ navigation }) {
             //style={styles.button}
             title="Refresh"
             color="blue"
-            onPress={refresh}
+            onPress={loadInvitations}
           />
           {/*<Options />*/}
         </View>
