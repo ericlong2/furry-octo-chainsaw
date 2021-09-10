@@ -220,15 +220,32 @@ export default function properties({ navigation }) {
         </View>
       </Modal>
 
-      <MaterialIcons
-        name="add"
-        size={24}
-        style={styles.modalToggle}
-        onPress={() => setModalOpen(true)}
-      />
+
 
       <View style={styles.tasksWrapper}>
-        <Text style={styles.sectionTitle}>Properties</Text>
+
+
+          <View style = {{
+             flexDirection: 'row', 
+             justifyContent: 'space-between', 
+             marginRight: 50,
+           }}> 
+           
+           <MaterialIcons
+              name="settings"
+              size={30}
+              onPress={() => setModal2Open(true)}
+            />
+            <Text style={styles.sectionTitle}>Properties</Text>
+
+            
+          
+
+        </View>
+  
+
+
+      
         {/*Properties list*/}
         <View style={styles.items}>
           <FlatList
@@ -248,16 +265,19 @@ export default function properties({ navigation }) {
         </View>
       </View>
 
-      <MaterialIcons
-        name="menu-open"
-        size={24}
-        style={styles.modal2Toggle}
-        onPress={() => setModal2Open(true)}
-      />
 
-      <View style={styles.buttonContainer}>
+
+      {/* <View style={styles.buttonContainer}>
         <MaterialCommunityIcons name="chat" size={28} color="white" />
-      </View>
+      </View> */}
+
+      <MaterialIcons
+        name="add"
+        backgroundColor = "green"
+        size={24}
+        style={styles.modalToggle}
+        onPress={() => setModalOpen(true)}
+      />
     </View>
   );
 }
@@ -284,6 +304,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 24,
     fontWeight: "bold",
+    flexDirection: 'row', 
+    width: 1000, 
+    justifyContent: 'space-between', 
+    marginRight: 10,
   },
   items: {
     marginTop: 30,
@@ -324,4 +348,5 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 1,
   },
+
 });

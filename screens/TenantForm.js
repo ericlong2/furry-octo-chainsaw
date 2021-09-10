@@ -4,6 +4,7 @@ import { Formik } from "formik";
 
 function TenantForm({ editTenant }) {
   return (
+
     <View style={StyleSheet.container}>
       <Formik
         initialValues={{
@@ -21,10 +22,11 @@ function TenantForm({ editTenant }) {
       >
         {(props) => (
           <View>
-            <Text>Email</Text>
-            <TextInput
+            <Text >Email</Text>
+            <TextInput  
               style={styles.input}
-              placeholder="Enter email"
+              placeholder="Enter emails"
+              placeholderTextColor = "grey"
               onChangeText={props.handleChange("email")}
               value={props.values.email}
               //keyboardType="numeric"
@@ -34,6 +36,7 @@ function TenantForm({ editTenant }) {
             <TextInput
               style={styles.input}
               placeholder="Lease term in months"
+              placeholderTextColor = "grey"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("leaseTerm")}
               value={props.values.leaseTerm}
@@ -44,6 +47,7 @@ function TenantForm({ editTenant }) {
             <TextInput
               style={styles.input}
               placeholder="lease terms start date"
+              placeholderTextColor = "grey"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("leaseStart")}
               value={props.values.leaseStart}
@@ -53,6 +57,7 @@ function TenantForm({ editTenant }) {
             <TextInput
               style={styles.input}
               placeholder="monthly rent amount"
+              placeholderTextColor = "grey"
               //autoCompleteType="street-address"
               onChangeText={props.handleChange("rentAmount")}
               value={props.values.rentAmount}
@@ -73,7 +78,8 @@ function TenantForm({ editTenant }) {
 }
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    marginTop: 10,
+    padding: 50,
     backgroundColor: "#E8EAED",
   },
   input: {
@@ -87,9 +93,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   submit: {
-    marginTop: 10,
+    marginTop: 50,
     borderRadius: 100,
   },
+
 });
 
 export default TenantForm;
