@@ -7,11 +7,32 @@ const api = "AIzaSyA-_saB2dNwnIRDgJ7_8YBWkWbaeTlfsA8";
 const GooglePlacesInput = ({ addRental }) => {
   return (
     <ScrollView keyboardShouldPersistTaps="handled">
-      <GooglePlacesAutocomplete
+      <GooglePlacesAutocomplete 
+
         placeholder="Search address"
+        
+
         minLength={2} // minimum length of text to search
         autoFocus={false}
-        //fetchDetails={true}
+
+        styles={{
+          textInputContainer: {
+            backgroundColor: "#989898",
+            borderTopWidth: 0,
+            borderBottomWidth:0
+          },
+          textInput: {
+            marginLeft: 0,
+            marginRight: 0,
+            height: 40,
+            backgroundColor: "#989898",
+            placeholderTextColor: "red",
+            fontSize: 30
+          },
+        }}
+
+
+        //fetchDetails={true}ex
         onPress={(data, details = null) => {
           // 'details' is provided when fetchDetails = true
 
